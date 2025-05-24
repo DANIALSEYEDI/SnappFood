@@ -1,7 +1,7 @@
 package org.foodapp;
 
 
-import Controller.UserHttpHandler;
+import org.foodapp.Controller.UserHttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.net.InetSocketAddress;
