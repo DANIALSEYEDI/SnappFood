@@ -21,7 +21,7 @@
         <!-- معرفی Entityها -->
         <mapping class="org.foodapp.model.Buyer"/>
         <mapping class="org.foodapp.model.Seller"/>
-        <mapping class="org.foodapp.model.Deliverer"/>
+        <mapping class="org.foodapp.model.Courier"/>
         <mapping class="org.foodapp.model.Admin"/>
 
     </session-factory>

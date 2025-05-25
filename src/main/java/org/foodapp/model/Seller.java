@@ -8,6 +8,11 @@ public class Seller extends User {
 
     @Column
     private String bankAccount;
+     @Column
+     private String address;
+
+     public Seller() {}
+
 
     public String getBankAccount() {
         return bankAccount;
@@ -15,5 +20,9 @@ public class Seller extends User {
 
     public void setBankAccount(String bankAccount) {
         this.bankAccount = bankAccount;
+    }
+    public String getAddress() {return address;
+    }
+    public void setAddress(String address) {this.address = address;
     }
 }

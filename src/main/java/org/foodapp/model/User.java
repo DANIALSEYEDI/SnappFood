@@ -24,9 +24,12 @@ public abstract class User {
 
     @Column
     protected String email;
-    
+
     @Column
-    protected String address;
+    protected String role;
+
+    public User() {}
+
 
     // Getters and Setters
 
@@ -65,13 +68,10 @@ public abstract class User {
     public void setEmail(String email) {
         this.email = email;
     }
-
-    public String getAddress() {
-        return address;
+    public String getRole() {return role;
     }
-
-    public void setAddress(String address) {
-        this.address = address;
+    public void setRole(String role) {
+        this.role = role;
     }
 }
 
