@@ -3,11 +3,13 @@ package org.foodapp.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "deliverers")
-public class Deliverer extends User {
+@Table(name = "courier")
+public class Courier extends User {
 
     @Column
     private String bankAccount;
+
+    public Courier() {}
 
     public String getBankAccount() {
         return bankAccount;
