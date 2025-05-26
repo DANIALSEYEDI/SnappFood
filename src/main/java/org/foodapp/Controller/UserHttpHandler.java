@@ -1,4 +1,4 @@
-package Controller;
+package org.foodapp.Controller;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
