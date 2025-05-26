@@ -1,4 +1,4 @@
-package org.foodapp.controller;
+package org.foodapp.Controller;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
