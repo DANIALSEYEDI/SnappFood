@@ -1,13 +1,12 @@
-package org.foodapp.Controller;
+package org.foodapp.controller;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import org.foodapp.dao.UserDao;
 import org.foodapp.dto.*;
 import org.foodapp.model.*;
-import org.foodapp.util.HibernateUtil;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.foodapp.util.JwtUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -15,20 +14,26 @@ import java.nio.charset.StandardCharsets;
 public class AuthHandler implements HttpHandler {
 
     private final Gson gson = new Gson();
+    private final UserDao userDao = new UserDao();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
 
-        if ("POST".equalsIgnoreCase(method)) {
-            switch (path) {
-                case "/auth/register" -> handleRegister(exchange);
-                case "/auth/login" -> handleLogin(exchange);
-                default -> exchange.sendResponseHeaders(404, -1);
+        try {
+            if ("POST".equalsIgnoreCase(method)) {
+                switch (path) {
+                    case "/auth/register" -> handleRegister(exchange);
+                    case "/auth/login" -> handleLogin(exchange);
+                    default -> sendJson(exchange, 404, "{\"error\": \"Not found\"}");
+                }
+            } else {
+                sendJson(exchange, 405, "{\"error\": \"Method not allowed\"}");
             }
-        } else {
-            exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
     }
 
@@ -36,45 +41,62 @@ public class AuthHandler implements HttpHandler {
         InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
         RegisterRequest request = gson.fromJson(reader, RegisterRequest.class);
 
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        session.beginTransaction();
+
+        if (request.full_name == null || request.phone == null || request.password == null ||
+                request.role == null || request.address == null) {
+            sendJson(exchange, 400, "{\"error\": \"Invalid input - required fields missing\"}");
+            return;
+        }
+
+
+        User existing = userDao.findByPhone(request.phone);
+        if (existing != null) {
+            sendJson(exchange, 409, "{\"error\": \"Phone number already exists\"}");
+            return;
+        }
+
         User user;
-        switch (request.role.toUpperCase()) {
-            case "BUYER" -> {
-                Buyer buyer = new Buyer();
-                buyer.setName(request.full_name);
-                buyer.setPhoneNumber(request.phone);
-                buyer.setPassword(request.password);
-                buyer.setAddress(request.address);
-                user = buyer;
-            }
+        switch (request.role.trim().toUpperCase()) {
+            case "BUYER" -> user = new Buyer(
+                    request.full_name, request.phone, request.email, request.password,
+                    request.role, request.address, request.profileImageBase64, null, null
+            );
             case "SELLER" -> {
-                Seller seller = new Seller();
-                seller.setName(request.full_name);
-                seller.setPhoneNumber(request.phone);
-                seller.setPassword(request.password);
-                seller.setAddress(request.address);
-                user = seller;
+                if (request.bank_info == null || request.bank_info.bank_name == null || request.bank_info.account_number == null) {
+                    sendJson(exchange, 400, "{\"error\": \"Bank info required for seller\"}");
+                    return;
+                }
+                user = new Seller(
+                        request.full_name, request.phone, request.email, request.password,
+                        request.role, request.address, request.profileImageBase64,
+                        request.bank_info.bank_name, request.bank_info.account_number
+                );
             }
             case "COURIER" -> {
-                Courier courier = new Courier();
-                courier.setName(request.full_name);
-                courier.setPhoneNumber(request.phone);
-                courier.setPassword(request.password);
-                user = courier;
+                if (request.bank_info == null || request.bank_info.bank_name == null || request.bank_info.account_number == null) {
+                    sendJson(exchange, 400, "{\"error\": \"Bank info required for courier\"}");
+                    return;
+                }
+                user = new Courier(
+                        request.full_name, request.phone, request.email, request.password,
+                        request.role, request.address, request.profileImageBase64,
+                        request.bank_info.bank_name, request.bank_info.account_number
+                );
             }
             default -> {
-                sendJson(exchange, 400, "{\"message\": \"Invalid role\"}");
+                sendJson(exchange, 400, "{\"error\": \"Invalid role\"}");
                 return;
             }
         }
-        session.persist(user);
-        session.getTransaction().commit();
-        session.close();
+
+
+        userDao.save(user);
+        String token = JwtUtil.generateToken(user.getId().toString(), user.getRole());
+
         RegisterResponse response = new RegisterResponse(
                 "User registered successfully",
                 user.getId(),
-                "fake-jwt-token"
+                token
         );
         sendJson(exchange, 200, gson.toJson(response));
     }
@@ -83,32 +105,35 @@ public class AuthHandler implements HttpHandler {
         InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
         LoginRequest request = gson.fromJson(reader, LoginRequest.class);
 
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Query<User> query = session.createQuery("FROM User WHERE phoneNumber = :phone AND password = :password", User.class);
-        query.setParameter("phone", request.phone);
-        query.setParameter("password", request.password);
-        User user = query.uniqueResult();
-        session.close();
-
-        if (user == null) {
-            sendJson(exchange, 401, "{\"message\": \"Invalid credentials\"}");
+        if (request.phone == null || request.password == null) {
+            sendJson(exchange, 400, "{\"error\": \"Invalid input\"}");
             return;
         }
 
+        User user = userDao.findByPhoneAndPassword(request.phone, request.password);
+        if (user == null) {
+            sendJson(exchange, 401, "{\"error\": \"Invalid credentials\"}");
+            return;
+        }
+
+        String token = JwtUtil.generateToken(user.getId().toString(), user.getRole());
+
         LoginResponse response = new LoginResponse(
                 "Login successful",
-                user.getId(),
-                "fake-jwt-token"
+                token,
+                user
         );
-
         sendJson(exchange, 200, gson.toJson(response));
     }
 
+
+
     private void sendJson(HttpExchange exchange, int statusCode, String json) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json");
-        exchange.sendResponseHeaders(statusCode, json.getBytes().length);
-        OutputStream os = exchange.getResponseBody();
-        os.write(json.getBytes());
-        os.close();
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+        exchange.sendResponseHeaders(statusCode, bytes.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(bytes);
+        }
     }
 }

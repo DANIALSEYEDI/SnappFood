@@ -1,23 +1,12 @@
 package org.foodapp.model;
-
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "buyers")
-
 public class Buyer extends User {
-
-    @Column(nullable = false)
-    private String address;
-
 public Buyer() {}
-
-    public String getAddress() {
-        return address;
+    public Buyer(String name, String phoneNumber, String email, String password, String role, String address, String profileImageBase64, String bankName, String accountNumber) {
+    super( name,  phoneNumber,  email, password, role, address, profileImageBase64, bankName, accountNumber);
     }
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
 }
 

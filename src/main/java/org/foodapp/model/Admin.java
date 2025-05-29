@@ -1,5 +1,4 @@
 package org.foodapp.model;
-
 import jakarta.persistence.*;
 
 @Entity
