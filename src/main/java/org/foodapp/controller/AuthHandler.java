@@ -22,15 +22,23 @@ public class AuthHandler implements HttpHandler {
         String path = exchange.getRequestURI().getPath();
 
         try {
-            if ("POST".equalsIgnoreCase(method)) {
-                switch (path) {
-                    case "/auth/register" -> handleRegister(exchange);
-                    case "/auth/login" -> handleLogin(exchange);
-                    default -> sendJson(exchange, 404, "{\"error\": \"Not found\"}");
-                }
-            } else {
+            if (!"POST".equalsIgnoreCase(method)) {
                 sendJson(exchange, 405, "{\"error\": \"Method not allowed\"}");
+                return;
             }
+
+            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+            if (contentType == null || !contentType.contains("application/json")) {
+                sendJson(exchange, 415, "{\"error\": \"Unsupported Media Type\"}");
+                return;
+            }
+
+            switch (path) {
+                case "/auth/register" -> handleRegister(exchange);
+                case "/auth/login" -> handleLogin(exchange);
+                default -> sendJson(exchange, 404, "{\"error\": \"Not found\"}");
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
@@ -38,19 +46,17 @@ public class AuthHandler implements HttpHandler {
     }
 
     private void handleRegister(HttpExchange exchange) throws IOException {
-        InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
-        RegisterRequest request = gson.fromJson(reader, RegisterRequest.class);
+        RegisterRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), RegisterRequest.class);
 
-
+        // ورودی ناقص
         if (request.full_name == null || request.phone == null || request.password == null ||
                 request.role == null || request.address == null) {
             sendJson(exchange, 400, "{\"error\": \"Invalid input - required fields missing\"}");
             return;
         }
 
-
-        User existing = userDao.findByPhone(request.phone);
-        if (existing != null) {
+        // شماره قبلاً وجود دارد
+        if (userDao.findByPhone(request.phone) != null) {
             sendJson(exchange, 409, "{\"error\": \"Phone number already exists\"}");
             return;
         }
@@ -89,7 +95,6 @@ public class AuthHandler implements HttpHandler {
             }
         }
 
-
         userDao.save(user);
         String token = JwtUtil.generateToken(user.getId().toString(), user.getRole());
 
@@ -102,8 +107,7 @@ public class AuthHandler implements HttpHandler {
     }
 
     private void handleLogin(HttpExchange exchange) throws IOException {
-        InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
-        LoginRequest request = gson.fromJson(reader, LoginRequest.class);
+        LoginRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), LoginRequest.class);
 
         if (request.phone == null || request.password == null) {
             sendJson(exchange, 400, "{\"error\": \"Invalid input\"}");
@@ -125,8 +129,6 @@ public class AuthHandler implements HttpHandler {
         );
         sendJson(exchange, 200, gson.toJson(response));
     }
-
-
 
     private void sendJson(HttpExchange exchange, int statusCode, String json) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json");
