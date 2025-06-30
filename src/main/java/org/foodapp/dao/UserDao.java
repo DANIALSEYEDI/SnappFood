@@ -17,7 +17,6 @@ public class UserDao {
             session.close();
         }
     }
-
     public User findByPhone(String phone) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
@@ -40,4 +39,11 @@ public class UserDao {
             session.close();
         }
     }
+    public User findById(Long id) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        User user = session.get(User.class, id);
+        session.close();
+        return user;
+    }
+
 }

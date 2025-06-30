@@ -48,14 +48,13 @@ public class AuthHandler implements HttpHandler {
     private void handleRegister(HttpExchange exchange) throws IOException {
         RegisterRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), RegisterRequest.class);
 
-        // ورودی ناقص
+
         if (request.full_name == null || request.phone == null || request.password == null ||
                 request.role == null || request.address == null) {
             sendJson(exchange, 400, "{\"error\": \"Invalid input - required fields missing\"}");
             return;
         }
 
-        // شماره قبلاً وجود دارد
         if (userDao.findByPhone(request.phone) != null) {
             sendJson(exchange, 409, "{\"error\": \"Phone number already exists\"}");
             return;
@@ -121,7 +120,6 @@ public class AuthHandler implements HttpHandler {
         }
 
         String token = JwtUtil.generateToken(user.getId().toString(), user.getRole());
-
         LoginResponse response = new LoginResponse(
                 "Login successful",
                 token,

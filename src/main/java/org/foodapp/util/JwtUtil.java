@@ -24,5 +24,12 @@ public class JwtUtil {
         JWTVerifier verifier = JWT.require(Algorithm.HMAC256(SECRET)).build();
         return verifier.verify(token);
     }
-}
 
+    public static String getUserId(String token) {
+        return verifyToken(token).getSubject();
+    }
+
+    public static String getUserRole(String token) {
+        return verifyToken(token).getClaim("role").asString();
+    }
+}

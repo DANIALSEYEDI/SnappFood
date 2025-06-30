@@ -51,7 +51,6 @@ public class RegisterRequest {
         this.bank_info = bank_info;
     }
 
-    // Getters and setters for other fields...
 
     public String getFull_name() {
         return full_name;
