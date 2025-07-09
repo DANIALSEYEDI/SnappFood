@@ -28,7 +28,7 @@ public class UserDao {
             session.close();
         }
     }
-    
+
     public User findByPhone(String phone) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {

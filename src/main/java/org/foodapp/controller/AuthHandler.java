@@ -24,18 +24,25 @@ public class AuthHandler implements HttpHandler {
         String path = exchange.getRequestURI().getPath();
 
         try {
-            if (path.equals("/auth/register") && method.equalsIgnoreCase("POST")) {
-                handleRegister(exchange);
-            } else if (path.equals("/auth/login") && method.equalsIgnoreCase("POST")) {
-                handleLogin(exchange);
-            } else if (path.equals("/auth/profile") && method.equalsIgnoreCase("GET")) {
-                handleProfileGet(exchange);
-            } else if (path.equals("/auth/profile") && method.equalsIgnoreCase("PUT")) {
-                handleProfileUpdate(exchange);
-            } else if (path.equals("/auth/logout") && method.equalsIgnoreCase("POST")) {
-                handleLogout(exchange);
-            } else {
-                sendJson(exchange, 404, "{\"error\": \"Not found\"}");
+            switch (path) {
+                case "/auth/register" -> {
+                    if (method.equalsIgnoreCase("POST")) handleRegister(exchange);
+                    else sendJson(exchange, 405, "{\"error\": \"Method not allowed\"}");
+                }
+                case "/auth/login" -> {
+                    if (method.equalsIgnoreCase("POST")) handleLogin(exchange);
+                    else sendJson(exchange, 405, "{\"error\": \"Method not allowed\"}");
+                }
+                case "/auth/profile" -> {
+                    if (method.equalsIgnoreCase("GET")) handleProfileGet(exchange);
+                    else if (method.equalsIgnoreCase("PUT")) handleProfileUpdate(exchange);
+                    else sendJson(exchange, 405, "{\"error\": \"Method not allowed\"}");
+                }
+                case "/auth/logout" -> {
+                    if (method.equalsIgnoreCase("POST")) handleLogout(exchange);
+                    else sendJson(exchange, 405, "{\"error\": \"Method not allowed\"}");
+                }
+                default -> sendJson(exchange, 404, "{\"error\": \"Not found\"}");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -57,42 +64,41 @@ public class AuthHandler implements HttpHandler {
             return;
         }
 
-        User user;
-        switch (request.role.trim().toUpperCase()) {
-            case "BUYER" -> user = new Buyer(
-                    request.full_name, request.phone, request.email, request.password,
-                    request.role, request.address, request.profileImageBase64, null, null
-            );
-            case "SELLER" -> {
-                if (request.bank_info == null || request.bank_info.bank_name == null || request.bank_info.account_number == null) {
-                    sendJson(exchange, 400, "{\"error\": \"Bank info required for seller\"}");
-                    return;
-                }
-                user = new Seller(
-                        request.full_name, request.phone, request.email, request.password,
-                        request.role, request.address, request.profileImageBase64,
-                        request.bank_info.bank_name, request.bank_info.account_number
-                );
-            }
-            case "COURIER" -> {
-                if (request.bank_info == null || request.bank_info.bank_name == null || request.bank_info.account_number == null) {
-                    sendJson(exchange, 400, "{\"error\": \"Bank info required for courier\"}");
-                    return;
-                }
-                user = new Courier(
-                        request.full_name, request.phone, request.email, request.password,
-                        request.role, request.address, request.profileImageBase64,
-                        request.bank_info.bank_name, request.bank_info.account_number
-                );
-            }
-            default -> {
-                sendJson(exchange, 400, "{\"error\": \"Invalid role\"}");
-                return;
-            }
+        Role role;
+        try {
+            role = Role.valueOf(request.role.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            sendJson(exchange, 400, "{\"error\": \"Invalid role\"}");
+            return;
         }
 
+        String bankName = null;
+        String accountNumber = null;
+
+        if ((role == Role.SELLER || role == Role.COURIER)) {
+            if (request.bank_info == null || request.bank_info.bank_name == null || request.bank_info.account_number == null) {
+                sendJson(exchange, 400, "{\"error\": \"Bank info required\"}");
+                return;
+            }
+            bankName = request.bank_info.bank_name;
+            accountNumber = request.bank_info.account_number;
+        }
+
+        User user = new User(
+                request.full_name,
+                request.phone,
+                request.email,
+                request.password,
+                request.address,
+                request.profileImageBase64,
+                role,
+                bankName,
+                accountNumber
+        );
+
         userDao.save(user);
-        String token = JwtUtil.generateToken(user.getId().toString(), user.getRole());
+
+        String token = JwtUtil.generateToken(user.getId().toString(), user.getRole().toString());
 
         RegisterResponse response = new RegisterResponse(
                 "User registered successfully",
@@ -116,7 +122,7 @@ public class AuthHandler implements HttpHandler {
             return;
         }
 
-        String token = JwtUtil.generateToken(user.getId().toString(), user.getRole());
+        String token = JwtUtil.generateToken(user.getId().toString(), user.getRole().toString());
         LoginResponse response = new LoginResponse(
                 "Login successful",
                 token,
@@ -143,14 +149,9 @@ public class AuthHandler implements HttpHandler {
         if (request.address != null) user.setAddress(request.address);
         if (request.profileImageBase64 != null) user.setProfileImageBase64(request.profileImageBase64);
 
-        if ((user instanceof Seller || user instanceof Courier) && request.bank_info != null) {
-            if (user instanceof Seller seller) {
-                seller.setBankName(request.bank_info.bank_name);
-                seller.setAccountNumber(request.bank_info.account_number);
-            } else if (user instanceof Courier courier) {
-                courier.setBankName(request.bank_info.bank_name);
-                courier.setAccountNumber(request.bank_info.account_number);
-            }
+        if ((user.getRole() == Role.SELLER || user.getRole() == Role.COURIER) && request.bank_info != null) {
+            user.setBankName(request.bank_info.bank_name);
+            user.setAccountNumber(request.bank_info.account_number);
         }
 
         userDao.update(user);
@@ -189,5 +190,6 @@ public class AuthHandler implements HttpHandler {
         }
     }
 }
+
 
 

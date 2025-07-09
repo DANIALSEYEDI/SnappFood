@@ -26,12 +26,12 @@ public class Restaurant {
 
     @ManyToOne
     @JoinColumn(name = "seller_id")
-    private Seller seller;
+    private User seller;
 
     public Restaurant() {}
 
     public Restaurant(String name, String address, String phone, String logoBase64,
-                      Integer taxFee, Integer additionalFee, Seller seller) {
+                      Integer taxFee, Integer additionalFee, User seller) {
         this.name = name;
         this.address = address;
         this.phone = phone;
@@ -95,11 +95,11 @@ public class Restaurant {
         this.additionalFee = additionalFee;
     }
 
-    public Seller getSeller() {
+    public User getSeller() {
         return seller;
     }
 
-    public void setSeller(Seller seller) {
+    public void setSeller(User seller) {
         this.seller = seller;
     }
 }

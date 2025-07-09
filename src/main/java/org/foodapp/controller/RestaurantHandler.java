@@ -7,7 +7,7 @@ import org.foodapp.dao.RestaurantDao;
 import org.foodapp.dao.UserDao;
 import org.foodapp.dto.RestaurantRequest;
 import org.foodapp.model.Restaurant;
-import org.foodapp.model.Seller;
+import org.foodapp.model.Role;
 import org.foodapp.model.User;
 import org.foodapp.util.JwtUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -29,11 +29,11 @@ public class RestaurantHandler implements HttpHandler {
         String path = uri.getPath();
 
         try {
-            if (path.equals("/restaurants") && method.equals("POST")) {
+            if (path.equals("/restaurants") && method.equalsIgnoreCase("POST")) {
                 handleCreate(exchange);
-            } else if (path.equals("/restaurants/mine") && method.equals("GET")) {
+            } else if (path.equals("/restaurants/mine") && method.equalsIgnoreCase("GET")) {
                 handleGetMyRestaurants(exchange);
-            } else if (path.matches("/restaurants/\\d+") && method.equals("PUT")) {
+            } else if (path.matches("/restaurants/\\d+") && method.equalsIgnoreCase("PUT")) {
                 handleUpdate(exchange);
             } else {
                 sendJson(exchange, 404, "{\"error\": \"Not found\"}");
@@ -47,12 +47,17 @@ public class RestaurantHandler implements HttpHandler {
     private void handleCreate(HttpExchange exchange) throws IOException {
         User user = authenticate(exchange);
         if (user == null) return;
-        if (!(user instanceof Seller)) {
+
+        if (user.getRole() != Role.SELLER) {
             sendJson(exchange, 403, "{\"error\": \"Only sellers can create restaurants\"}");
             return;
         }
 
-        RestaurantRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), RestaurantRequest.class);
+        RestaurantRequest request = gson.fromJson(
+                new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
+                RestaurantRequest.class
+        );
+
         if (request.name == null || request.address == null || request.phone == null) {
             sendJson(exchange, 400, "{\"error\": \"Missing required fields: name, address, or phone\"}");
             return;
@@ -65,7 +70,7 @@ public class RestaurantHandler implements HttpHandler {
                 request.logoBase64,
                 request.tax_fee,
                 request.additional_fee,
-                (Seller) user
+                user
         );
 
         restaurantDao.save(restaurant);
@@ -75,7 +80,8 @@ public class RestaurantHandler implements HttpHandler {
     private void handleGetMyRestaurants(HttpExchange exchange) throws IOException {
         User user = authenticate(exchange);
         if (user == null) return;
-        if (!(user instanceof Seller)) {
+
+        if (user.getRole() != Role.SELLER) {
             sendJson(exchange, 403, "{\"error\": \"Only sellers can view their restaurants\"}");
             return;
         }
@@ -87,7 +93,8 @@ public class RestaurantHandler implements HttpHandler {
     private void handleUpdate(HttpExchange exchange) throws IOException {
         User user = authenticate(exchange);
         if (user == null) return;
-        if (!(user instanceof Seller)) {
+
+        if (user.getRole() != Role.SELLER) {
             sendJson(exchange, 403, "{\"error\": \"Only sellers can update restaurants\"}");
             return;
         }
@@ -112,7 +119,11 @@ public class RestaurantHandler implements HttpHandler {
             return;
         }
 
-        RestaurantRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), RestaurantRequest.class);
+        RestaurantRequest request = gson.fromJson(
+                new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
+                RestaurantRequest.class
+        );
+
         if (request.name != null) restaurant.setName(request.name);
         if (request.address != null) restaurant.setAddress(request.address);
         if (request.phone != null) restaurant.setPhone(request.phone);
@@ -130,6 +141,7 @@ public class RestaurantHandler implements HttpHandler {
             sendJson(exchange, 401, "{\"error\": \"Missing Authorization header\"}");
             return null;
         }
+
         String token = authHeaders.get(0).replace("Bearer ", "");
         DecodedJWT decoded;
         try {
@@ -138,6 +150,7 @@ public class RestaurantHandler implements HttpHandler {
             sendJson(exchange, 401, "{\"error\": \"Invalid token\"}");
             return null;
         }
+
         return new UserDao().findById(Long.parseLong(decoded.getSubject()));
     }
 

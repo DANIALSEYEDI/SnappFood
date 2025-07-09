@@ -18,10 +18,11 @@
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.format_sql">true</property>
 
-        <mapping class="org.foodapp.model.Buyer"/>
-        <mapping class="org.foodapp.model.Seller"/>
-        <mapping class="org.foodapp.model.Courier"/>
-        <mapping class="org.foodapp.model.Admin"/>
+        <!-- فقط کلاس‌های جدید ثبت شوند -->
+        <mapping class="org.foodapp.model.User"/>
+        <mapping class="org.foodapp.model.Restaurant"/>
+        <!-- در صورت نیاز سایر entityها مانند FoodItem نیز اضافه شود -->
 
     </session-factory>
 </hibernate-configuration>
+

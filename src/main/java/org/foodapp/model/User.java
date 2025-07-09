@@ -1,84 +1,72 @@
 package org.foodapp.model;
+
 import jakarta.persistence.*;
 
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "user_type")
 @Table(name = "users")
-public abstract class User {
-
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected Long id;
+    private Long id;
 
     @Column(nullable = false)
-    protected String Fullname;
+    private String fullName;
 
     @Column(nullable = false, unique = true)
-    protected String phoneNumber;
-
-    @Column
-    protected String email;
+    private String phoneNumber;
 
     @Column(nullable = false)
-    protected String password;
+    private String password;
 
+    private String email;
+    private String address;
+
+    @Column(columnDefinition = "TEXT")
+    private String profileImageBase64;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    protected String role;
+    private Role role;
 
-    @Column
-    protected String address;
-
-    @Column(name = "profile_image", columnDefinition = "TEXT")
-    protected String profileImageBase64;
-
-    @Column(name = "bank_name")
-    protected String bankName;
-
-    @Column(name = "account_number")
-    protected String accountNumber;
+    // فقط برای SELLER و COURIER
+    private String bankName;
+    private String accountNumber;
 
     public User() {}
 
-    public User(String name, String phoneNumber, String email, String password, String role, String address, String profileImageBase64, String bankName, String accountNumber) {
-        this.Fullname = name;
+    public User(String fullName, String phoneNumber, String email, String password,
+                String address, String profileImageBase64, Role role,
+                String bankName, String accountNumber) {
+        this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.password = password;
-        this.role = role;
         this.address = address;
         this.profileImageBase64 = profileImageBase64;
+        this.role = role;
         this.bankName = bankName;
         this.accountNumber = accountNumber;
     }
 
+    // Getters و Setters
 
     public Long getId() { return id; }
-
-    public String getFullName() { return Fullname; }
-    public void setFullName(String name) { this.Fullname = name; }
-
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
-
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
-
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
-
-    public String getProfileImageBase64() { return profileImageBase64; }
-    public void setProfileImageBase64(String profileImageBase64) { this.profileImageBase64 = profileImageBase64; }
-
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
-
+    public String getProfileImageBase64() { return profileImageBase64; }
+    public void setProfileImageBase64(String profileImageBase64) { this.profileImageBase64 = profileImageBase64; }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
     public String getBankName() { return bankName; }
     public void setBankName(String bankName) { this.bankName = bankName; }
-
     public String getAccountNumber() { return accountNumber; }
     public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
 }
