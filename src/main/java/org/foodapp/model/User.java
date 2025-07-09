@@ -12,7 +12,7 @@ public abstract class User {
     protected Long id;
 
     @Column(nullable = false)
-    protected String name;
+    protected String Fullname;
 
     @Column(nullable = false, unique = true)
     protected String phoneNumber;
@@ -41,7 +41,7 @@ public abstract class User {
     public User() {}
 
     public User(String name, String phoneNumber, String email, String password, String role, String address, String profileImageBase64, String bankName, String accountNumber) {
-        this.name = name;
+        this.Fullname = name;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.password = password;
@@ -55,8 +55,8 @@ public abstract class User {
 
     public Long getId() { return id; }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getFullName() { return Fullname; }
+    public void setFullName(String name) { this.Fullname = name; }
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }

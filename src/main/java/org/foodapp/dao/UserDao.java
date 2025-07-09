@@ -17,6 +17,18 @@ public class UserDao {
             session.close();
         }
     }
+
+    public void update(User user) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+            session.merge(user);
+            session.getTransaction().commit();
+        } finally {
+            session.close();
+        }
+    }
+    
     public User findByPhone(String phone) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
