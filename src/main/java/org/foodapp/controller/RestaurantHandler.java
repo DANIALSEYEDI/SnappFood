@@ -11,7 +11,6 @@ import org.foodapp.model.Seller;
 import org.foodapp.model.User;
 import org.foodapp.util.JwtUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import org.hibernate.Session;
 
 import java.io.*;
 import java.net.URI;
@@ -55,7 +54,7 @@ public class RestaurantHandler implements HttpHandler {
 
         RestaurantRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), RestaurantRequest.class);
         if (request.name == null || request.address == null || request.phone == null) {
-            sendJson(exchange, 400, "{\"error\": \"Invalid input\"}");
+            sendJson(exchange, 400, "{\"error\": \"Missing required fields: name, address, or phone\"}");
             return;
         }
 
@@ -94,10 +93,22 @@ public class RestaurantHandler implements HttpHandler {
         }
 
         String path = exchange.getRequestURI().getPath();
-        int id = Integer.parseInt(path.substring(path.lastIndexOf("/") + 1));
-        Restaurant restaurant = restaurantDao.findById((long) id);
-        if (restaurant == null || restaurant.getSeller().getId() != user.getId()) {
-            sendJson(exchange, 404, "{\"error\": \"Restaurant not found or not authorized\"}");
+        long id;
+        try {
+            id = Long.parseLong(path.substring(path.lastIndexOf("/") + 1));
+        } catch (NumberFormatException e) {
+            sendJson(exchange, 400, "{\"error\": \"Invalid restaurant ID\"}");
+            return;
+        }
+
+        Restaurant restaurant = restaurantDao.findById(id);
+        if (restaurant == null) {
+            sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+            return;
+        }
+
+        if (!restaurant.getSeller().getId().equals(user.getId())) {
+            sendJson(exchange, 403, "{\"error\": \"You are not authorized to update this restaurant\"}");
             return;
         }
 

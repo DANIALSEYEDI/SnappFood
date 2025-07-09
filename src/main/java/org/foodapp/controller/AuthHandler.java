@@ -61,7 +61,7 @@ public class AuthHandler implements HttpHandler {
         }
 
         User user;
-        switch (request.role.trim().toUpperCase()) {
+        switch (request.role.trim().toLowerCase()) {
             case "BUYER" -> user = new Buyer(
                     request.full_name, request.phone, request.email, request.password,
                     request.role, request.address, request.profileImageBase64, null, null

@@ -1,7 +1,6 @@
 package org.foodapp.dao;
 
 import org.foodapp.model.Restaurant;
-import org.foodapp.model.RestaurantStatus;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -41,14 +40,5 @@ public class RestaurantDao {
         session.getTransaction().commit();
         session.close();
     }
-
-    public List<Restaurant> findByStatus(RestaurantStatus status) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List<Restaurant> result = session.createQuery("FROM Restaurant WHERE status = :status", Restaurant.class)
-                .setParameter("status", status)
-                .list();
-        session.close();
-        return result;
-    }
-
 }
+

@@ -28,10 +28,6 @@ public class Restaurant {
     @JoinColumn(name = "seller_id")
     private Seller seller;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RestaurantStatus status = RestaurantStatus.PENDING;
-
     public Restaurant() {}
 
     public Restaurant(String name, String address, String phone, String logoBase64,
@@ -43,7 +39,6 @@ public class Restaurant {
         this.taxFee = taxFee;
         this.additionalFee = additionalFee;
         this.seller = seller;
-        this.status = RestaurantStatus.PENDING;
     }
 
     // Getters and Setters
@@ -107,12 +102,5 @@ public class Restaurant {
     public void setSeller(Seller seller) {
         this.seller = seller;
     }
-
-    public RestaurantStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(RestaurantStatus status) {
-        this.status = status;
-    }
 }
+
