@@ -5,7 +5,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.RestaurantDao;
 import org.foodapp.dao.UserDao;
-import org.foodapp.dto.RestaurantRequest;
+import org.foodapp.dto.CreateRestaurantRequest;
+import org.foodapp.dto.RestaurantResponse;
 import org.foodapp.model.Restaurant;
 import org.foodapp.model.Role;
 import org.foodapp.model.User;
@@ -44,96 +45,184 @@ public class RestaurantHandler implements HttpHandler {
         }
     }
 
+
+
+
+
     private void handleCreate(HttpExchange exchange) throws IOException {
-        User user = authenticate(exchange);
-        if (user == null) return;
+        try {
+            User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
 
-        if (user.getRole() != Role.SELLER) {
-            sendJson(exchange, 403, "{\"error\": \"Only sellers can create restaurants\"}");
-            return;
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"Only sellers can create restaurants\"}");
+                return;
+            }
+
+            CreateRestaurantRequest request = gson.fromJson(
+                    new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
+                    CreateRestaurantRequest.class
+            );
+
+            if (request.name == null || request.address == null || request.phone == null) {
+                sendJson(exchange, 400, "{\"error\": \"Missing required fields: name, address, or phone\"}");
+                return;
+            }
+
+            Restaurant restaurant = new Restaurant(
+                    request.name,
+                    request.address,
+                    request.phone,
+                    request.logoBase64,
+                    request.tax_fee,
+                    request.additional_fee,
+                    user
+            );
+
+            restaurantDao.save(restaurant);
+            RestaurantResponse response = new RestaurantResponse(
+                    restaurant.getId(),
+                    restaurant.getName(),
+                    restaurant.getAddress(),
+                    restaurant.getPhone(),
+                    restaurant.getLogoBase64(),
+                    restaurant.getTaxFee(),
+                    restaurant.getAdditionalFee()
+            );
+            sendJson(exchange, 201, gson.toJson(response));
         }
-
-        RestaurantRequest request = gson.fromJson(
-                new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
-                RestaurantRequest.class
-        );
-
-        if (request.name == null || request.address == null || request.phone == null) {
-            sendJson(exchange, 400, "{\"error\": \"Missing required fields: name, address, or phone\"}");
-            return;
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
-
-        Restaurant restaurant = new Restaurant(
-                request.name,
-                request.address,
-                request.phone,
-                request.logoBase64,
-                request.tax_fee,
-                request.additional_fee,
-                user
-        );
-
-        restaurantDao.save(restaurant);
-        sendJson(exchange, 201, gson.toJson(restaurant));
     }
+
+
+
+
 
     private void handleGetMyRestaurants(HttpExchange exchange) throws IOException {
-        User user = authenticate(exchange);
-        if (user == null) return;
+        try {
+            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+            if (contentType == null || !contentType.toLowerCase().contains("application/json")) {
+                sendJson(exchange, 415, "{\"error\": \"Unsupported Media Type\"}");
+                return;
+            }
 
-        if (user.getRole() != Role.SELLER) {
-            sendJson(exchange, 403, "{\"error\": \"Only sellers can view their restaurants\"}");
-            return;
+                User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"Only sellers can view their restaurants\"}");
+                return;
+            }
+            List<Restaurant> restaurants = restaurantDao.findBySeller(user.getId());
+            if (restaurants == null || restaurants.isEmpty()) {
+                sendJson(exchange, 404, "{\"error\": \"No restaurants found for this seller\"}");
+                return;
+            }
+            List<RestaurantResponse> responseList = restaurants.stream()
+                    .map(r -> new RestaurantResponse(
+                            r.getId(),
+                            r.getName(),
+                            r.getAddress(),
+                            r.getPhone(),
+                            r.getLogoBase64(),
+                            r.getTaxFee(),
+                            r.getAdditionalFee()
+                    ))
+                    .toList();
+
+            sendJson(exchange, 200, gson.toJson(responseList));
         }
-
-        List<Restaurant> restaurants = restaurantDao.findBySeller(user.getId());
-        sendJson(exchange, 200, gson.toJson(restaurants));
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+        }
     }
+
+
+
+
 
     private void handleUpdate(HttpExchange exchange) throws IOException {
-        User user = authenticate(exchange);
-        if (user == null) return;
-
-        if (user.getRole() != Role.SELLER) {
-            sendJson(exchange, 403, "{\"error\": \"Only sellers can update restaurants\"}");
-            return;
-        }
-
-        String path = exchange.getRequestURI().getPath();
-        long id;
         try {
-            id = Long.parseLong(path.substring(path.lastIndexOf("/") + 1));
-        } catch (NumberFormatException e) {
-            sendJson(exchange, 400, "{\"error\": \"Invalid restaurant ID\"}");
-            return;
+            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+            if (contentType == null || !contentType.toLowerCase().contains("application/json")) {
+                sendJson(exchange, 415, "{\"error\": \"Unsupported Media Type\"}");
+                return;
+            }
+
+                User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"Only sellers can update restaurants\"}");
+                return;
+            }
+
+            String path = exchange.getRequestURI().getPath();
+            long id;
+            try {
+                id = Long.parseLong(path.substring(path.lastIndexOf("/") + 1));
+            } catch (NumberFormatException e) {
+                sendJson(exchange, 400, "{\"error\": \"Invalid restaurant ID\"}");
+                return;
+            }
+
+            Restaurant restaurant = restaurantDao.findById(id);
+            if (restaurant == null) {
+                sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+                return;
+            }
+
+            if (!restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"You are not authorized to update this restaurant\"}");
+                return;
+            }
+
+            CreateRestaurantRequest request = gson.fromJson(
+                    new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
+                    CreateRestaurantRequest.class
+            );
+
+            if (request.name != null) restaurant.setName(request.name);
+            if (request.address != null) restaurant.setAddress(request.address);
+            if (request.phone != null) restaurant.setPhone(request.phone);
+            if (request.logoBase64 != null) restaurant.setLogoBase64(request.logoBase64);
+            if (request.tax_fee != null) restaurant.setTaxFee(request.tax_fee);
+            if (request.additional_fee != null) restaurant.setAdditionalFee(request.additional_fee);
+
+            restaurantDao.update(restaurant);
+            RestaurantResponse response = new RestaurantResponse(
+                    restaurant.getId(),
+                    restaurant.getName(),
+                    restaurant.getAddress(),
+                    restaurant.getPhone(),
+                    restaurant.getLogoBase64(),
+                    restaurant.getTaxFee(),
+                    restaurant.getAdditionalFee()
+            );
+            sendJson(exchange, 200, gson.toJson(response));
         }
-
-        Restaurant restaurant = restaurantDao.findById(id);
-        if (restaurant == null) {
-            sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
-            return;
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
-
-        if (!restaurant.getSeller().getId().equals(user.getId())) {
-            sendJson(exchange, 403, "{\"error\": \"You are not authorized to update this restaurant\"}");
-            return;
-        }
-
-        RestaurantRequest request = gson.fromJson(
-                new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
-                RestaurantRequest.class
-        );
-
-        if (request.name != null) restaurant.setName(request.name);
-        if (request.address != null) restaurant.setAddress(request.address);
-        if (request.phone != null) restaurant.setPhone(request.phone);
-        if (request.logoBase64 != null) restaurant.setLogoBase64(request.logoBase64);
-        if (request.tax_fee != null) restaurant.setTaxFee(request.tax_fee);
-        if (request.additional_fee != null) restaurant.setAdditionalFee(request.additional_fee);
-
-        restaurantDao.update(restaurant);
-        sendJson(exchange, 200, gson.toJson(restaurant));
     }
+
+
+
+
+
 
     private User authenticate(HttpExchange exchange) throws IOException {
         List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
@@ -153,6 +242,10 @@ public class RestaurantHandler implements HttpHandler {
 
         return new UserDao().findById(Long.parseLong(decoded.getSubject()));
     }
+
+
+
+
 
     private void sendJson(HttpExchange exchange, int statusCode, String json) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json");

@@ -8,11 +8,11 @@ public class RestaurantResponse {
     public String logoBase64;
     public Integer tax_fee;
     public Integer additional_fee;
-    public boolean approved;
 
     public RestaurantResponse() {}
 
-    public RestaurantResponse(Long id, String name, String address, String phone, String logoBase64, Integer tax_fee, Integer additional_fee, boolean approved) {
+    public RestaurantResponse(Long id, String name, String address, String phone, String logoBase64,
+                              Integer tax_fee, Integer additional_fee) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -20,6 +20,5 @@ public class RestaurantResponse {
         this.logoBase64 = logoBase64;
         this.tax_fee = tax_fee;
         this.additional_fee = additional_fee;
-        this.approved = approved;
     }
 }

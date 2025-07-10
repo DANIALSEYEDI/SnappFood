@@ -28,7 +28,6 @@ public class JwtUtil {
     public static String getUserId(String token) {
         return verifyToken(token).getSubject();
     }
-
     public static String getUserRole(String token) {
         return verifyToken(token).getClaim("role").asString();
     }

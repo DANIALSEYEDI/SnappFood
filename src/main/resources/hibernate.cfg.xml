@@ -11,17 +11,17 @@
             jdbc:mysql://localhost:3306/mydatabase?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC
         </property>
         <property name="hibernate.connection.username">root</property>
-        <property name="hibernate.connection.password">Alireza1384Alireza1384@</property>
+        <property name="hibernate.connection.password">Danial1384@</property>
 
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
         <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.format_sql">true</property>
 
-        <!-- فقط کلاس‌های جدید ثبت شوند -->
+
         <mapping class="org.foodapp.model.User"/>
         <mapping class="org.foodapp.model.Restaurant"/>
-        <!-- در صورت نیاز سایر entityها مانند FoodItem نیز اضافه شود -->
+
 
     </session-factory>
 </hibernate-configuration>

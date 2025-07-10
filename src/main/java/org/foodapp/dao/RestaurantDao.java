@@ -33,6 +33,7 @@ public class RestaurantDao {
         return restaurant;
     }
 
+
     public void update(Restaurant restaurant) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         session.beginTransaction();
@@ -40,5 +41,6 @@ public class RestaurantDao {
         session.getTransaction().commit();
         session.close();
     }
+
 }
 

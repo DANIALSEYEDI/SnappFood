@@ -28,7 +28,7 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    // فقط برای SELLER و COURIER
+    //  SELLER و COURIER
     private String bankName;
     private String accountNumber;
 
@@ -47,6 +47,7 @@ public class User {
         this.bankName = bankName;
         this.accountNumber = accountNumber;
     }
+
 
     // Getters و Setters
 

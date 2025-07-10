@@ -50,6 +50,9 @@ public class AuthHandler implements HttpHandler {
         }
     }
 
+
+
+
     private void handleRegister(HttpExchange exchange) throws IOException {
         RegisterRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), RegisterRequest.class);
 
@@ -84,85 +87,174 @@ public class AuthHandler implements HttpHandler {
             accountNumber = request.bank_info.account_number;
         }
 
-        User user = new User(
-                request.full_name,
-                request.phone,
-                request.email,
-                request.password,
-                request.address,
-                request.profileImageBase64,
-                role,
-                bankName,
-                accountNumber
-        );
+        try {
+            User user = new User(
+                    request.full_name,
+                    request.phone,
+                    request.email,
+                    request.password,
+                    request.address,
+                    request.profileImageBase64,
+                    role,
+                    bankName,
+                    accountNumber
+            );
 
-        userDao.save(user);
+            userDao.save(user);
 
-        String token = JwtUtil.generateToken(user.getId().toString(), user.getRole().toString());
+            String token = JwtUtil.generateToken(user.getId().toString(), user.getRole().toString());
 
-        RegisterResponse response = new RegisterResponse(
-                "User registered successfully",
-                user.getId(),
-                token
-        );
-        sendJson(exchange, 200, gson.toJson(response));
+            RegisterResponse response = new RegisterResponse(
+                    "User registered successfully",
+                    user.getId(),
+                    token
+            );
+            sendJson(exchange, 200, gson.toJson(response));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+        }
+
     }
+
+
+
+
+
 
     private void handleLogin(HttpExchange exchange) throws IOException {
-        LoginRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), LoginRequest.class);
+        try {
+            LoginRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), LoginRequest.class);
 
-        if (request.phone == null || request.password == null) {
-            sendJson(exchange, 400, "{\"error\": \"Invalid input\"}");
-            return;
+            if (request.phone == null || request.password == null) {
+                sendJson(exchange, 400, "{\"error\": \"Invalid input\"}");
+                return;
+            }
+
+            User user = userDao.findByPhoneAndPassword(request.phone, request.password);
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Invalid credentials\"}");
+                return;
+            }
+
+            String token = JwtUtil.generateToken(user.getId().toString(), user.getRole().toString());
+            LoginResponse response = new LoginResponse(
+                    "User logged in successfully",
+                    token,
+                    user
+            );
+            sendJson(exchange, 200, gson.toJson(response));
         }
-
-        User user = userDao.findByPhoneAndPassword(request.phone, request.password);
-        if (user == null) {
-            sendJson(exchange, 401, "{\"error\": \"Invalid credentials\"}");
-            return;
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
-
-        String token = JwtUtil.generateToken(user.getId().toString(), user.getRole().toString());
-        LoginResponse response = new LoginResponse(
-                "Login successful",
-                token,
-                user
-        );
-        sendJson(exchange, 200, gson.toJson(response));
     }
+
+
+
 
     private void handleProfileGet(HttpExchange exchange) throws IOException {
-        User user = authenticate(exchange);
-        if (user == null) return;
-        sendJson(exchange, 200, gson.toJson(user));
+        try {
+            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+            if (contentType != null && !contentType.contains("application/json")) {
+                sendJson(exchange, 415, "{\"error\": \"Unsupported Media Type\"}");
+                return;
+            }
+
+            User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+
+            if (user.getId() == null) {
+                sendJson(exchange, 404, "{\"error\": \"User not found\"}");
+                return;
+            }
+            sendJson(exchange, 200, gson.toJson(user));
+        } catch (NumberFormatException e) {
+            sendJson(exchange, 400, "{\"error\": \"Invalid input\"}");
+        } catch (SecurityException e) {
+            sendJson(exchange, 403, "{\"error\": \"Forbidden\"}");
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+        }
     }
+
+
+
+
 
     private void handleProfileUpdate(HttpExchange exchange) throws IOException {
-        User user = authenticate(exchange);
-        if (user == null) return;
+        try {
+            User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
 
-        ProfileUpdateRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), ProfileUpdateRequest.class);
+            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+            if (contentType == null || !contentType.contains("application/json")) {
+                sendJson(exchange, 415, "{\"error\": \"Unsupported Media Type\"}");
+                return;
+            }
 
-        if (request.full_name != null) user.setFullName(request.full_name);
-        if (request.phone != null) user.setPhoneNumber(request.phone);
-        if (request.email != null) user.setEmail(request.email);
-        if (request.address != null) user.setAddress(request.address);
-        if (request.profileImageBase64 != null) user.setProfileImageBase64(request.profileImageBase64);
+            ProfileUpdateRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), ProfileUpdateRequest.class);
 
-        if ((user.getRole() == Role.SELLER || user.getRole() == Role.COURIER) && request.bank_info != null) {
-            user.setBankName(request.bank_info.bank_name);
-            user.setAccountNumber(request.bank_info.account_number);
+            if (request == null) {
+                sendJson(exchange, 400, "{\"error\": \"Invalid input\"}");
+                return;
+            }
+
+            if (request.full_name != null) user.setFullName(request.full_name);
+            if (request.phone != null) user.setPhoneNumber(request.phone);
+            if (request.email != null) user.setEmail(request.email);
+            if (request.address != null) user.setAddress(request.address);
+            if (request.profileImageBase64 != null) user.setProfileImageBase64(request.profileImageBase64);
+
+            if ((user.getRole() == Role.SELLER || user.getRole() == Role.COURIER) && request.bank_info != null) {
+                user.setBankName(request.bank_info.bank_name);
+                user.setAccountNumber(request.bank_info.account_number);
+            }
+
+            userDao.update(user);
+            sendJson(exchange, 200, "{\"message\": \"Profile updated successfully\"}");
         }
-
-        userDao.update(user);
-        sendJson(exchange, 200, "{\"message\": \"Profile updated successfully\"}");
+     catch (com.google.gson.JsonSyntaxException e) {
+        sendJson(exchange, 400, "{\"error\": \"Invalid JSON input\"}");
     }
+        catch (Exception e) {
+        e.printStackTrace();
+        sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+    }
+    }
+
+
+
+
+
 
     private void handleLogout(HttpExchange exchange) throws IOException {
-        User user = authenticate(exchange);
-        if (user == null) return;
-        sendJson(exchange, 200, "{\"message\": \"User logged out successfully\"}");
+        try {
+            User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+            sendJson(exchange, 200, "{\"message\": \"User logged out successfully\"}");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+        }
     }
+
+
+
+
 
     private User authenticate(HttpExchange exchange) throws IOException {
         List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
@@ -181,6 +273,8 @@ public class AuthHandler implements HttpHandler {
         return userDao.findById(Long.parseLong(decoded.getSubject()));
     }
 
+
+
     private void sendJson(HttpExchange exchange, int statusCode, String json) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json");
         byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
@@ -189,6 +283,8 @@ public class AuthHandler implements HttpHandler {
             os.write(bytes);
         }
     }
+
+
 }
 
 
