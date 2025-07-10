@@ -5,7 +5,6 @@ import java.util.List;
 
 @Entity
 public class FoodItem {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,11 +18,10 @@ public class FoodItem {
     @ElementCollection
     private List<String> keywords;
 
-    @ManyToOne
-    @JoinColumn(name = "restaurant_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 
-    // Constructors
     public FoodItem() {}
 
     public FoodItem(String name, String imageBase64, String description, Integer price,
@@ -101,4 +99,5 @@ public class FoodItem {
         this.restaurant = restaurant;
     }
 }
+
 

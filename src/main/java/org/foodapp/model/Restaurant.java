@@ -1,7 +1,7 @@
 package org.foodapp.model;
 
 import jakarta.persistence.*;
-
+import java.util.*;
 @Entity
 @Table(name = "restaurants")
 public class Restaurant {
@@ -27,6 +27,17 @@ public class Restaurant {
     @ManyToOne
     @JoinColumn(name = "seller_id")
     private User seller;
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Menu> menus = new HashSet<>();
+
+    public Set<Menu> getMenus() {
+        return menus;
+    }
+
+    public void setMenus(Set<Menu> menus) {
+        this.menus = menus;
+    }
 
     public Restaurant() {}
 

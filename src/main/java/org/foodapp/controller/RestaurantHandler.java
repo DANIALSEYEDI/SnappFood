@@ -3,29 +3,27 @@ package org.foodapp.controller;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import org.foodapp.dao.RestaurantDao;
-import org.foodapp.dao.UserDao;
-import org.foodapp.dao.FoodItemDao;
+import org.foodapp.dao.*;
 import org.foodapp.dto.CreateRestaurantRequest;
 import org.foodapp.dto.RestaurantResponse;
 import org.foodapp.dto.FoodItemRequest;
-import org.foodapp.model.Restaurant;
-import org.foodapp.model.Role;
-import org.foodapp.model.User;
-import org.foodapp.model.FoodItem;
+import org.foodapp.dto.MenuRequest;
+import org.foodapp.dto.AddItemToMenuRequest;
+import org.foodapp.model.*;
 import org.foodapp.util.JwtUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import java.io.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.*;
 
 public class RestaurantHandler implements HttpHandler {
 
     private final Gson gson = new Gson();
     private final RestaurantDao restaurantDao = new RestaurantDao();
-
+    private final FoodItemDao foodItemDao = new FoodItemDao();
+    private final MenuDao menuDao = new MenuDao();
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
@@ -45,12 +43,42 @@ public class RestaurantHandler implements HttpHandler {
                 handleEditItem(exchange);
             } else if (path.matches("/restaurants/\\d+/item/\\d+") && method.equals("DELETE")) {
                 handleDeleteItem(exchange);
+            }else if (path.matches("/restaurants/\\d+/menu") && method.equals("POST")) {
+                long id = extractId(path, "/restaurants/", "/menu");
+                handleCreateMenu(exchange, id);
+            } else if (path.matches("/restaurants/\\d+/menu/[^/]+") && method.equals("DELETE")) {
+                long id = extractId(path, "/restaurants/", "/menu/");
+                String title = path.substring(path.lastIndexOf("/") + 1);
+                handleDeleteMenu(exchange, id, title);
+            } else if (path.matches("/restaurants/\\d+/menu/[^/]+") && method.equals("PUT")) {
+                long id = extractId(path, "/restaurants/", "/menu/");
+                String title = path.substring(path.lastIndexOf("/") + 1);
+                handleAddItemToMenu(exchange, id, title);
+            } else if (path.matches("/restaurants/\\d+/menu/[^/]+/\\d+") && method.equals("DELETE")) {
+                String[] parts = path.split("/");
+                long id = Long.parseLong(parts[2]);
+                String title = parts[4];
+                long itemId = Long.parseLong(parts[5]);
+                handleRemoveItemFromMenu(exchange, id, title, itemId);
             } else {
                 sendJson(exchange, 404, "{\"error\": \"Not found\"}");
             }
         } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+        }
+    }
+    private long extractId(String path, String prefix, String suffix) {
+        try {
+            String temp = path.substring(prefix.length());
+            int endIndex = temp.indexOf(suffix);
+            if (endIndex == -1) {
+                return Long.parseLong(temp); // وقتی suffix وجود نداره
+            } else {
+                return Long.parseLong(temp.substring(0, endIndex));
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid path format for extracting ID");
         }
     }
 
@@ -294,6 +322,125 @@ public class RestaurantHandler implements HttpHandler {
 
     private long extractIdFromPath(String path, String prefix, String suffix) {
         return Long.parseLong(path.replace(prefix, "").replace(suffix, "").split("/")[0]);
+    }
+
+    private void handleCreateMenu(HttpExchange exchange, long restaurantId) throws IOException {
+        User user = authenticate(exchange);
+        if (user == null) return;
+
+        Restaurant restaurant = restaurantDao.findById(restaurantId);
+        if (restaurant == null) {
+            sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+            return;
+        }
+
+        if (!restaurant.getSeller().getId().equals(user.getId())) {
+            sendJson(exchange, 403, "{\"error\": \"Access denied\"}");
+            return;
+        }
+
+        MenuRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), MenuRequest.class);
+        if (request.title == null) {
+            sendJson(exchange, 400, "{\"error\": \"Menu title is required\"}");
+            return;
+        }
+
+        Menu menu = new Menu();
+        menu.setTitle(request.title);
+        menu.setRestaurant(restaurant);
+
+        restaurant.getMenus().add(menu);
+        restaurantDao.update(restaurant);
+
+        sendJson(exchange, 200, gson.toJson(Map.of("title", menu.getTitle())));
+    }
+
+    private void handleDeleteMenu(HttpExchange exchange, long restaurantId, String title) throws IOException {
+        User user = authenticate(exchange);
+        if (user == null) return;
+
+        Restaurant restaurant = restaurantDao.findById(restaurantId);
+        if (restaurant == null) {
+            sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+            return;
+        }
+
+        Menu toRemove = restaurant.getMenus().stream()
+                .filter(menu -> menu.getTitle().equalsIgnoreCase(title))
+                .findFirst()
+                .orElse(null);
+
+        if (toRemove == null) {
+            sendJson(exchange, 404, "{\"error\": \"Menu not found\"}");
+            return;
+        }
+
+        restaurant.getMenus().remove(toRemove);
+        restaurantDao.update(restaurant);
+        sendJson(exchange, 200, "{\"message\": \"Food menu removed from restaurant successfully\"}");
+    }
+
+    private void handleAddItemToMenu(HttpExchange exchange, long restaurantId, String title) throws IOException {
+        User user = authenticate(exchange);
+        if (user == null) return;
+
+        Restaurant restaurant = restaurantDao.findById(restaurantId);
+        if (restaurant == null) {
+            sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+            return;
+        }
+
+        Menu menu = restaurant.getMenus().stream()
+                .filter(m -> m.getTitle().equalsIgnoreCase(title))
+                .findFirst()
+                .orElse(null);
+
+        if (menu == null) {
+            sendJson(exchange, 404, "{\"error\": \"Menu not found\"}");
+            return;
+        }
+
+        AddItemToMenuRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), AddItemToMenuRequest.class);
+        FoodItem item = foodItemDao.findById(request.item_id);
+        if (item == null) {
+            sendJson(exchange, 404, "{\"error\": \"Food item not found\"}");
+            return;
+        }
+
+        menu.addItem(item);
+        menuDao.update(menu);
+        sendJson(exchange, 200, "{\"message\": \"Food item added to menu successfully\"}");
+    }
+
+    private void handleRemoveItemFromMenu(HttpExchange exchange, long restaurantId, String title, long itemId) throws IOException {
+        User user = authenticate(exchange);
+        if (user == null) return;
+
+        Restaurant restaurant = restaurantDao.findById(restaurantId);
+        if (restaurant == null) {
+            sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+            return;
+        }
+
+        Menu menu = restaurant.getMenus().stream()
+                .filter(m -> m.getTitle().equalsIgnoreCase(title))
+                .findFirst()
+                .orElse(null);
+
+        if (menu == null) {
+            sendJson(exchange, 404, "{\"error\": \"Menu not found\"}");
+            return;
+        }
+
+        FoodItem item = foodItemDao.findById(itemId);
+        if (item == null || !menu.getItems().contains(item)) {
+            sendJson(exchange, 404, "{\"error\": \"Item not found in this menu\"}");
+            return;
+        }
+
+        menu.getItems().remove(item);
+        foodItemDao.delete(item);
+        sendJson(exchange, 200, "{\"message\": \"Item removed from menu successfully\"}");
     }
 
     private User authenticate(HttpExchange exchange) throws IOException {
