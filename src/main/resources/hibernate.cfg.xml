@@ -21,6 +21,7 @@
 
         <mapping class="org.foodapp.model.User"/>
         <mapping class="org.foodapp.model.Restaurant"/>
+        <mapping class="org.foodapp.model.FoodItem"/>
 
 
     </session-factory>
