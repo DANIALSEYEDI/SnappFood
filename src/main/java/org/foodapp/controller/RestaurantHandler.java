@@ -4,11 +4,7 @@ import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.*;
-import org.foodapp.dto.CreateRestaurantRequest;
-import org.foodapp.dto.RestaurantResponse;
-import org.foodapp.dto.FoodItemRequest;
-import org.foodapp.dto.MenuRequest;
-import org.foodapp.dto.AddItemToMenuRequest;
+import org.foodapp.dto.*;
 import org.foodapp.model.*;
 import org.foodapp.util.JwtUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -233,215 +229,296 @@ public class RestaurantHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
     }
+
+
     private void handleAddItem(HttpExchange exchange) throws IOException {
-        User user = authenticate(exchange);
-        if (user == null || user.getRole() != Role.SELLER) {
-            sendJson(exchange, 403, "{\"error\": \"Only sellers can add food items\"}");
-            return;
+        try {
+            User user = authenticate(exchange);
+            if (user == null || user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"Only sellers can add food items\"}");
+                return;
+            }
+
+            long restaurantId = extractIdFromPath(exchange.getRequestURI().getPath(), "/restaurants/", "/item");
+            Restaurant restaurant = new RestaurantDao().findById(restaurantId);
+
+            if (restaurant == null || !restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"Unauthorized to modify this restaurant\"}");
+                return;
+            }
+
+            FoodItemRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), FoodItemRequest.class);
+            if (request.name == null || request.description == null || request.price == null || request.supply == null || request.keywords == null || request.keywords.isEmpty()) {
+                sendJson(exchange, 400, "{\"error\": \"Missing required fields\"}");
+                return;
+            }
+
+            FoodItem item = new FoodItem(
+                    request.name, request.imageBase64, request.description,
+                    request.price, request.supply, request.keywords, restaurant
+            );
+            new FoodItemDao().save(item);
+            FoodItemResponse response = new FoodItemResponse(item);
+            sendJson(exchange, 200, gson.toJson(response));
         }
-
-        long restaurantId = extractIdFromPath(exchange.getRequestURI().getPath(), "/restaurants/", "/item");
-        Restaurant restaurant = new RestaurantDao().findById(restaurantId);
-
-        if (restaurant == null || !restaurant.getSeller().getId().equals(user.getId())) {
-            sendJson(exchange, 403, "{\"error\": \"Unauthorized to modify this restaurant\"}");
-            return;
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
-
-        FoodItemRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), FoodItemRequest.class);
-        if (request.name == null || request.description == null || request.price == null || request.supply == null || request.keywords == null || request.keywords.isEmpty()) {
-            sendJson(exchange, 400, "{\"error\": \"Missing required fields\"}");
-            return;
-        }
-
-        FoodItem item = new FoodItem(
-                request.name, request.imageBase64, request.description,
-                request.price, request.supply, request.keywords, restaurant
-        );
-        new FoodItemDao().save(item);
-        sendJson(exchange, 200, gson.toJson(item));
     }
+
 
     private void handleEditItem(HttpExchange exchange) throws IOException {
-        User user = authenticate(exchange);
-        if (user == null || user.getRole() != Role.SELLER) {
-            sendJson(exchange, 403, "{\"error\": \"Only sellers can edit food items\"}");
-            return;
+        try {
+            User user = authenticate(exchange);
+            if (user == null || user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"Only sellers can edit food items\"}");
+                return;
+            }
+
+            String path = exchange.getRequestURI().getPath();
+            long restaurantId = Long.parseLong(path.split("/")[2]);
+            long itemId = Long.parseLong(path.split("/")[4]);
+
+            Restaurant restaurant = new RestaurantDao().findById(restaurantId);
+            if (restaurant == null || !restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+
+            FoodItem item = new FoodItemDao().findById(itemId);
+            if (item == null || !item.getRestaurant().getId().equals(restaurantId)) {
+                sendJson(exchange, 404, "{\"error\": \"Item not found\"}");
+                return;
+            }
+
+            FoodItemRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), FoodItemRequest.class);
+            if (request.name != null) item.setName(request.name);
+            if (request.imageBase64 != null) item.setImageBase64(request.imageBase64);
+            if (request.description != null) item.setDescription(request.description);
+            if (request.price != null) item.setPrice(request.price);
+            if (request.supply != null) item.setSupply(request.supply);
+            if (request.keywords != null && !request.keywords.isEmpty()) item.setKeywords(request.keywords);
+
+            new FoodItemDao().update(item);
+            FoodItemResponse response = new FoodItemResponse(item);
+            sendJson(exchange, 200, gson.toJson(response));
         }
-
-        String path = exchange.getRequestURI().getPath();
-        long restaurantId = Long.parseLong(path.split("/")[2]);
-        long itemId = Long.parseLong(path.split("/")[4]);
-
-        Restaurant restaurant = new RestaurantDao().findById(restaurantId);
-        if (restaurant == null || !restaurant.getSeller().getId().equals(user.getId())) {
-            sendJson(exchange, 403, "{\"error\": \"Unauthorized\"}");
-            return;
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
-
-        FoodItem item = new FoodItemDao().findById(itemId);
-        if (item == null || !item.getRestaurant().getId().equals(restaurantId)) {
-            sendJson(exchange, 404, "{\"error\": \"Item not found\"}");
-            return;
-        }
-
-        FoodItemRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), FoodItemRequest.class);
-        if (request.name != null) item.setName(request.name);
-        if (request.imageBase64 != null) item.setImageBase64(request.imageBase64);
-        if (request.description != null) item.setDescription(request.description);
-        if (request.price != null) item.setPrice(request.price);
-        if (request.supply != null) item.setSupply(request.supply);
-        if (request.keywords != null && !request.keywords.isEmpty()) item.setKeywords(request.keywords);
-
-        new FoodItemDao().update(item);
-        sendJson(exchange, 200, gson.toJson(item));
     }
+
+
 
     private void handleDeleteItem(HttpExchange exchange) throws IOException {
-        User user = authenticate(exchange);
-        if (user == null || user.getRole() != Role.SELLER) {
-            sendJson(exchange, 403, "{\"error\": \"Only sellers can delete food items\"}");
-            return;
+        try {
+            User user = authenticate(exchange);
+            if (user == null || user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"Only sellers can delete food items\"}");
+                return;
+            }
+
+            String path = exchange.getRequestURI().getPath();
+            long restaurantId = Long.parseLong(path.split("/")[2]);
+            long itemId = Long.parseLong(path.split("/")[4]);
+
+            Restaurant restaurant = new RestaurantDao().findById(restaurantId);
+            FoodItem item = new FoodItemDao().findById(itemId);
+
+            if (restaurant == null || item == null || !restaurant.getSeller().getId().equals(user.getId()) || !item.getRestaurant().getId().equals(restaurantId)) {
+                sendJson(exchange, 403, "{\"error\": \"Unauthorized or item not found\"}");
+                return;
+            }
+            new FoodItemDao().delete(item);
+            sendJson(exchange, 200, "{\"message\": \"Food item removed successfully\"}");
         }
-
-        String path = exchange.getRequestURI().getPath();
-        long restaurantId = Long.parseLong(path.split("/")[2]);
-        long itemId = Long.parseLong(path.split("/")[4]);
-
-        Restaurant restaurant = new RestaurantDao().findById(restaurantId);
-        FoodItem item = new FoodItemDao().findById(itemId);
-
-        if (restaurant == null || item == null || !restaurant.getSeller().getId().equals(user.getId()) || !item.getRestaurant().getId().equals(restaurantId)) {
-            sendJson(exchange, 403, "{\"error\": \"Unauthorized or item not found\"}");
-            return;
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
-
-        new FoodItemDao().delete(item);
-        sendJson(exchange, 200, "{\"message\": \"Food item removed successfully\"}");
     }
+
+
+
 
     private long extractIdFromPath(String path, String prefix, String suffix) {
         return Long.parseLong(path.replace(prefix, "").replace(suffix, "").split("/")[0]);
     }
 
+
+
+
     private void handleCreateMenu(HttpExchange exchange, long restaurantId) throws IOException {
-        User user = authenticate(exchange);
-        if (user == null) return;
+        try {
+            User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 403, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
 
-        Restaurant restaurant = restaurantDao.findById(restaurantId);
-        if (restaurant == null) {
-            sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
-            return;
+            Restaurant restaurant = restaurantDao.findById(restaurantId);
+            if (restaurant == null) {
+                sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+                return;
+            }
+
+            if (!restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"Access denied\"}");
+                return;
+            }
+
+            MenuRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), MenuRequest.class);
+            if (request.title == null) {
+                sendJson(exchange, 400, "{\"error\": \"Menu title is required\"}");
+                return;
+            }
+
+            Menu menu = new Menu();
+            menu.setTitle(request.title);
+            menu.setRestaurant(restaurant);
+
+            restaurant.getMenus().add(menu);
+            restaurantDao.update(restaurant);
+            menuDao.save(menu);
+            sendJson(exchange, 200, gson.toJson(Map.of("title", menu.getTitle())));
         }
-
-        if (!restaurant.getSeller().getId().equals(user.getId())) {
-            sendJson(exchange, 403, "{\"error\": \"Access denied\"}");
-            return;
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
-
-        MenuRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), MenuRequest.class);
-        if (request.title == null) {
-            sendJson(exchange, 400, "{\"error\": \"Menu title is required\"}");
-            return;
-        }
-
-        Menu menu = new Menu();
-        menu.setTitle(request.title);
-        menu.setRestaurant(restaurant);
-
-        restaurant.getMenus().add(menu);
-        restaurantDao.update(restaurant);
-
-        sendJson(exchange, 200, gson.toJson(Map.of("title", menu.getTitle())));
     }
+
+
 
     private void handleDeleteMenu(HttpExchange exchange, long restaurantId, String title) throws IOException {
-        User user = authenticate(exchange);
-        if (user == null) return;
+        try {
+            User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 403, "{\"error\": \"Unauthorized\"}");
+                return;}
 
-        Restaurant restaurant = restaurantDao.findById(restaurantId);
-        if (restaurant == null) {
-            sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
-            return;
+            Restaurant restaurant = restaurantDao.findById(restaurantId);
+            if (restaurant == null) {
+                sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+                return;
+            }
+
+            Menu toRemove = restaurant.getMenus().stream()
+                    .filter(menu -> menu.getTitle().equalsIgnoreCase(title))
+                    .findFirst()
+                    .orElse(null);
+
+            if (toRemove == null) {
+                sendJson(exchange, 404, "{\"error\": \"Menu not found\"}");
+                return;
+            }
+
+            restaurant.getMenus().remove(toRemove);
+            restaurantDao.update(restaurant);
+            sendJson(exchange, 200, "{\"message\": \"Food menu removed from restaurant successfully\"}");
         }
-
-        Menu toRemove = restaurant.getMenus().stream()
-                .filter(menu -> menu.getTitle().equalsIgnoreCase(title))
-                .findFirst()
-                .orElse(null);
-
-        if (toRemove == null) {
-            sendJson(exchange, 404, "{\"error\": \"Menu not found\"}");
-            return;
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
-
-        restaurant.getMenus().remove(toRemove);
-        restaurantDao.update(restaurant);
-        sendJson(exchange, 200, "{\"message\": \"Food menu removed from restaurant successfully\"}");
     }
+
+
+
 
     private void handleAddItemToMenu(HttpExchange exchange, long restaurantId, String title) throws IOException {
-        User user = authenticate(exchange);
-        if (user == null) return;
+        try {
+            User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 403, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
 
-        Restaurant restaurant = restaurantDao.findById(restaurantId);
-        if (restaurant == null) {
-            sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
-            return;
+            Restaurant restaurant = restaurantDao.findById(restaurantId);
+            if (restaurant == null) {
+                sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+                return;
+            }
+
+            if (!restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"Access denied\"}");
+                return;
+            }
+
+            Menu menu = menuDao.findByRestaurantAndTitleWithItems(restaurantId, title);
+            if (menu == null) {
+                sendJson(exchange, 404, "{\"error\": \"Menu not found\"}");
+                return;
+            }
+
+            AddItemToMenuRequest request = gson.fromJson(
+                    new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
+                    AddItemToMenuRequest.class
+            );
+
+            FoodItem item = foodItemDao.findById(request.item_id);
+            if (item == null) {
+                sendJson(exchange, 404, "{\"error\": \"Food item not found\"}");
+                return;
+            }
+
+            menu.addItem(item);
+            menuDao.update(menu);
+
+            sendJson(exchange, 200, "{\"message\": \"Food item added to menu successfully\"}");
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
-
-        Menu menu = restaurant.getMenus().stream()
-                .filter(m -> m.getTitle().equalsIgnoreCase(title))
-                .findFirst()
-                .orElse(null);
-
-        if (menu == null) {
-            sendJson(exchange, 404, "{\"error\": \"Menu not found\"}");
-            return;
-        }
-
-        AddItemToMenuRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), AddItemToMenuRequest.class);
-        FoodItem item = foodItemDao.findById(request.item_id);
-        if (item == null) {
-            sendJson(exchange, 404, "{\"error\": \"Food item not found\"}");
-            return;
-        }
-
-        menu.addItem(item);
-        menuDao.update(menu);
-        sendJson(exchange, 200, "{\"message\": \"Food item added to menu successfully\"}");
     }
+
+
 
     private void handleRemoveItemFromMenu(HttpExchange exchange, long restaurantId, String title, long itemId) throws IOException {
-        User user = authenticate(exchange);
-        if (user == null) return;
+        try {
+            User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 403, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
 
-        Restaurant restaurant = restaurantDao.findById(restaurantId);
-        if (restaurant == null) {
-            sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
-            return;
+            Restaurant restaurant = restaurantDao.findById(restaurantId);
+            if (restaurant == null) {
+                sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+                return;
+            }
+
+            Menu menu = menuDao.findByRestaurantAndTitleWithItems(restaurantId, title);
+            if (menu == null) {
+                sendJson(exchange, 404, "{\"error\": \"Menu not found\"}");
+                return;
+            }
+
+            FoodItem item = foodItemDao.findById(itemId);
+            boolean found = menu.getItems().stream()
+                    .anyMatch(i -> i.getId().equals(item.getId()));
+
+            if (item == null || !found) {
+                sendJson(exchange, 404, "{\"error\": \"Item not found in this menu\"}");
+                return;
+            }
+
+            menu.getItems().remove(item);
+            menuDao.update(menu);
+
+            sendJson(exchange, 200, "{\"message\": \"Item removed from menu successfully\"}");
         }
-
-        Menu menu = restaurant.getMenus().stream()
-                .filter(m -> m.getTitle().equalsIgnoreCase(title))
-                .findFirst()
-                .orElse(null);
-
-        if (menu == null) {
-            sendJson(exchange, 404, "{\"error\": \"Menu not found\"}");
-            return;
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
-
-        FoodItem item = foodItemDao.findById(itemId);
-        if (item == null || !menu.getItems().contains(item)) {
-            sendJson(exchange, 404, "{\"error\": \"Item not found in this menu\"}");
-            return;
-        }
-
-        menu.getItems().remove(item);
-        foodItemDao.delete(item);
-        sendJson(exchange, 200, "{\"message\": \"Item removed from menu successfully\"}");
     }
+
+
+
+
 
     private User authenticate(HttpExchange exchange) throws IOException {
         List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");

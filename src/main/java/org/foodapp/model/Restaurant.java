@@ -28,7 +28,7 @@ public class Restaurant {
     @JoinColumn(name = "seller_id")
     private User seller;
 
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Menu> menus = new HashSet<>();
 
     public Set<Menu> getMenus() {

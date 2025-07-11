@@ -17,15 +17,21 @@ public class MenuDao {
         session.close();
     }
 
-    public Menu findByRestaurantIdAndTitle(Long restaurantId, String title) {
+    public Menu findByRestaurantAndTitleWithItems(Long restaurantId, String title) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Query<Menu> query = session.createQuery(
-                "FROM Menu WHERE restaurant.id = :rid AND title = :title", Menu.class);
-        query.setParameter("rid", restaurantId);
-        query.setParameter("title", title);
-        Menu menu = query.uniqueResult();
-        session.close();
-        return menu;
+        try {
+            List<Menu> menus = session.createQuery(
+                            "SELECT DISTINCT m FROM Menu m " +
+                                    "LEFT JOIN FETCH m.items " +
+                                    "WHERE m.restaurant.id = :restaurantId AND LOWER(m.title) = LOWER(:title)", Menu.class)
+                    .setParameter("restaurantId", restaurantId)
+                    .setParameter("title", title)
+                    .list();
+
+            return menus.isEmpty() ? null : menus.get(0);
+        } finally {
+            session.close();
+        }
     }
 
     public void update(Menu menu) {
@@ -35,6 +41,7 @@ public class MenuDao {
         session.getTransaction().commit();
         session.close();
     }
+
 
     public void delete(Menu menu) {
         Session session = HibernateUtil.getSessionFactory().openSession();

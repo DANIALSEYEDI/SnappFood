@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table(name = "menus")
 public class Menu {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
