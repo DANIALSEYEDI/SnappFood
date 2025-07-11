@@ -23,6 +23,7 @@
         <mapping class="org.foodapp.model.Restaurant"/>
         <mapping class="org.foodapp.model.FoodItem"/>
         <mapping class="org.foodapp.model.Menu"/>
+        <mapping class="org.foodapp.model.Order"/>
 
 
     </session-factory>

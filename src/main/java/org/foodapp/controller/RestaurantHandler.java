@@ -8,7 +8,7 @@ import org.foodapp.dto.*;
 import org.foodapp.model.*;
 import org.foodapp.util.JwtUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
-
+import java.net.URLDecoder;
 import java.io.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -56,13 +56,35 @@ public class RestaurantHandler implements HttpHandler {
                 String title = parts[4];
                 long itemId = Long.parseLong(parts[5]);
                 handleRemoveItemFromMenu(exchange, id, title, itemId);
-            } else {
+            }else if (path.matches("/restaurants/\\d+/orders") && method.equalsIgnoreCase("GET")) {
+                long id = extractId(path, "/restaurants/", "/orders");
+                handleListOrders(exchange, id);
+            } else if (path.matches("/restaurants/orders/\\d+") && method.equalsIgnoreCase("PATCH")) {
+                long oid = extractId(path, "/restaurants/orders/", "");
+                handleUpdateOrderStatus(exchange, oid);
+            }
+            else {
                 sendJson(exchange, 404, "{\"error\": \"Not found\"}");
             }
         } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
+    }
+
+    private Map<String, String> parseQuery(String query) {
+        Map<String, String> map = new HashMap<>();
+        if (query == null || query.isEmpty()) return map;
+
+        for (String pair : query.split("&")) {
+            String[] parts = pair.split("=");
+            if (parts.length == 2) {
+                String key = URLDecoder.decode(parts[0], StandardCharsets.UTF_8);
+                String value = URLDecoder.decode(parts[1], StandardCharsets.UTF_8);
+                map.put(key, value);
+            }
+        }
+        return map;
     }
     private long extractId(String path, String prefix, String suffix) {
         try {
@@ -516,6 +538,40 @@ public class RestaurantHandler implements HttpHandler {
         }
     }
 
+    private void handleListOrders(HttpExchange exchange, long restaurantId) throws IOException {
+        User user = authenticate(exchange); if (user == null) return;
+        if (user.getRole() != Role.SELLER) { sendJson(exchange, 403, "{\"error\":\"Forbidden\"}"); return; }
+
+        Map<String,String> query = parseQuery(exchange.getRequestURI().getQuery());
+        List<Order> orders = new OrderDao().findByRestaurantWithFilters(
+                restaurantId, query.get("status"), query.get("search"),
+                query.get("user"), query.get("courier")
+        );
+        sendJson(exchange, 200, gson.toJson(orders));
+    }
+
+    private void handleUpdateOrderStatus(HttpExchange exchange, long orderId) throws IOException {
+        User user = authenticate(exchange); if (user == null) return;
+        if (user.getRole() != Role.SELLER) { sendJson(exchange, 403, "{\"error\":\"Forbidden\"}"); return; }
+
+        UpdateOrderStatusRequest req = gson.fromJson(
+                new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
+                UpdateOrderStatusRequest.class
+        );
+        Order order = new OrderDao().findById(orderId);
+        if (order == null) { sendJson(exchange,404,"{\"error\":\"Order not found\"}"); return; }
+        if (!order.getRestaurant().getId().equals(user.getId())) {
+            sendJson(exchange,403,"{\"error\":\"Forbidden on order\"}"); return;
+        }
+
+        try {
+            order.setStatus(OrderStatus.valueOf(req.status.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            sendJson(exchange,400,"{\"error\":\"Invalid status\"}"); return;
+        }
+        new OrderDao().update(order);
+        sendJson(exchange,200,"{\"message\":\"Order status changed successfully\"}");
+    }
 
 
 
