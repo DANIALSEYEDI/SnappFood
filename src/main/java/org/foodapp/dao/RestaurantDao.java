@@ -5,6 +5,9 @@ import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class RestaurantDao {
@@ -42,40 +45,51 @@ public class RestaurantDao {
         session.close();
     }
 
-    public List<Restaurant> findByFilters(String search, List<String> keywords) {
+    public List<Restaurant> findByFilters(String searchText, List<String> keywords) {
         Session session = HibernateUtil.getSessionFactory().openSession();
 
-        // ساخت HQL بر اساس فیلتر search
-        String hql = "SELECT DISTINCT r FROM Restaurant r " +
-                "LEFT JOIN FETCH r.menus m " +
-                "LEFT JOIN FETCH m.items i " +
-                "WHERE 1=1";
+        String hql = """
+        SELECT DISTINCT r FROM Restaurant r
+        JOIN r.menus m
+        JOIN m.items i
+        WHERE 
+            (:search IS NULL OR 
+             LOWER(r.name) LIKE LOWER(:search) OR 
+             LOWER(i.name) LIKE LOWER(:search))
+            AND (
+                :keywordsEmpty = true OR 
+                EXISTS (
+                    SELECT 1 FROM FoodItem fi2 
+                    WHERE fi2 = i 
+                    AND :keyword MEMBER OF fi2.keywords
+                )
+            )
+        """;
 
-        if (search != null && !search.isBlank()) {
-            hql += " AND (lower(r.name) LIKE :search OR lower(r.address) LIKE :search)";
+        List<Restaurant> result = new ArrayList<>();
+        if (keywords == null || keywords.isEmpty()) {
+            var q = session.createQuery(hql, Restaurant.class);
+            q.setParameter("search", searchText != null ? "%" + searchText.toLowerCase() + "%" : null);
+            q.setParameter("keywordsEmpty", true);
+            q.setParameter("keyword", "");
+            result = q.getResultList();
+        } else {
+            for (String kw : keywords) {
+                var q = session.createQuery(hql, Restaurant.class);
+                q.setParameter("search", searchText != null ? "%" + searchText.toLowerCase() + "%" : null);
+                q.setParameter("keywordsEmpty", false);
+                q.setParameter("keyword", kw.toLowerCase());
+                result.addAll(q.getResultList());
+            }
         }
 
-        Query<Restaurant> query = session.createQuery(hql, Restaurant.class);
-
-        if (search != null && !search.isBlank()) {
-            query.setParameter("search", "%" + search.toLowerCase() + "%");
-        }
-
-        List<Restaurant> results = query.list();
         session.close();
-
-        // اگر فیلتر keyword وجود دارد، در Java فیلتر شود
-        if (keywords != null && !keywords.isEmpty()) {
-            return results.stream()
-                    .filter(r -> r.getMenus().stream()
-                            .flatMap(menu -> menu.getItems().stream())
-                            .anyMatch(item -> item.getKeywords() != null &&
-                                    item.getKeywords().stream().anyMatch(keywords::contains)))
-                    .toList();
-        }
-
-        return results;
+        return new ArrayList<>(new HashSet<>(result));
     }
+
+
+
+
 
 
 

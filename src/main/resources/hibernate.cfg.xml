@@ -18,7 +18,7 @@
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.format_sql">true</property>
 
-
+        <mapping class="org.foodapp.model.Admin"/>
         <mapping class="org.foodapp.model.User"/>
         <mapping class="org.foodapp.model.Restaurant"/>
         <mapping class="org.foodapp.model.FoodItem"/>

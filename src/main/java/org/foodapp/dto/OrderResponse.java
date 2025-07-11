@@ -4,11 +4,11 @@ import org.foodapp.model.Order;
 public class OrderResponse {
     private Long id;
     private String status;
-    private String user;      // phone number
-    private String courier;   // phone number (nullable)
+    private String user;
+    private String courier;
     private Long restaurantId;
 
-    // Constructors
+
     public OrderResponse() {}
 
     public static OrderResponse fromEntity(Order order) {
@@ -21,7 +21,7 @@ public class OrderResponse {
         return dto;
     }
 
-    // Getters & Setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

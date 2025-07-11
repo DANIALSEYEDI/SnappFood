@@ -11,22 +11,22 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // کاربر سفارش‌دهنده
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    // رستورانی که سفارش از آن داده شده
+
     @ManyToOne
     @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
 
-    // پیک (ممکن است null باشد در ابتدا)
+
     @ManyToOne
     @JoinColumn(name = "courier_id")
     private User courier;
 
-    // لیست آیتم‌های غذایی سفارش داده‌شده
+
     @ManyToMany
     @JoinTable(
             name = "order_items",
@@ -35,17 +35,16 @@ public class Order {
     )
     private List<FoodItem> items;
 
-    // وضعیت سفارش
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    // یادداشت کاربر (اختیاری)
+
     private String note;
 
-    // مبلغ کل سفارش (جمع آیتم‌ها)
+
     private Integer totalPrice;
 
-    // Constructors
     public Order() {}
 
     public Order(User user, Restaurant restaurant, List<FoodItem> items, String note, Integer totalPrice) {

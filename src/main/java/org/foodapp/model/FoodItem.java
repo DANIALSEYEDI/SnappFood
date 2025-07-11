@@ -1,6 +1,8 @@
 package org.foodapp.model;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,8 +17,14 @@ public class FoodItem {
     private Integer price;
     private Integer supply;
 
-    @ElementCollection
-    private List<String> keywords;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "fooditem_keywords",
+            joinColumns = @JoinColumn(name = "food_item_id")
+    )
+    @Column(name = "keyword")
+    private List<String> keywords = new ArrayList<>();
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)

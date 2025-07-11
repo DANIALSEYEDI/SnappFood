@@ -14,6 +14,8 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.foodapp.util.QueryUtil;
+
 
 public class RestaurantHandler implements HttpHandler {
 
@@ -22,6 +24,7 @@ public class RestaurantHandler implements HttpHandler {
     private final FoodItemDao foodItemDao = new FoodItemDao();
     private final MenuDao menuDao = new MenuDao();
     private final OrderDao orderDao = new OrderDao();
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
@@ -60,17 +63,11 @@ public class RestaurantHandler implements HttpHandler {
                 handleRemoveItemFromMenu(exchange, id, title, itemId);
             }else if (path.matches("/restaurants/\\d+/orders") && method.equalsIgnoreCase("GET")) {
                 long id = extractId(path, "/restaurants/", "/orders");
-                handleListOrders(exchange, id);
+                handleGetOrdersForRestaurant(exchange, id);
             } else if (path.matches("/restaurants/orders/\\d+") && method.equalsIgnoreCase("PATCH")) {
                 long oid = extractId(path, "/restaurants/orders/", "");
                 handleUpdateOrderStatus(exchange, oid);
-            }else if (path.equals("/vendors") && method.equals("POST")) {
-                handleSearchVendors(exchange);
-            } else if (path.matches("/vendors/\\d+") && method.equals("GET")) {
-                long id = extractId(path, "/vendors/","");
-                handleVendorDetails(exchange, id);
             }
-
             else {
                 sendJson(exchange, 404, "{\"error\": \"Not found\"}");
             }
@@ -99,7 +96,7 @@ public class RestaurantHandler implements HttpHandler {
             String temp = path.substring(prefix.length());
             int endIndex = temp.indexOf(suffix);
             if (endIndex == -1) {
-                return Long.parseLong(temp); // وقتی suffix وجود نداره
+                return Long.parseLong(temp);
             } else {
                 return Long.parseLong(temp.substring(0, endIndex));
             }
@@ -546,104 +543,101 @@ public class RestaurantHandler implements HttpHandler {
         }
     }
 
-    private void handleListOrders(HttpExchange exchange, long restaurantId) throws IOException {
-        // پارامترهای کوئری
-        Map<String, String> queryParams = QueryParser.parseQuery(exchange.getRequestURI().getQuery());
-        String status = queryParams.get("status");
-        String search = queryParams.get("search");
-        String user = queryParams.get("user");
-        String courier = queryParams.get("courier");
 
-        // دریافت سفارش‌ها
-        List<Order> orders = orderDao.findByRestaurantWithFilters(restaurantId, status, search, user, courier);
 
-        // تبدیل به DTO
-        List<OrderResponse> responseList = orders.stream()
-                .map(OrderResponse::fromEntity)
-                .toList();
 
-        // ارسال پاسخ
-        String json = new ObjectMapper().writeValueAsString(responseList);
-        sendJson(exchange, 200, json);
+    private void handleGetOrdersForRestaurant(HttpExchange exchange, long restaurantId) throws IOException {
+        try {
+            User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"Only sellers can view their orders\"}");
+                return;
+            }
+
+            Restaurant restaurant = restaurantDao.findById(restaurantId);
+            if (restaurant == null || !restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"Access denied\"}");
+                return;
+            }
+
+            Map<String, String> queryParams = QueryUtil.getQueryParams(exchange.getRequestURI().getRawQuery());
+            String status = queryParams.get("status");
+            String search = queryParams.get("search");
+            String userParam = queryParams.get("user");
+            String courier = queryParams.get("courier");
+
+            List<Order> orders = orderDao.findByFilters(restaurantId, status, search, userParam, courier);
+
+            List<OrderResponse> response = orders.stream()
+                    .map(OrderResponse::fromEntity)
+                    .toList();
+
+            sendJson(exchange, 200, new Gson().toJson(response));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+        }
     }
 
 
 
 
     private void handleUpdateOrderStatus(HttpExchange exchange, long orderId) throws IOException {
-        // خواندن body و پارس کردن JSON
-        UpdateOrderStatusRequest request = new ObjectMapper()
-                .readValue(exchange.getRequestBody(), UpdateOrderStatusRequest.class);
-
-        if (request.getStatus() == null) {
-            String response = "{\"error\": \"Invalid ID\"}";
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.sendResponseHeaders(400, response.getBytes().length);
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-
-            return;
-        }
-
-        Order order = orderDao.findById(orderId);
-        if (order == null) {
-            String response = "{\"error\": \"Not found\"}";
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.sendResponseHeaders(404, response.getBytes().length);
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-
-            return;
-        }
-
-        // اعمال تغییر وضعیت
         try {
-            OrderStatus newStatus = OrderStatus.valueOf(request.getStatus().toUpperCase());
-            order.setStatus(newStatus);
-            orderDao.update(order);
-        } catch (IllegalArgumentException e) {
-            String response = "{\"error\": \"Invalid ID\"}";
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.sendResponseHeaders(400, response.getBytes().length);
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
+            User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
 
-            return;
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"Only sellers can change order status\"}");
+                return;
+            }
+
+            UpdateOrderStatusRequest request = new ObjectMapper()
+                    .readValue(exchange.getRequestBody(), UpdateOrderStatusRequest.class);
+
+            if (request.getStatus() == null) {
+                sendJson(exchange, 400, "{\"error\": \"Missing status in request body\"}");
+                return;
+            }
+
+            Order order = orderDao.findById(orderId);
+            if (order == null) {
+                sendJson(exchange, 404, "{\"error\": \"Order not found\"}");
+                return;
+            }
+
+
+            if (!order.getRestaurant().getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"Access denied: You cannot change this order\"}");
+                return;
+            }
+
+            try {
+                OrderStatus newStatus = OrderStatus.valueOf(request.getStatus().toUpperCase());
+                order.setStatus(newStatus);
+                orderDao.update(order);
+            } catch (IllegalArgumentException e) {
+                sendJson(exchange, 400, "{\"error\": \"Invalid status value\"}");
+                return;
+            }
+
+            sendJson(exchange, 200, "{\"message\": \"Order status changed successfully\"}");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
-
-        // ارسال پیام موفقیت
-        sendJson(exchange, 200, "{\"message\": \"Order status changed successfully\"}");
     }
 
-
-
-
-    private void handleSearchVendors(HttpExchange exchange) throws IOException {
-        VendorFilterRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody()), VendorFilterRequest.class);
-        List<Restaurant> vendors = restaurantDao.findByFilters(request.search, request.keywords);
-        sendJson(exchange, 200, gson.toJson(vendors));
-    }
-
-    private void handleVendorDetails(HttpExchange exchange, long vendorId) throws IOException {
-        Restaurant restaurant = restaurantDao.findById(vendorId);
-        if (restaurant == null) {
-            sendJson(exchange, 404, "{\"error\": \"Vendor not found\"}");
-            return;
-        }
-
-        VendorMenuResponse response = new VendorMenuResponse();
-        response.vendor = restaurant;
-        response.menu_titles = restaurant.getMenus().stream().map(Menu::getTitle).toList();
-        Map<String, List<FoodItem>> map = new HashMap<>();
-        for (Menu menu : restaurant.getMenus()) {
-            map.put(menu.getTitle(), new ArrayList<>(menu.getItems()));
-        }
-        response.menu_items_by_title = map;
-        sendJson(exchange, 200, gson.toJson(response));
-    }
 
 
 
@@ -665,27 +659,6 @@ public class RestaurantHandler implements HttpHandler {
 
         return new UserDao().findById(Long.parseLong(decoded.getSubject()));
     }
-
-    public class QueryParser {
-
-        public static Map<String, String> parseQuery(String query) {
-            Map<String, String> map = new HashMap<>();
-            if (query == null || query.isBlank()) return map;
-
-            for (String param : query.split("&")) {
-                String[] pair = param.split("=", 2);
-                try {
-                    String key = URLDecoder.decode(pair[0], "UTF-8");
-                    String value = pair.length > 1 ? URLDecoder.decode(pair[1], "UTF-8") : "";
-                    map.put(key, value);
-                } catch (UnsupportedEncodingException e) {
-                    // گزینه اختیاری: لاگ کردن یا نادیده گرفتن
-                }
-            }
-            return map;
-        }
-    }
-
 
 
     private void sendJson(HttpExchange exchange, int statusCode, String json) throws IOException {
