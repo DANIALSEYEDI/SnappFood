@@ -1,8 +1,10 @@
 package org.foodapp.dao;
 import org.foodapp.model.Order;
 import org.foodapp.model.OrderStatus;
+import org.foodapp.model.User;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import java.util.List;
 public class OrderDao {
@@ -42,6 +44,47 @@ public class OrderDao {
         session.merge(order);
         session.getTransaction().commit();
         session.close();
+    }
+
+    public List<Order> findHistoryByUser(User user, String search, String vendorName) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        String hql = "FROM Order o WHERE o.user = :user";
+
+        if (search != null && !search.isBlank()) {
+            hql += " AND lower(o.deliveryAddress) LIKE :search";
+        }
+        if (vendorName != null && !vendorName.isBlank()) {
+            hql += " AND lower(o.restaurant.name) LIKE :vendor";
+        }
+
+        Query<Order> query = session.createQuery(hql, Order.class);
+        query.setParameter("user", user);
+        if (search != null && !search.isBlank()) {
+            query.setParameter("search", "%" + search.toLowerCase() + "%");
+        }
+        if (vendorName != null && !vendorName.isBlank()) {
+            query.setParameter("vendor", "%" + vendorName.toLowerCase() + "%");
+        }
+
+        List<Order> results = query.list();
+        session.close();
+        return results;
+    }
+
+    public void save(Order order) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+
+        try {
+            tx = session.beginTransaction();
+            session.persist(order);  // با توجه به @OneToMany روی OrderItemها، خودکار ذخیره می‌شوند
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
+        } finally {
+            session.close();
+        }
     }
 }
 

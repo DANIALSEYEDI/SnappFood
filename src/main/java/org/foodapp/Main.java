@@ -1,10 +1,7 @@
 package org.foodapp;
 
 import com.sun.net.httpserver.HttpServer;
-import org.foodapp.controller.AuthHandler;
-import org.foodapp.controller.BuyerHandler;
-import org.foodapp.controller.RestaurantHandler;
-import org.foodapp.controller.VendorsHandler;
+import org.foodapp.controller.*;
 
 import java.net.InetSocketAddress;
 
@@ -17,6 +14,7 @@ public class Main {
         server.createContext("/restaurants",  new RestaurantHandler());
         server.createContext("/vendors", new VendorsHandler());
         server.createContext("/items", new BuyerHandler());
+        server.createContext("/orders", new OrderHandler());
 
         server.start();
         System.out.println("✅ Server started on http://localhost:8080");
