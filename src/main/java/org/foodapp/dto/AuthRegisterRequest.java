@@ -1,6 +1,6 @@
 package org.foodapp.dto;
 
-public class RegisterRequest {
+public class AuthRegisterRequest {
     public String full_name;
     public String phone;
     public String password;
@@ -37,10 +37,10 @@ public class RegisterRequest {
         }
     }
 
-    public RegisterRequest() {}
+    public AuthRegisterRequest() {}
 
-    public RegisterRequest(String full_name, String phone, String password, String role, String address,
-                           String email, String profileImageBase64, BankInfo bank_info) {
+    public AuthRegisterRequest(String full_name, String phone, String password, String role, String address,
+                               String email, String profileImageBase64, BankInfo bank_info) {
         this.full_name = full_name;
         this.phone = phone;
         this.password = password;

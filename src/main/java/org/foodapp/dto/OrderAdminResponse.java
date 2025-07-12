@@ -6,7 +6,7 @@ import org.foodapp.model.Order;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AdminOrderResponse {
+public class OrderAdminResponse {
     private Long id;
     private String status;
     private String user;
@@ -15,8 +15,8 @@ public class AdminOrderResponse {
     private String deliveryAddress;
     private List<OrderItemResponse> items;
 
-    public static AdminOrderResponse fromEntity(Order order) {
-        AdminOrderResponse dto = new AdminOrderResponse();
+    public static OrderAdminResponse fromEntity(Order order) {
+        OrderAdminResponse dto = new OrderAdminResponse();
         dto.setId(order.getId());
         dto.setStatus(order.getStatus().name());
         dto.setUser(order.getUser() != null ? order.getUser().getPhoneNumber() : null);

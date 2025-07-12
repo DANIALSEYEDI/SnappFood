@@ -54,7 +54,7 @@ public class AuthHandler implements HttpHandler {
 
 
     private void handleRegister(HttpExchange exchange) throws IOException {
-        RegisterRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), RegisterRequest.class);
+        AuthRegisterRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), AuthRegisterRequest.class);
 
         if (request.full_name == null || request.phone == null || request.password == null ||
                 request.role == null || request.address == null) {
@@ -104,7 +104,7 @@ public class AuthHandler implements HttpHandler {
 
             String token = JwtUtil.generateToken(user.getId().toString(), user.getRole().toString());
 
-            RegisterResponse response = new RegisterResponse(
+            AuthRegisterResponse response = new AuthRegisterResponse(
                     "User registered successfully",
                     user.getId(),
                     token
@@ -125,7 +125,7 @@ public class AuthHandler implements HttpHandler {
 
     private void handleLogin(HttpExchange exchange) throws IOException {
         try {
-            LoginRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), LoginRequest.class);
+            AuthLoginRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), AuthLoginRequest.class);
 
             if (request.phone == null || request.password == null) {
                 sendJson(exchange, 400, "{\"error\": \"Invalid input\"}");
@@ -139,7 +139,7 @@ public class AuthHandler implements HttpHandler {
             }
 
             String token = JwtUtil.generateToken(user.getId().toString(), user.getRole().toString());
-            LoginResponse response = new LoginResponse(
+            AuthLoginResponse response = new AuthLoginResponse(
                     "User logged in successfully",
                     token,
                     user
@@ -202,7 +202,7 @@ public class AuthHandler implements HttpHandler {
                 return;
             }
 
-            ProfileUpdateRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), ProfileUpdateRequest.class);
+            AuthProfileUpdateRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), AuthProfileUpdateRequest.class);
 
             if (request == null) {
                 sendJson(exchange, 400, "{\"error\": \"Invalid input\"}");

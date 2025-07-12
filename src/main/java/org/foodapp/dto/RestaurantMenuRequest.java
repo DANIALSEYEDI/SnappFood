@@ -1,6 +1,6 @@
 package org.foodapp.dto;
 
-public class MenuRequest {
+public class RestaurantMenuRequest {
     public String title;
 }
 

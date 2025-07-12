@@ -9,6 +9,7 @@ import org.hibernate.query.Query;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RestaurantDao {
 
@@ -45,50 +46,59 @@ public class RestaurantDao {
         session.close();
     }
 
+
     public List<Restaurant> findByFilters(String searchText, List<String> keywords) {
         Session session = HibernateUtil.getSessionFactory().openSession();
+        List<Restaurant> result;
 
-        String hql = """
+        String baseHQL = """
         SELECT DISTINCT r FROM Restaurant r
-        JOIN r.menus m
-        JOIN m.items i
-        WHERE 
-            (:search IS NULL OR 
-             LOWER(r.name) LIKE LOWER(:search) OR 
-             LOWER(i.name) LIKE LOWER(:search))
-            AND (
-                :keywordsEmpty = true OR 
-                EXISTS (
-                    SELECT 1 FROM FoodItem fi2 
-                    WHERE fi2 = i 
-                    AND :keyword MEMBER OF fi2.keywords
-                )
+        JOIN FETCH r.menus m
+        JOIN FETCH m.items i
+        WHERE (:search IS NULL OR 
+               LOWER(r.name) LIKE LOWER(:search) OR 
+               LOWER(i.name) LIKE LOWER(:search))
+    """;
+
+
+        if (keywords != null && !keywords.isEmpty()) {
+            baseHQL += """
+            AND EXISTS (
+                SELECT 1 FROM FoodItem fi2
+                JOIN fi2.keywords k
+                WHERE fi2 = i AND LOWER(k) IN (:keywords)
             )
         """;
-
-        List<Restaurant> result = new ArrayList<>();
-        if (keywords == null || keywords.isEmpty()) {
-            var q = session.createQuery(hql, Restaurant.class);
-            q.setParameter("search", searchText != null ? "%" + searchText.toLowerCase() + "%" : null);
-            q.setParameter("keywordsEmpty", true);
-            q.setParameter("keyword", "");
-            result = q.getResultList();
-        } else {
-            for (String kw : keywords) {
-                var q = session.createQuery(hql, Restaurant.class);
-                q.setParameter("search", searchText != null ? "%" + searchText.toLowerCase() + "%" : null);
-                q.setParameter("keywordsEmpty", false);
-                q.setParameter("keyword", kw.toLowerCase());
-                result.addAll(q.getResultList());
-            }
         }
 
+        Query<Restaurant> query = session.createQuery(baseHQL, Restaurant.class);
+        query.setParameter("search", searchText != null ? "%" + searchText.toLowerCase() + "%" : null);
+
+        if (keywords != null && !keywords.isEmpty()) {
+            List<String> lowerKeywords = keywords.stream().map(String::toLowerCase).toList();
+            query.setParameter("keywords", lowerKeywords);
+        }
+
+        result = query.getResultList();
         session.close();
-        return new ArrayList<>(new HashSet<>(result));
+        return result;
     }
 
 
-
+    public Restaurant findWithMenusAndItems(Long id) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            return session.createQuery(
+                            "SELECT r FROM Restaurant r " +
+                                    "LEFT JOIN FETCH r.menus m " +
+                                    "LEFT JOIN FETCH m.items " +
+                                    "WHERE r.id = :id", Restaurant.class)
+                    .setParameter("id", id)
+                    .uniqueResult();
+        } finally {
+            session.close();
+        }
+    }
 
 
 

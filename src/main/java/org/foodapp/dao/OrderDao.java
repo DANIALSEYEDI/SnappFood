@@ -31,12 +31,18 @@ public class OrderDao {
     }
 
 
+
+
     public Order findById(Long id) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Order o = session.get(Order.class, id);
         session.close();
         return o;
     }
+
+
+
+
 
     public void update(Order order) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -45,6 +51,9 @@ public class OrderDao {
         session.getTransaction().commit();
         session.close();
     }
+
+
+
 
     public List<Order> findHistoryByUser(User user, String search, String vendorName) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -71,13 +80,17 @@ public class OrderDao {
         return results;
     }
 
+
+
+
+
     public void save(Order order) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
 
         try {
             tx = session.beginTransaction();
-            session.persist(order);  // با توجه به @OneToMany روی OrderItemها، خودکار ذخیره می‌شوند
+            session.persist(order);
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();

@@ -1,9 +1,9 @@
 package org.foodapp.dto;
 
-public class LoginRequest {
+public class AuthLoginRequest {
     public String phone;
     public String password;
-    public LoginRequest(String phone, String password) {
+    public AuthLoginRequest(String phone, String password) {
         this.phone = phone;
         this.password = password;
     }

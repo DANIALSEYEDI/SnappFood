@@ -1,6 +1,6 @@
 package org.foodapp.dto;
 
-public class ProfileUpdateRequest {
+public class AuthProfileUpdateRequest {
     public String full_name;
     public String phone;
     public String email;

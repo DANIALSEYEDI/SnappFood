@@ -1,6 +1,6 @@
 package org.foodapp.dto;
 
-public class CreateRestaurantRequest {
+public class RestaurantCreateRequest {
     public String name;
     public String address;
     public String phone;
@@ -8,6 +8,6 @@ public class CreateRestaurantRequest {
     public Integer tax_fee;
     public Integer additional_fee;
 
-    public CreateRestaurantRequest() {}
+    public RestaurantCreateRequest() {}
 }
 

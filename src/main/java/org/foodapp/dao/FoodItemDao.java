@@ -63,7 +63,6 @@ public class FoodItemDao {
         List<FoodItem> results = query.list();
         session.close();
 
-        // فیلتر دستی روی keywordها
         if (keywords != null && !keywords.isEmpty()) {
             return results.stream()
                     .filter(f -> f.getKeywords() != null &&

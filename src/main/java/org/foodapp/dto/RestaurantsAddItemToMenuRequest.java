@@ -1,6 +1,6 @@
 package org.foodapp.dto;
 
-public class AddItemToMenuRequest {
+public class RestaurantsAddItemToMenuRequest {
     public Long item_id;
 }
 

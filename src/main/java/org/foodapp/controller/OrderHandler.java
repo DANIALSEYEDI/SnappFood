@@ -1,11 +1,14 @@
 package org.foodapp.controller;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.*;
 import org.foodapp.model.*;
 import org.foodapp.dto.*;
+import org.foodapp.util.JwtUtil;
 import org.foodapp.util.QueryParser;
 
 import java.io.IOException;
@@ -34,21 +37,36 @@ public class OrderHandler implements HttpHandler {
         } else if (path.equals("/orders/history") && method.equals("GET")) {
             handleGetOrderHistory(exchange);
         } else {
-            sendNotFound(exchange, "Endpoint not found");
+            sendJson(exchange, 404, "{\"error\": \"Not found\"}");
         }
     }
 
+
+
+
+
     private void handleSubmitOrder(HttpExchange exchange) throws IOException {
         try {
-            SubmitOrderRequest req = gson.fromJson(new InputStreamReader(exchange.getRequestBody()), SubmitOrderRequest.class);
+            User user = authenticate(exchange);
+            if (user == null || user.getRole() != Role.BUYER) {
+                sendJson(exchange, 403, "{\"error\": \"Only buyers can submit orders\"}");
+                return;
+            }
+            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+            if (contentType == null || !contentType.contains("application/json")) {
+                sendJson(exchange, 415, "{\"error\": \"Unsupported Media Type\"}");
+                return;
+            }
+
+            OrderSubmitRequest req = gson.fromJson(new InputStreamReader(exchange.getRequestBody()), OrderSubmitRequest.class);
             if (req.vendor_id == null || req.delivery_address == null || req.items == null || req.items.isEmpty()) {
-                sendBadRequest(exchange, "Missing required fields");
+                sendJson(exchange, 400, "{\"error\": \"Missing required fields\"}");
                 return;
             }
 
             Restaurant vendor = restaurantDao.findById(req.vendor_id);
             if (vendor == null) {
-                sendNotFound(exchange, "Vendor not found");
+                sendJson(exchange, 404, "{\"error\": \"Vendor not found\"}");
                 return;
             }
 
@@ -56,7 +74,7 @@ public class OrderHandler implements HttpHandler {
             order.setRestaurant(vendor);
             order.setDeliveryAddress(req.delivery_address);
             order.setStatus(OrderStatus.PENDING);
-            order.setUser(getAuthenticatedUser(exchange));
+            order.setUser(user);
 
             for (OrderItemRequest itemReq : req.items) {
                 FoodItem item = foodItemDao.findById(itemReq.item_id);
@@ -65,20 +83,38 @@ public class OrderHandler implements HttpHandler {
             }
 
             orderDao.save(order);
-            sendJson(exchange, 200, AdminOrderResponse.fromEntity(order));
-        } catch (Exception e) {
-            sendServerError(exchange, "Failed to submit order: " + e.getMessage());
+            sendJson(exchange, 200, OrderAdminResponse.fromEntity(order));
+        }
+        catch (JsonSyntaxException e){
+                sendJson(exchange, 400, "{\"error\": \"Invalid input format\"}");
+        }
+        catch (Exception e) {
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
     }
+
+
+
+
+
+
+
+
 
     private void handleGetOrder(HttpExchange exchange, long id) throws IOException {
         Order order = orderDao.findById(id);
         if (order == null) {
-            sendNotFound(exchange, "Order not found");
+            sendJson(exchange, 404, "{\"error\": \"Order not found\"}");
             return;
         }
-        sendJson(exchange, 200, AdminOrderResponse.fromEntity(order));
+        sendJson(exchange, 200, OrderAdminResponse.fromEntity(order));
     }
+
+
+
+
+
+
 
     private void handleGetOrderHistory(HttpExchange exchange) throws IOException {
         String query = exchange.getRequestURI().getQuery();
@@ -88,18 +124,25 @@ public class OrderHandler implements HttpHandler {
 
         User currentUser = getAuthenticatedUser(exchange);
         List<Order> orders = orderDao.findHistoryByUser(currentUser, search, vendor);
-        List<AdminOrderResponse> dtoList = orders.stream()
-                .map(AdminOrderResponse::fromEntity)
+        List<OrderAdminResponse> dtoList = orders.stream()
+                .map(OrderAdminResponse::fromEntity)
                 .collect(Collectors.toList());
 
         sendJson(exchange, 200, dtoList);
     }
 
-    // متدهای کمکی
+
+
+
+
+
+
+
 
     private User getAuthenticatedUser(HttpExchange exchange) {
-        return userDao.findById(1L); // فرضی برای تست
+        return userDao.findById(1L);
     }
+
 
     private long extractId(String path, String prefix) {
         try {
@@ -109,6 +152,7 @@ public class OrderHandler implements HttpHandler {
         }
     }
 
+
     private void sendJson(HttpExchange exchange, int statusCode, Object data) throws IOException {
         String response = gson.toJson(data);
         exchange.getResponseHeaders().add("Content-Type", "application/json");
@@ -117,16 +161,22 @@ public class OrderHandler implements HttpHandler {
         exchange.getResponseBody().close();
     }
 
-    private void sendBadRequest(HttpExchange exchange, String message) throws IOException {
-        sendJson(exchange, 400, Map.of("error", message));
+    private User authenticate(HttpExchange exchange) throws IOException {
+        List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
+        if (authHeaders == null || authHeaders.isEmpty()) {
+            sendJson(exchange, 401, "{\"error\": \"Missing Authorization header\"}");
+            return null;
+        }
+        String token = authHeaders.get(0).replace("Bearer ", "");
+        DecodedJWT decoded;
+        try {
+            decoded = JwtUtil.verifyToken(token);
+        } catch (Exception e) {
+            sendJson(exchange, 401, "{\"error\": \"Invalid token\"}");
+            return null;
+        }
+        return userDao.findById(Long.parseLong(decoded.getSubject()));
     }
 
-    private void sendNotFound(HttpExchange exchange, String message) throws IOException {
-        sendJson(exchange, 404, Map.of("error", message));
-    }
-
-    private void sendServerError(HttpExchange exchange, String message) throws IOException {
-        sendJson(exchange, 500, Map.of("error", message));
-    }
 }
 

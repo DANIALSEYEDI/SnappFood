@@ -9,6 +9,7 @@ import java.util.List;
 
 public class MenuDao {
 
+
     public void save(Menu menu) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         session.beginTransaction();

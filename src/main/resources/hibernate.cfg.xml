@@ -25,6 +25,8 @@
         <mapping class="org.foodapp.model.Menu"/>
         <mapping class="org.foodapp.model.Order"/>
         <mapping class="org.foodapp.model.OrderItem"/>
+        <mapping class="org.foodapp.model.Coupon"/>
+
 
 
     </session-factory>

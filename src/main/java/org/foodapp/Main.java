@@ -13,7 +13,8 @@ public class Main {
         server.createContext("/auth", new AuthHandler());
         server.createContext("/restaurants",  new RestaurantHandler());
         server.createContext("/vendors", new VendorsHandler());
-        server.createContext("/items", new BuyerHandler());
+        server.createContext("/items", new ItemsHandler());
+        server.createContext("/coupons", new CouponsHandler());
         server.createContext("/orders", new OrderHandler());
 
         server.start();

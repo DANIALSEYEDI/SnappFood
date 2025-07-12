@@ -116,9 +116,9 @@ public class RestaurantHandler implements HttpHandler {
                 sendJson(exchange, 403, "{\"error\": \"Only sellers can create restaurants\"}");
                 return;
             }
-            CreateRestaurantRequest request = gson.fromJson(
+            RestaurantCreateRequest request = gson.fromJson(
                     new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
-                    CreateRestaurantRequest.class
+                    RestaurantCreateRequest.class
             );
             if (request.name == null || request.address == null || request.phone == null) {
                 sendJson(exchange, 400, "{\"error\": \"Missing required fields: name, address, or phone\"}");
@@ -227,9 +227,9 @@ public class RestaurantHandler implements HttpHandler {
                 sendJson(exchange, 403, "{\"error\": \"You are not authorized to update this restaurant\"}");
                 return;
             }
-            CreateRestaurantRequest request = gson.fromJson(
+            RestaurantCreateRequest request = gson.fromJson(
                     new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
-                    CreateRestaurantRequest.class
+                    RestaurantCreateRequest.class
             );
 
             if (request.name != null) restaurant.setName(request.name);
@@ -274,7 +274,7 @@ public class RestaurantHandler implements HttpHandler {
                 return;
             }
 
-            FoodItemRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), FoodItemRequest.class);
+            RestaurantFoodItemRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), RestaurantFoodItemRequest.class);
             if (request.name == null || request.description == null || request.price == null || request.supply == null || request.keywords == null || request.keywords.isEmpty()) {
                 sendJson(exchange, 400, "{\"error\": \"Missing required fields\"}");
                 return;
@@ -319,7 +319,7 @@ public class RestaurantHandler implements HttpHandler {
                 return;
             }
 
-            FoodItemRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), FoodItemRequest.class);
+            RestaurantFoodItemRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), RestaurantFoodItemRequest.class);
             if (request.name != null) item.setName(request.name);
             if (request.imageBase64 != null) item.setImageBase64(request.imageBase64);
             if (request.description != null) item.setDescription(request.description);
@@ -396,7 +396,7 @@ public class RestaurantHandler implements HttpHandler {
                 return;
             }
 
-            MenuRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), MenuRequest.class);
+            RestaurantMenuRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), RestaurantMenuRequest.class);
             if (request.title == null) {
                 sendJson(exchange, 400, "{\"error\": \"Menu title is required\"}");
                 return;
@@ -480,9 +480,9 @@ public class RestaurantHandler implements HttpHandler {
                 return;
             }
 
-            AddItemToMenuRequest request = gson.fromJson(
+            RestaurantsAddItemToMenuRequest request = gson.fromJson(
                     new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
-                    AddItemToMenuRequest.class
+                    RestaurantsAddItemToMenuRequest.class
             );
 
             FoodItem item = foodItemDao.findById(request.item_id);
@@ -601,8 +601,8 @@ public class RestaurantHandler implements HttpHandler {
                 return;
             }
 
-            UpdateOrderStatusRequest request = new ObjectMapper()
-                    .readValue(exchange.getRequestBody(), UpdateOrderStatusRequest.class);
+            RestaurantUpdateOrderStatusRequest request = new ObjectMapper()
+                    .readValue(exchange.getRequestBody(), RestaurantUpdateOrderStatusRequest.class);
 
             if (request.getStatus() == null) {
                 sendJson(exchange, 400, "{\"error\": \"Missing status in request body\"}");
