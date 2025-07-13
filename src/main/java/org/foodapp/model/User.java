@@ -31,7 +31,7 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "favorites",
             joinColumns = @JoinColumn(name = "user_id"),

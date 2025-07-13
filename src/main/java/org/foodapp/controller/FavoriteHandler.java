@@ -1,12 +1,16 @@
 package org.foodapp.controller;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.RestaurantDao;
 import org.foodapp.dao.UserDao;
+import org.foodapp.dto.RestaurantResponse;
 import org.foodapp.model.Restaurant;
+import org.foodapp.model.Role;
 import org.foodapp.model.User;
+import org.foodapp.util.JwtUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,13 +20,14 @@ public class FavoriteHandler implements HttpHandler {
 
     private final UserDao userDao = new UserDao();
     private final RestaurantDao restaurantDao = new RestaurantDao();
+    private static final Gson gson = new Gson();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
 
-        User user = getAuthenticatedUser(exchange);
+        User user = authenticate(exchange);
         if (user == null) {
             sendJson(exchange, 401,  "Unauthorized");
             return;
@@ -45,46 +50,123 @@ public class FavoriteHandler implements HttpHandler {
         }
     }
 
+
+
+
+
     private void handleGetFavorites(HttpExchange exchange, User user) throws IOException {
-        List<Restaurant> favorites = user.getFavorites();
-        sendJson(exchange, 200, favorites);
+        try {
+
+            List<Restaurant> favorites = user.getFavorites();
+            if (favorites == null || favorites.isEmpty()) {
+                sendJson(exchange, 404, "{\"error\": \"No favorite restaurants found\"}");
+                return;
+            }
+
+            List<RestaurantResponse> dtoList = favorites.stream()
+                    .map(r -> new RestaurantResponse(
+                            r.getId(),
+                            r.getName(),
+                            r.getAddress(),
+                            r.getPhone(),
+                            r.getLogoBase64(),
+                            r.getTaxFee(),
+                            r.getAdditionalFee()
+                    ))
+                    .toList();
+
+            sendJson(exchange, 200, gson.toJson(dtoList));
+        }
+        catch (Exception e) {
+            sendJson(exchange, 500, "Internal Server Error");
+        }
     }
+
+
+
+
 
     private void handleAddFavorite(HttpExchange exchange, User user, long restaurantId) throws IOException {
-        Restaurant restaurant = restaurantDao.findById(restaurantId);
-        if (restaurant == null) {
-            sendJson(exchange, 404,"Restaurant not found");
-            return;
-        }
+        try {
+            Restaurant restaurant = restaurantDao.findById(restaurantId);
+            if (user.getRole() != Role.BUYER) {
+                sendJson(exchange, 403, "{\"error\": \"Only buyers can add favorites\"}");
+                return;
+            }
 
-        if (!user.getFavorites().contains(restaurant)) {
-            user.getFavorites().add(restaurant);
+            if (restaurant == null) {
+                sendJson(exchange, 404, "Restaurant not found");
+                return;
+            }
+            List<Restaurant> favorites = user.getFavorites();
+            if (favorites.contains(restaurant)) {
+                sendJson(exchange, 409, "{\"error\": \"Already in favorites\"}");
+                return;
+            }
+            favorites.add(restaurant);
             userDao.update(user);
+            sendJson(exchange, 200, "Added to favorites");
         }
-        sendJson(exchange, 200, "Added to favorites");
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "Internal Server Error");
+        }
     }
+
+
+
+
 
     private void handleRemoveFavorite(HttpExchange exchange, User user, long restaurantId) throws IOException {
-        Restaurant restaurant = restaurantDao.findById(restaurantId);
-        if (restaurant == null) {
-            sendJson(exchange, 404,"Restaurant not found");
-            return;
-        }
-
-        if (user.getFavorites().contains(restaurant)) {
-            user.getFavorites().remove(restaurant);
+        try {
+            Restaurant restaurant = restaurantDao.findById(restaurantId);
+            if (user.getRole() != Role.BUYER) {
+                sendJson(exchange, 403, "{\"error\": \"Only buyers can remove favorites\"}");
+                return;
+            }
+            if (restaurant == null) {
+                sendJson(exchange, 404, "Restaurant not found");
+                return;
+            }
+            List<Restaurant> favorites = user.getFavorites();
+            if (!favorites.contains(restaurant)) {
+                sendJson(exchange, 404, "{\"error\": \"Restaurant is not in favorites\"}");
+                return;
+            }
+            favorites.remove(restaurant);
             userDao.update(user);
+            sendJson(exchange, 200, "Removed from favorites");
         }
-
-        sendJson(exchange, 200, "Removed from favorites");
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "Internal Server Error");
+        }
     }
 
-    private User getAuthenticatedUser(HttpExchange exchange) {
-        // به صورت تستی یا با توکن از header
-        return userDao.findById(1L); // فرضی
+
+
+    private User authenticate(HttpExchange exchange) throws IOException {
+        List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
+        if (authHeaders == null || authHeaders.isEmpty()) {
+            sendJson(exchange, 401, "{\"error\": \"Missing Authorization header\"}");
+            return null;
+        }
+        String token = authHeaders.get(0).replace("Bearer ", "");
+        DecodedJWT decoded;
+        try {
+            decoded = JwtUtil.verifyToken(token);
+        } catch (Exception e) {
+            sendJson(exchange, 401, "{\"error\": \"Invalid token\"}");
+            return null;
+        }
+        return new UserDao().findById(Long.parseLong(decoded.getSubject()));
     }
 
-    private static final Gson gson = new Gson();
+
+
+
+
+
     public static void sendJson(HttpExchange exchange, int statusCode, Object data) throws IOException {
         String json = gson.toJson(data);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
@@ -93,4 +175,7 @@ public class FavoriteHandler implements HttpHandler {
             os.write(json.getBytes());
         }
     }
+
+
+
 }
