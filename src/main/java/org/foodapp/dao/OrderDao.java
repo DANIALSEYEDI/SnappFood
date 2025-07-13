@@ -6,7 +6,7 @@ import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
-import java.util.List;
+import java.util.*;
 public class OrderDao {
     public List<Order> findByFilters(Long restaurantId, String status, String search, String userId, String courierId) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -85,5 +85,37 @@ public class OrderDao {
             session.close();
         }
     }
+
+    public List<Order> findByStatus(OrderStatus status) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("FROM Order o WHERE o.status = :status", Order.class)
+                    .setParameter("status", status)
+                    .list();
+        }
+    }
+
+    public List<Order> findDeliveriesByCourier(User courier, Map<String, String> filters) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            String hql = "FROM Order o WHERE o.courier = :courier";
+            if (filters.containsKey("search"))
+                hql += " AND lower(o.deliveryAddress) LIKE :search";
+            if (filters.containsKey("vendor"))
+                hql += " AND lower(o.restaurant.name) LIKE :vendor";
+            if (filters.containsKey("user"))
+                hql += " AND lower(o.user.phoneNumber) LIKE :user";
+
+            Query<Order> query = session.createQuery(hql, Order.class);
+            query.setParameter("courier", courier);
+            if (filters.containsKey("search"))
+                query.setParameter("search", "%" + filters.get("search").toLowerCase() + "%");
+            if (filters.containsKey("vendor"))
+                query.setParameter("vendor", "%" + filters.get("vendor").toLowerCase() + "%");
+            if (filters.containsKey("user"))
+                query.setParameter("user", "%" + filters.get("user").toLowerCase() + "%");
+
+            return query.list();
+        }
+    }
+
 }
 
