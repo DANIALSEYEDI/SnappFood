@@ -23,7 +23,6 @@ public class RatingHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
-
         if (path.equals("/ratings") && method.equals("POST")) {
             handleSubmitRating(exchange);
         } else if (path.matches("/ratings/\\d+") && method.equals("GET")) {
@@ -42,6 +41,9 @@ public class RatingHandler implements HttpHandler {
             exchange.sendResponseHeaders(404, -1);
         }
     }
+
+
+
 
     private void handleSubmitRating(HttpExchange exchange) throws IOException {
         RatingRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody()), RatingRequest.class);
@@ -67,6 +69,9 @@ public class RatingHandler implements HttpHandler {
         exchange.sendResponseHeaders(200, -1);
     }
 
+
+
+
     private void handleGetRating(HttpExchange exchange, long id) throws IOException {
         Rating rating = ratingDao.findById(id);
         if (rating == null) {
@@ -78,6 +83,9 @@ public class RatingHandler implements HttpHandler {
     }
 
 
+
+
+
     private void handleDeleteRating(HttpExchange exchange, long id) throws IOException {
         Rating rating = ratingDao.findById(id);
         if (rating == null) {
@@ -87,6 +95,9 @@ public class RatingHandler implements HttpHandler {
         ratingDao.delete(rating);
         sendJson(exchange, 200, Map.of("message", "Rating deleted"));
     }
+
+
+
 
     private void handleUpdateRating(HttpExchange exchange, long id) throws IOException {
         Rating rating = ratingDao.findById(id);
@@ -106,6 +117,8 @@ public class RatingHandler implements HttpHandler {
     }
 
 
+
+
     private void handleGetRatingsForItem(HttpExchange exchange, long itemId) throws IOException {
         List<Rating> ratings = ratingDao.findByItemId(itemId);
         double avg = ratings.stream().mapToInt(Rating::getRating).average().orElse(0);
@@ -121,6 +134,9 @@ public class RatingHandler implements HttpHandler {
     }
 
 
+
+
+
     private long extractId(String path, String prefix) {
         try {
             return Long.parseLong(path.substring(prefix.length()));
@@ -129,7 +145,7 @@ public class RatingHandler implements HttpHandler {
         }
     }
 
-    // ارسال JSON
+
     private void sendJson(HttpExchange exchange, int status, Object data) throws IOException {
         String json = gson.toJson(data);
         exchange.getResponseHeaders().set("Content-Type", "application/json");

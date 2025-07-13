@@ -117,5 +117,45 @@ public class OrderDao {
         }
     }
 
+    public Order findByIdWithItems(Long orderId) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Order order = session.createQuery(
+                        "SELECT o FROM Order o " +
+                                "LEFT JOIN FETCH o.itemsOfOrder i " +
+                                "LEFT JOIN FETCH i.item " +
+                                "LEFT JOIN FETCH o.restaurant " +
+                                "LEFT JOIN FETCH o.courier " +
+                                "WHERE o.id = :id", Order.class)
+                .setParameter("id", orderId)
+                .uniqueResult();
+        session.close();
+        return order;
+    }
+    public List<Order> findHistoryForUser(Long userId, String search, String vendorName) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        String hql = """
+        SELECT DISTINCT o FROM Order o
+        LEFT JOIN FETCH o.itemsOfOrder i
+        LEFT JOIN FETCH i.item fi
+        LEFT JOIN FETCH o.restaurant r
+        WHERE o.user.id = :userId
+        AND (:search IS NULL OR LOWER(fi.name) LIKE :search)
+        AND (:vendor IS NULL OR LOWER(r.name) LIKE :vendor)
+        ORDER BY o.id DESC
+    """;
+
+        Query<Order> query = session.createQuery(hql, Order.class);
+        query.setParameter("userId", userId);
+        query.setParameter("search", (search == null || search.isBlank()) ? null : "%" + search.toLowerCase() + "%");
+        query.setParameter("vendor", (vendorName == null || vendorName.isBlank()) ? null : "%" + vendorName.toLowerCase() + "%");
+
+        List<Order> orders = query.getResultList();
+        session.close();
+        return orders;
+    }
+
+
+
 }
 

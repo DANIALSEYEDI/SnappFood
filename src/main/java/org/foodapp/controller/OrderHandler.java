@@ -10,11 +10,14 @@ import org.foodapp.model.*;
 import org.foodapp.dto.*;
 import org.foodapp.util.JwtUtil;
 import org.foodapp.util.QueryParser;
+import org.foodapp.util.QueryUtil;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.foodapp.controller.FavoriteHandler.sendJson;
 
 public class OrderHandler implements HttpHandler {
 
@@ -23,6 +26,7 @@ public class OrderHandler implements HttpHandler {
     private final RestaurantDao restaurantDao = new RestaurantDao();
     private final UserDao userDao = new UserDao();
     private final Gson gson = new Gson();
+    private final CouponDao couponDao = new CouponDao();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -70,25 +74,40 @@ public class OrderHandler implements HttpHandler {
                 return;
             }
 
+            Coupon coupon = null;
+
+            if (req.coupon_id != null) {
+                coupon = couponDao.findByCode(String.valueOf(req.coupon_id));
+                if (coupon == null) {
+                    sendJson(exchange, 404, "{\"error\": \"Coupon not found\"}");
+                    return;
+                }
+            }
+
             Order order = new Order();
             order.setRestaurant(vendor);
             order.setDeliveryAddress(req.delivery_address);
             order.setStatus(OrderStatus.PENDING);
             order.setUser(user);
-
-            for (OrderItemRequest itemReq : req.items) {
-                FoodItem item = foodItemDao.findById(itemReq.item_id);
-                if (item == null) continue;
-                order.addItem(item, itemReq.quantity);
+            order.setItemsOfOrder(new ArrayList<>());
+            for (OrderItemRequest itemRequest : req.items) {
+                FoodItem food = foodItemDao.findById(itemRequest.item_id);
+                if (food == null || !food.getRestaurant().getId().equals(vendor.getId())) {
+                    sendJson(exchange, 404, "{\"error\": \"Invalid food item or not in this restaurant\"}");
+                    return;
+                }
+                OrderItem orderItem = new OrderItem();
+                orderItem.setItem(food);
+                orderItem.setQuantity(itemRequest.quantity);
+                orderItem.setOrder(order);
+                order.getItemsOfOrder().add(orderItem);
             }
-
             orderDao.save(order);
-            sendJson(exchange, 200, OrderAdminResponse.fromEntity(order));
-        }
-        catch (JsonSyntaxException e){
-                sendJson(exchange, 400, "{\"error\": \"Invalid input format\"}");
+            sendJson(exchange, 200, "{\"message\": \"Order submitted successfully\"}");
+
         }
         catch (Exception e) {
+            e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
     }
@@ -102,12 +121,34 @@ public class OrderHandler implements HttpHandler {
 
 
     private void handleGetOrder(HttpExchange exchange, long id) throws IOException {
-        Order order = orderDao.findById(id);
-        if (order == null) {
-            sendJson(exchange, 404, "{\"error\": \"Order not found\"}");
-            return;
+        try {
+            User user = authenticate(exchange);
+            if (user == null || user.getRole() != Role.BUYER) {
+                sendJson(exchange, 403, "{\"error\": \"Only buyers can access this endpoint\"}");
+                return;
+            }
+
+            Order order = orderDao.findByIdWithItems(id);
+            if (order == null) {
+                sendJson(exchange, 404, "{\"error\": \"Order not found\"}");
+                return;
+            }
+            if (!order.getUser().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"You are not authorized to view this order\"}");
+                return;
+            }
+            order.getItemsOfOrder().size();
+            if (order.getCourier() != null) order.getCourier().getPhoneNumber();
+            order.getRestaurant().getName();
+
+
+            OrderAdminResponse dto =OrderAdminResponse.fromEntity(order);
+            sendJson(exchange, 200, gson.toJson(dto));
         }
-        sendJson(exchange, 200, OrderAdminResponse.fromEntity(order));
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+        }
     }
 
 
@@ -117,18 +158,26 @@ public class OrderHandler implements HttpHandler {
 
 
     private void handleGetOrderHistory(HttpExchange exchange) throws IOException {
-        String query = exchange.getRequestURI().getQuery();
-        Map<String, String> params = QueryParser.parse(query);
-        String search = params.get("search");
-        String vendor = params.get("vendor");
+        try {
+            User user = authenticate(exchange);
+            if (user == null || user.getRole() != Role.BUYER) {
+                sendJson(exchange, 403, "{\"error\": \"Only buyers can access order history\"}");
+                return;
+            }
+            Map<String, String> queryParams = QueryUtil.getQueryParams(exchange.getRequestURI().getRawQuery());
+            String search = queryParams.get("search");
+            String vendor = queryParams.get("vendor");
+            List<Order> orders = orderDao.findHistoryForUser(user.getId(), search, vendor);
+            List<OrderAdminResponse> response = orders.stream()
+                    .map(OrderAdminResponse::fromEntity)
+                    .toList();
 
-        User currentUser = getAuthenticatedUser(exchange);
-        List<Order> orders = orderDao.findHistoryByUser(currentUser, search, vendor);
-        List<OrderAdminResponse> dtoList = orders.stream()
-                .map(OrderAdminResponse::fromEntity)
-                .collect(Collectors.toList());
-
-        sendJson(exchange, 200, dtoList);
+            sendJson(exchange, 200, gson.toJson(response));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+        }
     }
 
 
@@ -140,8 +189,10 @@ public class OrderHandler implements HttpHandler {
 
 
     private User getAuthenticatedUser(HttpExchange exchange) {
+
         return userDao.findById(1L);
     }
+
 
 
     private long extractId(String path, String prefix) {
