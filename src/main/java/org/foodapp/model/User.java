@@ -2,6 +2,9 @@ package org.foodapp.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -27,6 +30,14 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @ManyToMany
+    @JoinTable(
+            name = "favorites",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "restaurant_id")
+    )
+    private List<Restaurant> favorites = new ArrayList<>();
 
     //  SELLER و COURIER
     private String bankName;
@@ -70,6 +81,12 @@ public class User {
     public void setBankName(String bankName) { this.bankName = bankName; }
     public String getAccountNumber() { return accountNumber; }
     public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
+    public List<Restaurant> getFavorites() {
+        return favorites;
+    }
+    public void setFavorites(List<Restaurant> favorites) {
+        this.favorites = favorites;
+    }
 }
 
 
