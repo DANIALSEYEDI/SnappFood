@@ -1,0 +1,47 @@
+package org.foodapp.dao;
+
+import org.foodapp.model.Rating;
+import org.foodapp.util.HibernateUtil;
+import org.hibernate.Session;
+import java.util.List;
+
+public class RatingDao {
+
+    public void save(Rating rating) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            session.beginTransaction();
+            session.persist(rating);
+            session.getTransaction().commit();
+        }
+    }
+
+    public Rating findById(Long id) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.get(Rating.class, id);
+        }
+    }
+
+    public void delete(Rating rating) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            session.beginTransaction();
+            session.remove(rating);
+            session.getTransaction().commit();
+        }
+    }
+
+    public List<Rating> findByItemId(Long itemId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            String hql = """
+            SELECT r
+            FROM Rating r
+            JOIN r.order.itemsOfOrder oi
+            WHERE oi.item.id = :itemId
+            """;
+
+            return session.createQuery(hql, Rating.class)
+                    .setParameter("itemId", itemId)
+                    .list();
+        }
+    }
+
+}

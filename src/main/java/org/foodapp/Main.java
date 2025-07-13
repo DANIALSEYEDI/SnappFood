@@ -16,7 +16,8 @@ public class Main {
         server.createContext("/items", new ItemsHandler());
         server.createContext("/coupons", new CouponsHandler());
         server.createContext("/orders", new OrderHandler());
-        server.createContext("//favorites", new FavoriteHandler());
+        server.createContext("/favorites", new FavoriteHandler());
+        server.createContext("/ratings", new RatingHandler());
 
         server.start();
         System.out.println("✅ Server started on http://localhost:8080");
