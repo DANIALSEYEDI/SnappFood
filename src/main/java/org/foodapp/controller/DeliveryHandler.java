@@ -34,7 +34,7 @@ public class DeliveryHandler implements HttpHandler {
             long id = extractId(path, "/deliveries/");
             handleUpdateDeliveryStatus(exchange, id);
         } else {
-            exchange.sendResponseHeaders(404, -1);
+            sendJson(exchange, 404,"Path not found");
         }
     }
 

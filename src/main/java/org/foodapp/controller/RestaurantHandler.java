@@ -91,19 +91,28 @@ public class RestaurantHandler implements HttpHandler {
         }
         return map;
     }
+
     private long extractId(String path, String prefix, String suffix) {
         try {
-            String temp = path.substring(prefix.length());
-            int endIndex = temp.indexOf(suffix);
-            if (endIndex == -1) {
-                return Long.parseLong(temp);
-            } else {
-                return Long.parseLong(temp.substring(0, endIndex));
+            if (!path.startsWith(prefix)) {
+                throw new IllegalArgumentException("Path does not start with expected prefix");
             }
+
+            String temp = path.substring(prefix.length());
+
+            if (suffix != null && !suffix.isEmpty()) {
+                int endIndex = temp.indexOf(suffix);
+                if (endIndex != -1) {
+                    temp = temp.substring(0, endIndex);
+                }
+            }
+
+            return Long.parseLong(temp);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid path format for extracting ID");
+            throw new IllegalArgumentException("Invalid path format for extracting ID: " + path);
         }
     }
+
 
     private void handleCreate(HttpExchange exchange) throws IOException {
         try {

@@ -18,12 +18,19 @@ public class Rating {
 
     private String comment;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "rating_images", joinColumns = @JoinColumn(name = "rating_id"))
+    @Column(name = "image")
     private List<String> imageBase64;
 
     @ManyToOne
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id")
+    private FoodItem item;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public int getRating() {
@@ -42,6 +49,16 @@ public class Rating {
     }
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+    public FoodItem getItem() {
+        return item;
+    }
+    public void setItem(FoodItem item) {
+        this.item = item;
+    }
+
+    public List<String> getImageBase64() {
+        return imageBase64;
     }
 }
 

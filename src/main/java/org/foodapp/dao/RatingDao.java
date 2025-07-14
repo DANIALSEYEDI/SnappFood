@@ -3,6 +3,8 @@ package org.foodapp.dao;
 import org.foodapp.model.Rating;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
+
 import java.util.List;
 
 public class RatingDao {
@@ -12,6 +14,7 @@ public class RatingDao {
             session.beginTransaction();
             session.persist(rating);
             session.getTransaction().commit();
+            session.close();
         }
     }
 
@@ -43,5 +46,20 @@ public class RatingDao {
                     .list();
         }
     }
+    public void update(Rating rating) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.merge(rating);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+    }
+
 
 }
