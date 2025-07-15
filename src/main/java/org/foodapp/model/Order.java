@@ -37,6 +37,10 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
+    @Enumerated(EnumType.STRING)
+    private DeliveryStatus deliveryStatus;
+
+
     private String note;
     private String deliveryAddress;
     private Integer totalPrice;
@@ -114,6 +118,12 @@ public class Order {
 
     public void setItemsOfOrder(List<OrderItem> items) {
         this.itemsOfOrder = items;
+    }
+    public DeliveryStatus getDeliveryStatus() {
+        return deliveryStatus;
+    }
+    public void setDeliveryStatus(DeliveryStatus deliveryStatus) {
+        this.deliveryStatus = deliveryStatus;
     }
 }
 

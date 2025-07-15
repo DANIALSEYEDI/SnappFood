@@ -31,11 +31,18 @@ public class OrderDao {
     }
 
     public Order findById(Long id) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Order o = session.get(Order.class, id);
-        session.close();
-        return o;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("""
+            SELECT o FROM Order o
+            LEFT JOIN FETCH o.itemsOfOrder i
+            LEFT JOIN FETCH i.item
+            WHERE o.id = :id
+        """, Order.class)
+                    .setParameter("id", id)
+                    .uniqueResult();
+        }
     }
+
 
     public void update(Order order) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -86,36 +93,26 @@ public class OrderDao {
         }
     }
 
+
+
     public List<Order> findByStatus(OrderStatus status) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery("FROM Order o WHERE o.status = :status", Order.class)
+            return session.createQuery("""
+            SELECT DISTINCT o FROM Order o
+            LEFT JOIN FETCH o.itemsOfOrder i
+            LEFT JOIN FETCH i.item
+            WHERE o.status = :status
+        """, Order.class)
                     .setParameter("status", status)
                     .list();
         }
     }
 
-    public List<Order> findDeliveriesByCourier(User courier, Map<String, String> filters) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            String hql = "FROM Order o WHERE o.courier = :courier";
-            if (filters.containsKey("search"))
-                hql += " AND lower(o.deliveryAddress) LIKE :search";
-            if (filters.containsKey("vendor"))
-                hql += " AND lower(o.restaurant.name) LIKE :vendor";
-            if (filters.containsKey("user"))
-                hql += " AND lower(o.user.phoneNumber) LIKE :user";
 
-            Query<Order> query = session.createQuery(hql, Order.class);
-            query.setParameter("courier", courier);
-            if (filters.containsKey("search"))
-                query.setParameter("search", "%" + filters.get("search").toLowerCase() + "%");
-            if (filters.containsKey("vendor"))
-                query.setParameter("vendor", "%" + filters.get("vendor").toLowerCase() + "%");
-            if (filters.containsKey("user"))
-                query.setParameter("user", "%" + filters.get("user").toLowerCase() + "%");
 
-            return query.list();
-        }
-    }
+
+
+
 
     public Order findByIdWithItems(Long orderId) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -131,6 +128,11 @@ public class OrderDao {
         session.close();
         return order;
     }
+
+
+
+
+
     public List<Order> findHistoryForUser(Long userId, String search, String vendorName) {
         Session session = HibernateUtil.getSessionFactory().openSession();
 
@@ -155,6 +157,28 @@ public class OrderDao {
         return orders;
     }
 
+    public List<Order> findDeliveryHistoryByCourier(User courier, String search, String vendor, String userPhone) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            String hql = """
+            SELECT DISTINCT o FROM Order o
+            JOIN FETCH o.restaurant r
+            LEFT JOIN FETCH o.itemsOfOrder io
+            WHERE o.courier = :courier
+            AND ( :search IS NULL OR LOWER(o.deliveryAddress) LIKE :search )
+            AND ( :vendor IS NULL OR LOWER(r.name) LIKE :vendor )
+            AND ( :userPhone IS NULL OR LOWER(o.user.phoneNumber) LIKE :userPhone )
+            ORDER BY o.id DESC
+        """;
+
+            Query<Order> query = session.createQuery(hql, Order.class);
+            query.setParameter("courier", courier);
+            query.setParameter("search", search != null ? "%" + search.toLowerCase() + "%" : null);
+            query.setParameter("vendor", vendor != null ? "%" + vendor.toLowerCase() + "%" : null);
+            query.setParameter("userPhone", userPhone != null ? "%" + userPhone.toLowerCase() + "%" : null);
+
+            return query.list();
+        }
+    }
 
 
 }

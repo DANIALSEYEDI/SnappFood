@@ -6,15 +6,15 @@ import java.time.format.DateTimeFormatter;
 public class TransactionsResponse {
     public Long id;
     public Integer amount;
-    public String type;
-    public String created_at;
+    public String description;
+    public String createdAt;
 
-    public static TransactionsResponse fromEntity(Transaction t) {
+    public static TransactionsResponse from(Transaction tx) {
         TransactionsResponse dto = new TransactionsResponse();
-        dto.id = t.getId();
-        dto.amount = t.getAmount();
-        dto.type = t.getType().name();
-        dto.created_at = t.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        dto.id = tx.getId();
+        dto.amount = tx.getAmount();
+        dto.description = tx.getDescription();
+        dto.createdAt = tx.getCreatedAt().toString();
         return dto;
     }
 }

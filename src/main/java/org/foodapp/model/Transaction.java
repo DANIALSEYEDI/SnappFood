@@ -5,20 +5,18 @@ import java.time.LocalDateTime;
 
 @Entity
 public class Transaction {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Integer amount;
 
-    @Enumerated(EnumType.STRING)
-    private TransactionType type;
-
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne
     private User user;
+
+    private String description;
 
     public Transaction() {}
 
@@ -26,10 +24,10 @@ public class Transaction {
     public Long getId() { return id; }
     public Integer getAmount() { return amount; }
     public void setAmount(Integer amount) { this.amount = amount; }
-    public TransactionType getType() { return type; }
-    public void setType(TransactionType type) { this.type = type; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }

@@ -8,11 +8,14 @@ import org.hibernate.Session;
 import java.util.List;
 
 public class TransactionDao {
-    public List<Transaction> findByUser(User user) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery("FROM Transaction WHERE user.id = :userId", Transaction.class)
-                    .setParameter("userId", user.getId())
-                    .list();
+
+        public List<Transaction> findByUser(User user) {
+            try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+                return session.createQuery(
+                        "FROM Transaction t WHERE t.user.id = :uid ORDER BY t.createdAt DESC",
+                        Transaction.class
+                ).setParameter("uid", user.getId()).list();
+            }
         }
-    }
+
 }

@@ -1,5 +1,6 @@
 package org.foodapp.controller;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -8,9 +9,13 @@ import org.foodapp.dao.UserDao;
 import org.foodapp.dto.TransactionsResponse;
 import org.foodapp.model.Transaction;
 import org.foodapp.model.User;
+import org.foodapp.util.JwtUtil;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TransactionsHandler implements HttpHandler {
@@ -27,41 +32,72 @@ public class TransactionsHandler implements HttpHandler {
         if (path.equals("/transactions") && method.equals("GET")) {
             handleGetTransactions(exchange);
         } else {
-            exchange.sendResponseHeaders(404, -1);
+            sendJson(exchange, 404,"Path not found");
         }
     }
+
+
+
+
+
 
     private void handleGetTransactions(HttpExchange exchange) throws IOException {
         try {
-            User user = getAuthenticatedUser(exchange);
+            User user = authenticate(exchange);
             if (user == null) {
-                sendJson(exchange, 401,java.util.Map.of("error", "Unauthorized"));
                 return;
             }
-
             List<Transaction> transactions = transactionDao.findByUser(user);
-            List<TransactionsResponse> dtos = transactions.stream()
-                    .map(TransactionsResponse::fromEntity)
-                    .collect(Collectors.toList());
+            List<TransactionsResponse> response = transactions.stream()
+                    .map(TransactionsResponse::from)
+                    .toList();
 
-            sendJson(exchange, 200, dtos);
+            sendJson(exchange, 200, response);
         } catch (Exception e) {
-            sendJson(exchange, 500,  java.util.Map.of("error","Internal Server Error: " + e.getMessage()));
+            sendJson(exchange, 500, Map.of("error", "Internal server error"));
         }
 
     }
 
-    private User getAuthenticatedUser(HttpExchange exchange) {
-        return userDao.findById(1L); // فعلاً تستی، باید از توکن JWT یا Session استفاده شود
+
+
+
+
+
+
+    private User authenticate(HttpExchange exchange) throws IOException {
+        List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
+        if (authHeaders == null || authHeaders.isEmpty()) {
+            sendJson(exchange, 401, "{\"error\": \"Missing Authorization header\"}");
+            return null;
+        }
+        String token = authHeaders.get(0).replace("Bearer ", "");
+        DecodedJWT decoded;
+        try {
+            decoded = JwtUtil.verifyToken(token);
+        } catch (Exception e) {
+            sendJson(exchange, 401, "{\"error\": \"Invalid token\"}");
+            return null;
+        }
+        return new UserDao().findById(Long.parseLong(decoded.getSubject()));
     }
+
+
+
+
 
     private void sendJson(HttpExchange exchange, int statusCode, Object body) throws IOException {
         String json = new Gson().toJson(body);
-        byte[] bytes = json.getBytes();
-        exchange.getResponseHeaders().add("Content-Type", "application/json");
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
         exchange.sendResponseHeaders(statusCode, bytes.length);
-        exchange.getResponseBody().write(bytes);
-        exchange.getResponseBody().close();
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(bytes);
+        }
     }
+
+
+
 }
 
