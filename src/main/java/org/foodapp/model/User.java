@@ -2,6 +2,7 @@ package org.foodapp.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +39,9 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "restaurant_id")
     )
     private List<Restaurant> favorites = new ArrayList<>();
+
+    @Column(name = "wallet_balance")
+    private BigDecimal walletBalance = BigDecimal.ZERO;
 
     //  SELLER و COURIER
     private String bankName;
@@ -86,6 +90,12 @@ public class User {
     }
     public void setFavorites(List<Restaurant> favorites) {
         this.favorites = favorites;
+    }
+    public BigDecimal getWalletBalance() {
+        return walletBalance;
+    }
+    public void setWalletBalance(BigDecimal walletBalance) {
+        this.walletBalance = walletBalance;
     }
 }
 

@@ -1,11 +1,13 @@
 package org.foodapp.dto;
 
 import org.foodapp.model.Transaction;
+
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 
 public class TransactionsResponse {
     public Long id;
-    public Integer amount;
+    public BigDecimal amount;
     public String description;
     public String createdAt;
 

@@ -1,6 +1,8 @@
 package org.foodapp.model;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -9,7 +11,7 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer amount;
+    private BigDecimal amount;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -22,8 +24,8 @@ public class Transaction {
 
     // Getters and Setters
     public Long getId() { return id; }
-    public Integer getAmount() { return amount; }
-    public void setAmount(Integer amount) { this.amount = amount; }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public User getUser() { return user; }

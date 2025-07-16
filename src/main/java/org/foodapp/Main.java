@@ -20,6 +20,7 @@ public class Main {
         server.createContext("/ratings", new RatingHandler());
         server.createContext("/deliveries", new DeliveryHandler());
         server.createContext("/transactions", new TransactionsHandler());
+        server.createContext("/wallet", new WalletHandler());
 
         server.start();
         System.out.println("✅ Server started on http://localhost:8080");

@@ -5,6 +5,7 @@ import org.foodapp.model.User;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
 
+
 import java.util.List;
 
 public class TransactionDao {
@@ -17,5 +18,15 @@ public class TransactionDao {
                 ).setParameter("uid", user.getId()).list();
             }
         }
+
+    public void save(Transaction tx) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            org.hibernate.Transaction hibernateTx = session.beginTransaction();
+            session.persist(tx);
+            hibernateTx.commit();
+        } catch (Exception e) {
+            e.printStackTrace(); // در پروژه واقعی بهتره از logger استفاده بشه
+        }
+    }
 
 }
