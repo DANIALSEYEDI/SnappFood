@@ -40,14 +40,15 @@ public class User {
     )
     private List<Restaurant> favorites = new ArrayList<>();
 
-    @Column(name = "wallet_balance")
+    @Column(name = "wallet_balance", nullable = false)
     private BigDecimal walletBalance = BigDecimal.ZERO;
 
     //  SELLER و COURIER
     private String bankName;
     private String accountNumber;
 
-    public User() {}
+    public User() {
+    }
 
     public User(String fullName, String phoneNumber, String email, String password,
                 String address, String profileImageBase64, Role role,
@@ -66,36 +67,102 @@ public class User {
 
     // Getters و Setters
 
-    public Long getId() { return id; }
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
-    public String getPhoneNumber() { return phoneNumber; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
-    public String getProfileImageBase64() { return profileImageBase64; }
-    public void setProfileImageBase64(String profileImageBase64) { this.profileImageBase64 = profileImageBase64; }
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
-    public String getBankName() { return bankName; }
-    public void setBankName(String bankName) { this.bankName = bankName; }
-    public String getAccountNumber() { return accountNumber; }
-    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
+    public Long getId() {
+        return id;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getProfileImageBase64() {
+        return profileImageBase64;
+    }
+
+    public void setProfileImageBase64(String profileImageBase64) {
+        this.profileImageBase64 = profileImageBase64;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
+
     public List<Restaurant> getFavorites() {
         return favorites;
     }
+
     public void setFavorites(List<Restaurant> favorites) {
         this.favorites = favorites;
     }
+
     public BigDecimal getWalletBalance() {
         return walletBalance;
     }
+
     public void setWalletBalance(BigDecimal walletBalance) {
         this.walletBalance = walletBalance;
+    }
+
+    public void increaseWallet(BigDecimal amount) {
+        if (amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
+            this.walletBalance = this.walletBalance.add(amount);
+        }
     }
 }
 

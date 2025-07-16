@@ -25,7 +25,7 @@ public class TransactionDao {
             session.persist(tx);
             hibernateTx.commit();
         } catch (Exception e) {
-            e.printStackTrace(); // در پروژه واقعی بهتره از logger استفاده بشه
+            e.printStackTrace();
         }
     }
 
