@@ -21,6 +21,7 @@ public class Main {
         server.createContext("/deliveries", new DeliveryHandler());
         server.createContext("/transactions", new TransactionsHandler());
         server.createContext("/wallet", new WalletHandler());
+        server.createContext("/payment", new PaymentHandler());
 
         server.start();
         System.out.println("✅ Server started on http://localhost:8080");

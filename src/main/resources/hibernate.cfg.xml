@@ -28,6 +28,7 @@
         <mapping class="org.foodapp.model.Coupon"/>
         <mapping class="org.foodapp.model.Rating"/>
         <mapping class="org.foodapp.model.Transaction"/>
+        <mapping class="org.foodapp.model.Payment"/>
 
 
 
