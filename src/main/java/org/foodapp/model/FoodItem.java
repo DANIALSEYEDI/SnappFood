@@ -1,7 +1,5 @@
 package org.foodapp.model;
-
 import jakarta.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,13 +23,11 @@ public class FoodItem {
     @Column(name = "keyword")
     private List<String> keywords = new ArrayList<>();
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 
     public FoodItem() {}
-
     public FoodItem(String name, String imageBase64, String description, Integer price,
                     Integer supply, List<String> keywords, Restaurant restaurant) {
         this.name = name;

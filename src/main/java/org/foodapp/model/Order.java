@@ -1,6 +1,5 @@
 package org.foodapp.model;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +40,6 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "coupon_id")
     private Coupon coupon;
-
 
     private Integer rawPrice;
     private Integer taxFee;

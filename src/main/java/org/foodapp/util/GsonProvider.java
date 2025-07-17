@@ -2,8 +2,6 @@ package org.foodapp.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
- import org.foodapp.util.LocalDateTimeAdapter;
-
  import java.time.LocalDateTime;
 
 public class GsonProvider {

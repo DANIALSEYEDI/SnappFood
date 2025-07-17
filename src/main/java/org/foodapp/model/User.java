@@ -47,12 +47,17 @@ public class User {
     private String bankName;
     private String accountNumber;
 
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserStatus status ;
+
     public User() {
     }
 
     public User(String fullName, String phoneNumber, String email, String password,
                 String address, String profileImageBase64, Role role,
-                String bankName, String accountNumber) {
+                String bankName, String accountNumber, UserStatus status) {
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.email = email;
@@ -62,6 +67,7 @@ public class User {
         this.role = role;
         this.bankName = bankName;
         this.accountNumber = accountNumber;
+        this.status = status;
     }
 
 
@@ -163,6 +169,13 @@ public class User {
         if (amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             this.walletBalance = this.walletBalance.add(amount);
         }
+    }
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
     }
 }
 

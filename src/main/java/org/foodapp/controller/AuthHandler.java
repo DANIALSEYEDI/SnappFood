@@ -1,5 +1,4 @@
 package org.foodapp.controller;
-
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
@@ -8,21 +7,17 @@ import org.foodapp.dao.UserDao;
 import org.foodapp.dto.*;
 import org.foodapp.model.*;
 import org.foodapp.util.JwtUtil;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class AuthHandler implements HttpHandler {
-
     private final Gson gson = new Gson();
     private final UserDao userDao = new UserDao();
-
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
-
         try {
             switch (path) {
                 case "/auth/register" -> {
@@ -77,6 +72,7 @@ public class AuthHandler implements HttpHandler {
 
         String bankName = null;
         String accountNumber = null;
+        UserStatus userStatus = UserStatus.REJECTED;
 
         if ((role == Role.SELLER || role == Role.COURIER)) {
             if (request.bank_info == null || request.bank_info.bank_name == null || request.bank_info.account_number == null) {
@@ -97,7 +93,8 @@ public class AuthHandler implements HttpHandler {
                     request.profileImageBase64,
                     role,
                     bankName,
-                    accountNumber
+                    accountNumber,
+                    userStatus
             );
 
             userDao.save(user);
@@ -230,6 +227,7 @@ public class AuthHandler implements HttpHandler {
         e.printStackTrace();
         sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
     }
+
     }
 
 

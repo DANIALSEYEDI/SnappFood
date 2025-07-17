@@ -1,14 +1,13 @@
 package org.foodapp;
-
 import com.sun.net.httpserver.HttpServer;
 import org.foodapp.controller.*;
-
+import org.foodapp.util.AppInitializer;
 import java.net.InetSocketAddress;
-
 
 public class Main {
     public static void main(String[] args) throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+        AppInitializer.initializeAdminAccount();
 
         server.createContext("/auth", new AuthHandler());
         server.createContext("/restaurants",  new RestaurantHandler());
@@ -22,6 +21,7 @@ public class Main {
         server.createContext("/transactions", new TransactionsHandler());
         server.createContext("/wallet", new WalletHandler());
         server.createContext("/payment", new PaymentHandler());
+        server.createContext("/admin", new AdminHandler());
 
         server.start();
         System.out.println("✅ Server started on http://localhost:8080");

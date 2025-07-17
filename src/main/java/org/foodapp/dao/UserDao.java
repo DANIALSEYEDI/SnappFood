@@ -1,9 +1,13 @@
 package org.foodapp.dao;
 
 import org.foodapp.model.User;
+import org.foodapp.model.UserStatus;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+
+import java.util.List;
 
 public class UserDao {
 
@@ -57,6 +61,25 @@ public class UserDao {
         session.close();
         return user;
     }
+
+    public List<User> findAll() {
+            try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+                return session.createQuery("FROM User", User.class).list();
+            }
+        }
+
+    public void updateStatus(Long userId, UserStatus status) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction tx = session.beginTransaction();
+            User user = session.get(User.class, userId);
+            if (user != null) {
+                user.setStatus(status);
+                session.update(user);
+            }
+            tx.commit();
+        }
+    }
+
 
 
 }

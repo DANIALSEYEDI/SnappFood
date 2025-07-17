@@ -2,10 +2,8 @@ package org.foodapp.dto;
 
 
 import org.foodapp.model.Coupon;
-import org.foodapp.model.CouponType;
 
 import java.math.BigDecimal;
-import java.time.format.DateTimeFormatter;
 
 public class CouponResponse {
     public Long id;

@@ -1,5 +1,6 @@
 package org.foodapp.dao;
 import org.foodapp.model.Order;
+import org.foodapp.model.OrderStatus;
 import org.foodapp.model.RestaurantOrderStatus;
 import org.foodapp.model.User;
 import org.foodapp.util.HibernateUtil;
@@ -179,6 +180,54 @@ public class OrderDao {
             return query.list();
         }
     }
+
+    public List<Order> findByAdminFilters(Map<String, String> params) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            StringBuilder hql = new StringBuilder("FROM Order o WHERE 1=1");
+
+            if (params.containsKey("search")) {
+                hql.append(" AND o.deliveryAddress LIKE :search");
+            }
+            if (params.containsKey("vendor")) {
+                hql.append(" AND o.restaurant.name LIKE :vendor");
+            }
+            if (params.containsKey("courier")) {
+                hql.append(" AND o.courier.phoneNumber LIKE :courier");
+            }
+            if (params.containsKey("customer")) {
+                hql.append(" AND o.user.phoneNumber LIKE :customer");
+            }
+            if (params.containsKey("status")) {
+                hql.append(" AND o.status = :status");
+            }
+
+            Query<Order> query = session.createQuery(hql.toString(), Order.class);
+
+            if (params.containsKey("search")) {
+                query.setParameter("search", "%" + params.get("search") + "%");
+            }
+            if (params.containsKey("vendor")) {
+                query.setParameter("vendor", "%" + params.get("vendor") + "%");
+            }
+            if (params.containsKey("courier")) {
+                query.setParameter("courier", "%" + params.get("courier") + "%");
+            }
+            if (params.containsKey("customer")) {
+                query.setParameter("customer", "%" + params.get("customer") + "%");
+            }
+            if (params.containsKey("status")) {
+                try {
+                    OrderStatus status = OrderStatus.valueOf(params.get("status").toUpperCase().replace(" ", "_"));
+                    query.setParameter("status", status);
+                } catch (IllegalArgumentException e) {
+                    return List.of();
+                }
+            }
+
+            return query.list();
+        }
+    }
+
 
 
 }

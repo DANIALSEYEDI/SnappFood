@@ -1,10 +1,7 @@
 package org.foodapp.model;
-
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
 @Table(name = "coupons")
@@ -16,7 +13,6 @@ public class Coupon {
     @Column(nullable = false, unique = true)
     private String code;
 
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CouponType type;
@@ -27,6 +23,7 @@ public class Coupon {
     @Column(name = "min_price", nullable = false)
     private Integer minPrice;
 
+
     @Column(name = "user_count", nullable = false)
     private Integer userCount;
 
@@ -36,14 +33,9 @@ public class Coupon {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-
-
-
     public Coupon() {}
 
-
     // Getters and Setters
-    // Getters & Setters
 
     public Long getId() { return id; }
 
