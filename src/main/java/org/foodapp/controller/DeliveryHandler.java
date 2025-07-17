@@ -34,7 +34,7 @@ public class DeliveryHandler implements HttpHandler {
             handleDeliveryHistory(exchange);
         } else if (path.matches("/deliveries/\\d+") && method.equalsIgnoreCase("PATCH")) {
             long id = extractId(path, "/deliveries/");
-            handleUpdateDeliveryStatus(exchange, id);
+           // handleUpdateDeliveryStatus(exchange, id);
         } else {
             sendJson(exchange, 404,"Path not found");
         }
@@ -56,7 +56,7 @@ public class DeliveryHandler implements HttpHandler {
                 return;
             }
 
-            List<Order> orders = orderDao.findByStatus(OrderStatus.PENDING);
+            List<Order> orders = orderDao.findByStatus(RestaurantOrderStatus.PENDING);
             List<DeliveryResponse> result = orders.stream()
                     .map(DeliveryResponse::fromEntity)
                     .collect(Collectors.toList());
@@ -108,7 +108,7 @@ public class DeliveryHandler implements HttpHandler {
 
 
 
-    private void handleUpdateDeliveryStatus(HttpExchange exchange, long id) throws IOException {
+   /* private void handleUpdateDeliveryStatus(HttpExchange exchange, long id) throws IOException {
         try {
             User courier = authenticate(exchange);
             if (courier == null) return;
@@ -161,6 +161,8 @@ public class DeliveryHandler implements HttpHandler {
             sendJson(exchange, 500, Map.of("error", "Internal server error"));
         }
     }
+
+    */
 
 
 

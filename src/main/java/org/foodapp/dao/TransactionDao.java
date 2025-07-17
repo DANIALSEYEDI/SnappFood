@@ -10,14 +10,14 @@ import java.util.List;
 
 public class TransactionDao {
 
-        public List<Transaction> findByUser(User user) {
-            try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-                return session.createQuery(
-                        "FROM Transaction t WHERE t.user.id = :uid ORDER BY t.createdAt DESC",
-                        Transaction.class
-                ).setParameter("uid", user.getId()).list();
-            }
+    public List<Transaction> findByUser(User user) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                    "SELECT t FROM Transaction t LEFT JOIN FETCH t.order WHERE t.user.id = :uid ORDER BY t.createdAt DESC",
+                    Transaction.class
+            ).setParameter("uid", user.getId()).list();
         }
+    }
 
     public void save(Transaction tx) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -28,5 +28,6 @@ public class TransactionDao {
             e.printStackTrace();
         }
     }
+
 
 }

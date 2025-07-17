@@ -7,6 +7,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.CouponDao;
 import org.foodapp.dao.UserDao;
+import org.foodapp.dto.CouponResponse;
 import org.foodapp.model.Coupon;
 import org.foodapp.model.User;
 import org.foodapp.util.JwtUtil;
@@ -20,6 +21,7 @@ public class CouponsHandler implements HttpHandler {
 
     private final CouponDao couponDao = new CouponDao();
     private final Gson gson = new Gson();
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
@@ -48,8 +50,8 @@ public class CouponsHandler implements HttpHandler {
                 sendJson(exchange, 404, "{\"error\": \"Coupon not found\"}");
                 return;
             }
-
-            sendJson(exchange, 200, new Gson().toJson(coupon));
+            CouponResponse response = CouponResponse.fromEntity(coupon);
+            sendJson(exchange, 200, response);
         }
         catch (Exception e){
             e.printStackTrace();

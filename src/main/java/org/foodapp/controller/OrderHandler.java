@@ -2,22 +2,17 @@ package org.foodapp.controller;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.*;
 import org.foodapp.model.*;
 import org.foodapp.dto.*;
 import org.foodapp.util.JwtUtil;
-import org.foodapp.util.QueryParser;
 import org.foodapp.util.QueryUtil;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.foodapp.controller.FavoriteHandler.sendJson;
 
 public class OrderHandler implements HttpHandler {
 
@@ -77,7 +72,7 @@ public class OrderHandler implements HttpHandler {
             Coupon coupon = null;
 
             if (req.coupon_id != null) {
-                coupon = couponDao.findByCode(String.valueOf(req.coupon_id));
+                coupon = couponDao.findById(req.coupon_id);
                 if (coupon == null) {
                     sendJson(exchange, 404, "{\"error\": \"Coupon not found\"}");
                     return;
@@ -87,7 +82,7 @@ public class OrderHandler implements HttpHandler {
             Order order = new Order();
             order.setRestaurant(vendor);
             order.setDeliveryAddress(req.delivery_address);
-            order.setStatus(OrderStatus.PENDING);
+            order.setStatus(OrderStatus.SUBMITTED);
             order.setUser(user);
             order.setItemsOfOrder(new ArrayList<>());
             for (OrderItemRequest itemRequest : req.items) {
@@ -102,6 +97,7 @@ public class OrderHandler implements HttpHandler {
                 orderItem.setOrder(order);
                 order.getItemsOfOrder().add(orderItem);
             }
+
             orderDao.save(order);
             sendJson(exchange, 200, "{\"message\": \"Order submitted successfully\"}");
 
@@ -181,17 +177,6 @@ public class OrderHandler implements HttpHandler {
     }
 
 
-
-
-
-
-
-
-
-    private User getAuthenticatedUser(HttpExchange exchange) {
-
-        return userDao.findById(1L);
-    }
 
 
 

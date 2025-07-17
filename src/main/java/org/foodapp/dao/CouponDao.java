@@ -15,4 +15,11 @@ public class CouponDao {
             session.close();
         }
     }
+
+    public Coupon findById(Long id) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.get(Coupon.class, id);
+        }
+    }
+
 }

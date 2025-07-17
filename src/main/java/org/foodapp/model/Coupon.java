@@ -2,6 +2,8 @@ package org.foodapp.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -14,48 +16,57 @@ public class Coupon {
     @Column(nullable = false, unique = true)
     private String code;
 
-    private Integer discountAmount;
-    private Date expirationDate;
-    private Boolean isUsed = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CouponType type;
+
+    @Column(nullable = false)
+    private BigDecimal value;
+
+    @Column(name = "min_price", nullable = false)
+    private Integer minPrice;
+
+    @Column(name = "user_count", nullable = false)
+    private Integer userCount;
+
+    @Column(name = "start_date", nullable = false)
+    private LocalDate startDate;
+
+    @Column(name = "end_date", nullable = false)
+    private LocalDate endDate;
+
+
+
 
     public Coupon() {}
-    public Coupon(String code, Integer discountAmount, Date expirationDate, Boolean isUsed) {
-        this.code = code;
-        this.discountAmount = discountAmount;
-        this.expirationDate = expirationDate;
-        this.isUsed = isUsed;
-    }
+
+
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public String getCode() {
-        return code;
-    }
-    public void setCode(String code) {
-        this.code = code;
-    }
-    public Integer getDiscountAmount() {
-        return discountAmount;
-    }
-    public void setDiscountAmount(Integer discountAmount) {
-        this.discountAmount = discountAmount;
-    }
-    public Date getExpirationDate() {
-        return expirationDate;
-    }
-    public void setExpirationDate(Date expirationDate) {
-        this.expirationDate = expirationDate;
-    }
-    public Boolean getIsUsed() {
-        return isUsed;
-    }
-    public void setIsUsed(Boolean isUsed) {
-        this.isUsed = isUsed;
-    }
+    // Getters & Setters
+
+    public Long getId() { return id; }
+
+    public String getCouponCode() { return code; }
+    public void setCouponCode(String couponCode) { this.code = couponCode; }
+
+    public CouponType getType() { return type; }
+    public void setType(CouponType type) { this.type = type; }
+
+    public BigDecimal getValue() { return value; }
+    public void setValue(BigDecimal value) { this.value = value; }
+
+    public Integer getMinPrice() { return minPrice; }
+    public void setMinPrice(Integer minPrice) { this.minPrice = minPrice; }
+
+    public Integer getUserCount() { return userCount; }
+    public void setUserCount(Integer userCount) { this.userCount = userCount; }
+
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+
+    public LocalDate getEndDate() { return endDate; }
+    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 }
 
 

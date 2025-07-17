@@ -7,6 +7,8 @@ import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.TransactionDao;
 import org.foodapp.dao.UserDao;
 import org.foodapp.dto.WalletTopUpRequest;
+import org.foodapp.model.PaymentMethod;
+import org.foodapp.model.PaymentStatus;
 import org.foodapp.model.Transaction;
 import org.foodapp.model.User;
 import org.foodapp.util.JwtUtil;
@@ -39,47 +41,78 @@ public class WalletHandler implements HttpHandler {
 
 
 
-
     private void handleTopUp(HttpExchange exchange) throws IOException {
+        Transaction tx = new Transaction();
         try {
             User user = authenticate(exchange);
-            if (user == null) return;
+            if (user == null) {
+                return;
+            }
+            tx.setUser(user);
+            tx.setMethod(PaymentMethod.WALLET);
+            tx.setCreatedAt(LocalDateTime.now());
+
 
             String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
             if (contentType == null || !contentType.contains("application/json")) {
+                tx.setStatus(PaymentStatus.FAILED);
+                transactionDao.save(tx);
                 sendJson(exchange, 415, Map.of("error", "Unsupported Media Type"));
                 return;
             }
-            Map<String, Object> body = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), Map.class);
-            if (body == null || !body.containsKey("amount")) {
+
+            Map<String, Object> body = gson.fromJson(
+                    new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
+                    Map.class
+            );
+
+            if (body == null || !body.containsKey("amount") ||  body.get("amount") == null) {
+                tx.setStatus(PaymentStatus.FAILED);
+                transactionDao.save(tx);
                 sendJson(exchange, 400, Map.of("error", "Amount is required"));
                 return;
             }
 
-            BigDecimal amount = new BigDecimal(body.get("amount").toString());
+            BigDecimal amount;
+            try {
+                amount = new BigDecimal(body.get("amount").toString());
+            } catch (NumberFormatException e) {
+                tx.setStatus(PaymentStatus.FAILED);
+                transactionDao.save(tx);
+                sendJson(exchange, 400, Map.of("error", "Invalid amount format"));
+                return;
+            }
+
+
             if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                tx.setAmount(amount);
+                tx.setStatus(PaymentStatus.FAILED);
+                transactionDao.save(tx);
                 sendJson(exchange, 400, Map.of("error", "Amount must be positive"));
                 return;
             }
 
-            user.increaseWallet(amount);
+            BigDecimal current = user.getWalletBalance();
+            user.setWalletBalance(current.add(amount));
             userDao.update(user);
-            Transaction transaction = new Transaction();
-            transaction.setUser(user);
-            transaction.setAmount(amount);
-            transaction.setDescription("TOP_UP");
-            transactionDao.save(transaction);
+
+
+            tx.setAmount(amount);
+            tx.setStatus(PaymentStatus.SUCCESS);
+
+
+            transactionDao.save(tx);
+
             sendJson(exchange, 200, Map.of("message", "Wallet topped up successfully"));
-        }
-        catch (NumberFormatException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 400, Map.of("error", "Invalid amount format"));
-        }
-        catch (Exception e) {
-           e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            tx.setStatus(PaymentStatus.FAILED);
+            transactionDao.save(tx);
+            sendJson(exchange, 500, Map.of("error", "Internal server error"));
         }
     }
+
 
 
 

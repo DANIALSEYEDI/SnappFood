@@ -1,6 +1,7 @@
 package org.foodapp.model;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,9 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    private String deliveryAddress;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -34,96 +38,68 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> itemsOfOrder = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "coupon_id")
+    private Coupon coupon;
+
+
+    private Integer rawPrice;
+    private Integer taxFee;
+    private Integer additionalFee;
+    private Integer courierFee;
+    private Integer payPrice;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    @Enumerated(EnumType.STRING)
-    private DeliveryStatus deliveryStatus;
+    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
-
-    private String note;
-    private String deliveryAddress;
-    private Integer totalPrice;
     public Order() {}
-    public Order(User user, Restaurant restaurant, List<FoodItem> items, String note, Integer totalPrice) {
-        this.user = user;
-        this.restaurant = restaurant;
-        this.items = items;
-        this.note = note;
-        this.totalPrice = totalPrice;
-        this.status = OrderStatus.PENDING;
+
+    @PreUpdate
+    public void setUpdateTime() {
+        updatedAt = LocalDateTime.now();
     }
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-    public User getUser() {
-        return user;
-    }
-    public void setUser(User user) {
-        this.user = user;
-    }
-    public Restaurant getRestaurant() {
-        return restaurant;
-    }
-    public void setRestaurant(Restaurant restaurant) {
-        this.restaurant = restaurant;
-    }
-    public User getCourier() {
-        return courier;
-    }
-    public void setCourier(User courier) {
-        this.courier = courier;
-    }
-    public List<FoodItem> getItems() {
-        return items;
-    }
-    public void setItems(List<FoodItem> items) {
-        this.items = items;
-    }
-    public OrderStatus getStatus() {
-        return status;
-    }
-    public void setStatus(OrderStatus status) {
-        this.status = status;
-    }
-    public String getNote() {
-        return note;
-    }
-    public void setNote(String note) {
-        this.note = note;
-    }
-    public Integer getTotalPrice() {
-        return totalPrice;
-    }
-    public void setTotalPrice(Integer totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-    public String getDeliveryAddress() {
-        return deliveryAddress;
-    }
-    public void setDeliveryAddress(String deliveryAddress) {
-        this.deliveryAddress = deliveryAddress;
-    }
-    public void addItem(FoodItem item, int quantity) {
-        OrderItem orderItem = new OrderItem();
-        orderItem.setOrder(this);
-        orderItem.setItem(item);
-        orderItem.setQuantity(quantity);
-        this.itemsOfOrder.add(orderItem);
-    }
-    public List<OrderItem> getItemsOfOrder() {
-        return itemsOfOrder;
-    }
+    public Long getId() { return id; }
+    public String getDeliveryAddress() { return deliveryAddress; }
+    public void setDeliveryAddress(String deliveryAddress) { this.deliveryAddress = deliveryAddress; }
 
-    public void setItemsOfOrder(List<OrderItem> items) {
-        this.itemsOfOrder = items;
-    }
-    public DeliveryStatus getDeliveryStatus() {
-        return deliveryStatus;
-    }
-    public void setDeliveryStatus(DeliveryStatus deliveryStatus) {
-        this.deliveryStatus = deliveryStatus;
-    }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+
+    public Restaurant getRestaurant() { return restaurant; }
+    public void setRestaurant(Restaurant restaurant) { this.restaurant = restaurant; }
+
+    public User getCourier() { return courier; }
+    public void setCourier(User courier) { this.courier = courier; }
+
+    public List<OrderItem> getItemsOfOrder() { return itemsOfOrder; }
+    public void setItemsOfOrder(List<OrderItem> itemsOfOrder) { this.itemsOfOrder = itemsOfOrder; }
+
+    public Coupon getCoupon() { return coupon; }
+    public void setCoupon(Coupon coupon) { this.coupon = coupon; }
+
+    public Integer getRawPrice() { return rawPrice; }
+    public void setRawPrice(Integer rawPrice) { this.rawPrice = rawPrice; }
+
+    public Integer getTaxFee() { return taxFee; }
+    public void setTaxFee(Integer taxFee) { this.taxFee = taxFee; }
+
+    public Integer getAdditionalFee() { return additionalFee; }
+    public void setAdditionalFee(Integer additionalFee) { this.additionalFee = additionalFee; }
+
+    public Integer getCourierFee() { return courierFee; }
+    public void setCourierFee(Integer courierFee) { this.courierFee = courierFee; }
+
+    public Integer getPayPrice() { return payPrice; }
+    public void setPayPrice(Integer payPrice) { this.payPrice = payPrice; }
+
+    public OrderStatus getStatus() { return status; }
+    public void setStatus(OrderStatus status) { this.status = status; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 }
 

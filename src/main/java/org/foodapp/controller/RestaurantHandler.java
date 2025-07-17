@@ -631,8 +631,8 @@ public class RestaurantHandler implements HttpHandler {
             }
 
             try {
-                OrderStatus newStatus = OrderStatus.valueOf(request.getStatus().toUpperCase());
-                order.setStatus(newStatus);
+                RestaurantOrderStatus newStatus = RestaurantOrderStatus.valueOf(request.getStatus().toUpperCase());
+             //   order.setStatus(newStatus);
                 orderDao.update(order);
             } catch (IllegalArgumentException e) {
                 sendJson(exchange, 400, "{\"error\": \"Invalid status value\"}");

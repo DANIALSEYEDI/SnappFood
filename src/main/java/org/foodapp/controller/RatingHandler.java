@@ -77,14 +77,24 @@ public class RatingHandler implements HttpHandler {
                 return;
             }
 
-            Rating rating = new Rating();
-            rating.setOrder(order);
-            rating.setRating(request.rating);
-            rating.setComment(request.comment);
-            rating.setImageBase64(request.imageBase64);
-            rating.setUser(order.getUser());
 
-            ratingDao.save(rating);
+            List<OrderItem> items = order.getItemsOfOrder();
+            if (items == null || items.isEmpty()) {
+                sendJson(exchange, 400, Map.of("error", "Order has no items"));
+                return;
+            }
+
+            for (OrderItem item : items) {
+                Rating rating = new Rating();
+                rating.setOrder(order);
+                rating.setUser(user);
+                rating.setRating(request.rating);
+                rating.setComment(request.comment);
+                rating.setImageBase64(request.imageBase64 != null ? request.imageBase64 : List.of());
+                rating.setItem(item.getItem());
+
+                ratingDao.save(rating);
+            }
             sendJson(exchange, 200, "{\"message\": \"Rating submitted successfully\"}");
         } catch (JsonSyntaxException e) {
             sendJson(exchange, 400, "{\"error\": \"Invalid input format\"}");

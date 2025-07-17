@@ -60,5 +60,8 @@ public class Rating {
     public List<String> getImageBase64() {
         return imageBase64;
     }
+    public void setId(Long id) {
+        this.id = id;
+    }
 }
 
