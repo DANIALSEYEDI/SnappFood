@@ -168,11 +168,6 @@ public class User {
         this.walletBalance = walletBalance;
     }
 
-    public void increaseWallet(BigDecimal amount) {
-        if (amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
-            this.walletBalance = this.walletBalance.add(amount);
-        }
-    }
     public UserStatus getStatus() {
         return status;
     }

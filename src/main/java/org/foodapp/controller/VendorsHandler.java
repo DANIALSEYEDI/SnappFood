@@ -2,25 +2,19 @@ package org.foodapp.controller;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.RestaurantDao;
 import org.foodapp.dao.UserDao;
-import org.foodapp.dto.FoodItemResponse;
-import org.foodapp.dto.VendorSimpleRestaurantDTO;
-import org.foodapp.dto.VendorFilterRequest;
-import org.foodapp.dto.VendorMenuResponse;
+import org.foodapp.dto.*;
 import org.foodapp.model.*;
 import org.foodapp.util.JwtUtil;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class VendorsHandler implements HttpHandler {
     private final RestaurantDao restaurantDao = new RestaurantDao();
@@ -37,12 +31,12 @@ public class VendorsHandler implements HttpHandler {
                 long id = extractId(path, "/vendors/", "");
                 handleGetVendorDetails(exchange, id);
             } else {
-                sendJson(exchange, 404, "{\"error\": \"Not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found\"}");
             }
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"Internal_server_error\"}");
         }
     }
 
@@ -54,18 +48,10 @@ public class VendorsHandler implements HttpHandler {
                 sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
                 return;
             }
-
             if (user.getRole() != Role.BUYER) {
-                sendJson(exchange, 403, "{\"error\": \"Only buyers can access this endpoint\"}");
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
-
-            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
-            if (contentType == null || !contentType.contains("application/json")) {
-                sendJson(exchange, 415, "{\"error\": \"Unsupported Media Type\"}");
-                return;
-            }
-
             VendorFilterRequest request = gson.fromJson(
                     new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
                     VendorFilterRequest.class
@@ -74,42 +60,25 @@ public class VendorsHandler implements HttpHandler {
             List<Restaurant> vendors = restaurantDao.findByFilters(request.search, request.keywords);
 
             if (vendors == null || vendors.isEmpty()) {
-                sendJson(exchange, 404, "{\"error\": \"No vendors found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found vendors\"}");
                 return;
             }
 
-            List<VendorMenuResponse> responseList = new ArrayList<>();
-
-            for (Restaurant vendor : vendors) {
-                VendorMenuResponse dto = new VendorMenuResponse();
-                dto.vendorId = vendor.getId();
-                dto.vendorName = vendor.getName();
-                dto.vendorPhone = vendor.getPhone();
-                dto.vendorAddress = vendor.getAddress();
-
-                List<String> titles = new ArrayList<>();
-                Map<String, List<FoodItemResponse>> map = new LinkedHashMap<>();
-
-                for (Menu menu : vendor.getMenus()) {
-                    titles.add(menu.getTitle());
-                    List<FoodItemResponse> items = menu.getItems().stream()
-                            .map(FoodItemResponse::new)
-                            .collect(Collectors.toList());
-                    map.put(menu.getTitle(), items);
-                }
-
-                dto.menu_titles = titles;
-                dto.menu_items_by_title = map;
-                responseList.add(dto);
-            }
-
+            List<RestaurantResponse> responseList = vendors.stream()
+                    .map(r -> new RestaurantResponse(
+                            r.getId(),
+                            r.getName(),
+                            r.getAddress(),
+                            r.getPhone(),
+                            r.getLogoBase64(),
+                            r.getTaxFee(),
+                            r.getAdditionalFee()
+                    ))
+                    .toList();
             sendJson(exchange, 200, gson.toJson(responseList));
-
-        } catch (JsonSyntaxException e) {
-            sendJson(exchange, 400, "{\"error\": \"Invalid input format\"}");
-        } catch (Exception e) {
+        }  catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"Internal_server_error\"}");
         }
     }
 
@@ -127,42 +96,34 @@ public class VendorsHandler implements HttpHandler {
                 sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
                 return;
             }
-
             if (user.getRole() != Role.BUYER) {
-                sendJson(exchange, 403, "{\"error\": \"Only buyers can view vendors\"}");
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
             Restaurant restaurant = restaurantDao.findWithMenusAndItems(vendorId);
             if (restaurant == null) {
-                sendJson(exchange, 404, "{\"error\": \"Vendor not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found vendor\"}");
                 return;
             }
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("vendor", VendorSimpleRestaurantDTO.from(restaurant));
 
-            VendorMenuResponse dto = new VendorMenuResponse();
-            dto.vendor = VendorSimpleRestaurantDTO.from(restaurant);
-
-            List<String> menuTitles = new ArrayList<>();
-            Map<String, List<FoodItemResponse>> menuItemsMap = new LinkedHashMap<>();
-
+            List<String> menuTitles = restaurant.getMenus().stream()
+                    .map(Menu::getTitle)
+                    .toList();
+            response.put("menu_titles", menuTitles);
             for (Menu menu : restaurant.getMenus()) {
-                menuTitles.add(menu.getTitle());
-
-                List<FoodItemResponse> itemResponses = menu.getItems().stream()
+                String title = menu.getTitle();
+                List<FoodItemResponse> items = menu.getItems().stream()
                         .map(FoodItemResponse::new)
-                        .collect(Collectors.toList());
-
-                menuItemsMap.put(menu.getTitle(), itemResponses);
+                        .toList();
+                response.put(title, items);
             }
-
-            dto.menu_titles = menuTitles;
-            dto.menu_items_by_title = menuItemsMap;
-
-            sendJson(exchange, 200, gson.toJson(dto));
-
+            sendJson(exchange, 200, gson.toJson(response));
         } catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"Internal_server_error\"}");
         }
     }
 

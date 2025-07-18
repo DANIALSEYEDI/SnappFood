@@ -10,7 +10,7 @@ public class Menu {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Column(nullable = false, unique = true)
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,10 +28,6 @@ public class Menu {
     public Menu() {
     }
 
-    public Menu(String title, Restaurant restaurant) {
-        this.title = title;
-        this.restaurant = restaurant;
-    }
 
     public Long getId() {
         return id;

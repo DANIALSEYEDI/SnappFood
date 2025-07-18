@@ -69,7 +69,6 @@ public class FoodItemDao {
                             f.getKeywords().stream().anyMatch(k -> keywords.contains(k)))
                     .toList();
         }
-
         return results;
     }
 

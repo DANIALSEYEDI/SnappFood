@@ -1,7 +1,7 @@
 package org.foodapp.dto;
 
 import org.foodapp.model.Rating;
-import org.hibernate.query.ReturnableType;
+
 
 import java.util.List;
 import java.util.stream.Collectors;

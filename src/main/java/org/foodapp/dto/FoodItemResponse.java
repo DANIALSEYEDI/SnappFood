@@ -1,7 +1,5 @@
 package org.foodapp.dto;
-
 import org.foodapp.model.FoodItem;
-
 import java.util.List;
 
 public class FoodItemResponse {

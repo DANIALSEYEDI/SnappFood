@@ -1,6 +1,6 @@
 package org.foodapp.model;
 
-public enum DeliveryStatus {
+public enum OrderDeliveryStatus {
     ACCEPTED,
     RECEIVED,
     DELIVERED

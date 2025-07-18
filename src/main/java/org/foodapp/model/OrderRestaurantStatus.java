@@ -1,6 +1,6 @@
 package org.foodapp.model;
 
-public enum RestaurantOrderStatus {
+public enum OrderRestaurantStatus {
     PENDING,
     ACCEPTED,
     REJECTED,

@@ -1,7 +1,7 @@
 package org.foodapp.dao;
 import org.foodapp.model.Order;
 import org.foodapp.model.OrderStatus;
-import org.foodapp.model.RestaurantOrderStatus;
+import org.foodapp.model.OrderRestaurantStatus;
 import org.foodapp.model.User;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
@@ -96,7 +96,7 @@ public class OrderDao {
 
 
 
-    public List<Order> findByStatus(RestaurantOrderStatus status) {
+    public List<Order> findByStatus(OrderRestaurantStatus status) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery("""
             SELECT DISTINCT o FROM Order o

@@ -29,7 +29,6 @@ public class RestaurantHandler implements HttpHandler {
         String method = exchange.getRequestMethod();
         URI uri = exchange.getRequestURI();
         String path = uri.getPath();
-
         try {
             if (path.equals("/restaurants") && method.equalsIgnoreCase("POST")) {
                 handleCreate(exchange);
@@ -142,23 +141,25 @@ public class RestaurantHandler implements HttpHandler {
 
     private void handleGetMyRestaurants(HttpExchange exchange) throws IOException {
         try {
-            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
-            if (contentType == null || !contentType.toLowerCase().contains("application/json")) {
-                sendJson(exchange, 415, "{\"error\": \"Unsupported Media Type\"}");
-                return;
-            }
-                User user = authenticate(exchange);
+            User user = authenticate(exchange);
             if (user == null) {
                 sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
                 return;
             }
+
+            if (user.getStatus() != UserStatus.APPROVED) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+
+
             if (user.getRole() != Role.SELLER) {
-                sendJson(exchange, 403, "{\"error\": \"Only sellers can view their restaurants\"}");
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
             List<Restaurant> restaurants = restaurantDao.findBySeller(user.getId());
             if (restaurants == null || restaurants.isEmpty()) {
-                sendJson(exchange, 404, "{\"error\": \"No restaurants found for this seller\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found\"}");
                 return;
             }
             List<RestaurantResponse> responseList = restaurants.stream()
@@ -172,46 +173,54 @@ public class RestaurantHandler implements HttpHandler {
                             r.getAdditionalFee()
                     ))
                     .toList();
-
             sendJson(exchange, 200, gson.toJson(responseList));
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
 
+
+
+
+
+
+
+
+
+
     private void handleUpdate(HttpExchange exchange) throws IOException {
         try {
-            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
-            if (contentType == null || !contentType.toLowerCase().contains("application/json")) {
-                sendJson(exchange, 415, "{\"error\": \"Unsupported Media Type\"}");
-                return;
-            }
-                User user = authenticate(exchange);
+            User user = authenticate(exchange);
             if (user == null) {
                 sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
                 return;
             }
-            if (user.getRole() != Role.SELLER) {
-                sendJson(exchange, 403, "{\"error\": \"Only sellers can update restaurants\"}");
+            if (user.getStatus() != UserStatus.APPROVED) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+
             String path = exchange.getRequestURI().getPath();
             long id;
             try {
                 id = Long.parseLong(path.substring(path.lastIndexOf("/") + 1));
             } catch (NumberFormatException e) {
-                sendJson(exchange, 400, "{\"error\": \"Invalid restaurant ID\"}");
+                sendJson(exchange, 400, "{\"error\": \"invalid_input id\"}");
                 return;
             }
             Restaurant restaurant = restaurantDao.findById(id);
             if (restaurant == null) {
-                sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found restaurant\"}");
                 return;
             }
             if (!restaurant.getSeller().getId().equals(user.getId())) {
-                sendJson(exchange, 403, "{\"error\": \"You are not authorized to update this restaurant\"}");
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
             RestaurantCreateRequest request = gson.fromJson(
@@ -240,30 +249,52 @@ public class RestaurantHandler implements HttpHandler {
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
+
+
+
+
+
+
+
+
+
+
+
 
 
     private void handleAddItem(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
-            if (user == null || user.getRole() != Role.SELLER) {
-                sendJson(exchange, 403, "{\"error\": \"Only sellers can add food items\"}");
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+            if (user.getStatus() != UserStatus.APPROVED) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
             long restaurantId = extractIdFromPath(exchange.getRequestURI().getPath(), "/restaurants/", "/item");
             Restaurant restaurant = new RestaurantDao().findById(restaurantId);
-
-            if (restaurant == null || !restaurant.getSeller().getId().equals(user.getId())) {
-                sendJson(exchange, 403, "{\"error\": \"Unauthorized to modify this restaurant\"}");
+            if (restaurant == null) {
+                sendJson(exchange, 404, "{\"error\": \"not_found restaurant\"}");
+                return;
+            }
+            if (!restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
             RestaurantFoodItemRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), RestaurantFoodItemRequest.class);
             if (request.name == null || request.description == null || request.price == null || request.supply == null || request.keywords == null || request.keywords.isEmpty()) {
-                sendJson(exchange, 400, "{\"error\": \"Missing required fields\"}");
+                sendJson(exchange, 400, "{\"error\": \"invalid_input\"}");
                 return;
             }
 
@@ -277,16 +308,31 @@ public class RestaurantHandler implements HttpHandler {
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
+
+
+
+
+
+
+
 
 
     private void handleEditItem(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
-            if (user == null || user.getRole() != Role.SELLER) {
-                sendJson(exchange, 403, "{\"error\": \"Only sellers can edit food items\"}");
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+            if (user.getStatus() != UserStatus.APPROVED) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
@@ -295,14 +341,19 @@ public class RestaurantHandler implements HttpHandler {
             long itemId = Long.parseLong(path.split("/")[4]);
 
             Restaurant restaurant = new RestaurantDao().findById(restaurantId);
-            if (restaurant == null || !restaurant.getSeller().getId().equals(user.getId())) {
-                sendJson(exchange, 403, "{\"error\": \"Unauthorized\"}");
+            if (restaurant == null) {
+                sendJson(exchange, 404, "{\"error\": \"not_found restaurant\"}");
+                return;
+            }
+            if (!restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
+
             FoodItem item = new FoodItemDao().findById(itemId);
             if (item == null || !item.getRestaurant().getId().equals(restaurantId)) {
-                sendJson(exchange, 404, "{\"error\": \"Item not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found item\"}");
                 return;
             }
 
@@ -320,19 +371,39 @@ public class RestaurantHandler implements HttpHandler {
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
     private void handleDeleteItem(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
-            if (user == null || user.getRole() != Role.SELLER) {
-                sendJson(exchange, 403, "{\"error\": \"Only sellers can delete food items\"}");
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
                 return;
             }
+            if (user.getStatus() != UserStatus.APPROVED) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+
 
             String path = exchange.getRequestURI().getPath();
             long restaurantId = Long.parseLong(path.split("/")[2]);
@@ -340,19 +411,36 @@ public class RestaurantHandler implements HttpHandler {
 
             Restaurant restaurant = new RestaurantDao().findById(restaurantId);
             FoodItem item = new FoodItemDao().findById(itemId);
-
-            if (restaurant == null || item == null || !restaurant.getSeller().getId().equals(user.getId()) || !item.getRestaurant().getId().equals(restaurantId)) {
-                sendJson(exchange, 403, "{\"error\": \"Unauthorized or item not found\"}");
+            if (restaurant == null) {
+                sendJson(exchange, 404, "{\"error\": \"not_found restaurant\"}");
                 return;
             }
+            if (!restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+            if(item==null) {
+                sendJson(exchange, 404, "{\"error\": \"not_found item\"}");
+                return;
+            }
+
+            if (!item.getRestaurant().getId().equals(restaurantId)) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+
             new FoodItemDao().delete(item);
             sendJson(exchange, 200, "{\"message\": \"Food item removed successfully\"}");
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
+
+
+
+
 
 
 
@@ -368,41 +456,57 @@ public class RestaurantHandler implements HttpHandler {
         try {
             User user = authenticate(exchange);
             if (user == null) {
-                sendJson(exchange, 403, "{\"error\": \"Unauthorized\"}");
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+            if (user.getStatus() != UserStatus.APPROVED) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
             Restaurant restaurant = restaurantDao.findById(restaurantId);
             if (restaurant == null) {
-                sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found restaurant\"}");
                 return;
             }
-
             if (!restaurant.getSeller().getId().equals(user.getId())) {
-                sendJson(exchange, 403, "{\"error\": \"Access denied\"}");
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
             RestaurantMenuRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), RestaurantMenuRequest.class);
             if (request.title == null) {
-                sendJson(exchange, 400, "{\"error\": \"Menu title is required\"}");
+                sendJson(exchange, 400, "{\"error\": \"invalid_input\"}");
+                return;
+            }
+
+            Menu existing = menuDao.findByTitleAndRestaurant(request.title, restaurant);
+            if (existing != null) {
+                sendJson(exchange, 409, "{\"error\": \"conflict\"}");
                 return;
             }
 
             Menu menu = new Menu();
             menu.setTitle(request.title);
             menu.setRestaurant(restaurant);
-
             restaurant.getMenus().add(menu);
-            restaurantDao.update(restaurant);
             menuDao.save(menu);
             sendJson(exchange, 200, gson.toJson(Map.of("title", menu.getTitle())));
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
+
+
+
+
+
 
 
 
@@ -410,12 +514,25 @@ public class RestaurantHandler implements HttpHandler {
         try {
             User user = authenticate(exchange);
             if (user == null) {
-                sendJson(exchange, 403, "{\"error\": \"Unauthorized\"}");
-                return;}
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+            if (user.getStatus() != UserStatus.APPROVED) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
 
             Restaurant restaurant = restaurantDao.findById(restaurantId);
             if (restaurant == null) {
-                sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found restaurant\"}");
+                return;
+            }
+            if (!restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
@@ -425,19 +542,23 @@ public class RestaurantHandler implements HttpHandler {
                     .orElse(null);
 
             if (toRemove == null) {
-                sendJson(exchange, 404, "{\"error\": \"Menu not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found menu\"}");
                 return;
             }
-
             restaurant.getMenus().remove(toRemove);
             restaurantDao.update(restaurant);
+            menuDao.delete(toRemove);
             sendJson(exchange, 200, "{\"message\": \"Food menu removed from restaurant successfully\"}");
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
+
+
+
+
 
 
 
@@ -446,24 +567,32 @@ public class RestaurantHandler implements HttpHandler {
         try {
             User user = authenticate(exchange);
             if (user == null) {
-                sendJson(exchange, 403, "{\"error\": \"Unauthorized\"}");
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+            if (user.getStatus() != UserStatus.APPROVED) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
             Restaurant restaurant = restaurantDao.findById(restaurantId);
             if (restaurant == null) {
-                sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found Restaurant\"}");
                 return;
             }
 
             if (!restaurant.getSeller().getId().equals(user.getId())) {
-                sendJson(exchange, 403, "{\"error\": \"Access denied\"}");
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
             Menu menu = menuDao.findByRestaurantAndTitleWithItems(restaurantId, title);
             if (menu == null) {
-                sendJson(exchange, 404, "{\"error\": \"Menu not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found Menu\"}");
                 return;
             }
 
@@ -474,19 +603,25 @@ public class RestaurantHandler implements HttpHandler {
 
             FoodItem item = foodItemDao.findById(request.item_id);
             if (item == null) {
-                sendJson(exchange, 404, "{\"error\": \"Food item not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found food item\"}");
                 return;
             }
-
             menu.addItem(item);
             menuDao.update(menu);
-
-            sendJson(exchange, 200, "{\"message\": \"Food item added to menu successfully\"}");
+            sendJson(exchange, 200, "{\"message\": \"Food item created and added to restaurant successfully\"}");
         } catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"Internal_server_error\"}");
         }
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -494,41 +629,61 @@ public class RestaurantHandler implements HttpHandler {
         try {
             User user = authenticate(exchange);
             if (user == null) {
-                sendJson(exchange, 403, "{\"error\": \"Unauthorized\"}");
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+            if (user.getStatus() != UserStatus.APPROVED) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
             Restaurant restaurant = restaurantDao.findById(restaurantId);
             if (restaurant == null) {
-                sendJson(exchange, 404, "{\"error\": \"Restaurant not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found Restaurant\"}");
+                return;
+            }
+            if (!restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
             Menu menu = menuDao.findByRestaurantAndTitleWithItems(restaurantId, title);
             if (menu == null) {
-                sendJson(exchange, 404, "{\"error\": \"Menu not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found Menu\"}");
                 return;
             }
 
             FoodItem item = foodItemDao.findById(itemId);
+            if (item == null) {
+                sendJson(exchange, 404, "{\"error\": \"not_found item in this menu\"}");
+                return;
+            }
             boolean found = menu.getItems().stream()
                     .anyMatch(i -> i.getId().equals(item.getId()));
 
-            if (item == null || !found) {
-                sendJson(exchange, 404, "{\"error\": \"Item not found in this menu\"}");
+            if (!found) {
+                sendJson(exchange, 404, "{\"error\": \"not_found item in this menu\"}");
                 return;
             }
-
-            menu.getItems().remove(item);
+            menu.removeItem(item);
             menuDao.update(menu);
-
-            sendJson(exchange, 200, "{\"message\": \"Item removed from menu successfully\"}");
+            sendJson(exchange, 200, "{\"message\": \"Item removed from restaurant menu successfully\"}");
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"Internal_server_error\"}");
         }
     }
+
+
+
+
+
+
 
 
 
@@ -568,9 +723,16 @@ public class RestaurantHandler implements HttpHandler {
 
         } catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"Internal_server_error\"}");
         }
     }
+
+
+
+
+
+
+
 
 
 
@@ -609,7 +771,7 @@ public class RestaurantHandler implements HttpHandler {
             }
 
             try {
-                RestaurantOrderStatus newStatus = RestaurantOrderStatus.valueOf(request.getStatus().toUpperCase());
+                OrderRestaurantStatus newStatus = OrderRestaurantStatus.valueOf(request.getStatus().toUpperCase());
              //   order.setStatus(newStatus);
                 orderDao.update(order);
             } catch (IllegalArgumentException e) {

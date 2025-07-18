@@ -2,6 +2,7 @@ package org.foodapp.model;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class FoodItem {
@@ -10,10 +11,10 @@ public class FoodItem {
     private Long id;
 
     private String name;
-    private String imageBase64;
     private String description;
     private Integer price;
     private Integer supply;
+    private String imageBase64;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
@@ -102,6 +103,24 @@ public class FoodItem {
     public void setRestaurant(Restaurant restaurant) {
         this.restaurant = restaurant;
     }
+
+
+
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FoodItem)) return false;
+        FoodItem that = (FoodItem) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
 
 }
 

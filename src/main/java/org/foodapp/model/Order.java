@@ -27,12 +27,6 @@ public class Order {
     @JoinColumn(name = "courier_id")
     private User courier;
 
-    @ManyToMany
-    @JoinTable(
-            name = "order_items",
-            joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "food_item_id"))
-    private List<FoodItem> items;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> itemsOfOrder = new ArrayList<>();
