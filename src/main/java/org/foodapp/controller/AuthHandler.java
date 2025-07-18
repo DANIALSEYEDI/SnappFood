@@ -75,9 +75,9 @@ public class AuthHandler implements HttpHandler {
                 sendJson(exchange, 400, "{\"error\": \"invalid_input\"}");
                 return;
             }
-            bankName = request.bank_info.bank_name;
-            accountNumber = request.bank_info.account_number;
         }
+        bankName = request.bank_info.bank_name;
+        accountNumber = request.bank_info.account_number;
 
         if (role == Role.SELLER || role == Role.BUYER) {
             if (request.address==null){

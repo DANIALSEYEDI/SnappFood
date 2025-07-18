@@ -31,13 +31,7 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Menu> menus = new HashSet<>();
 
-    public Set<Menu> getMenus() {
-        return menus;
-    }
 
-    public void setMenus(Set<Menu> menus) {
-        this.menus = menus;
-    }
 
     public Restaurant() {}
 
@@ -51,6 +45,8 @@ public class Restaurant {
         this.additionalFee = additionalFee;
         this.seller = seller;
     }
+
+
 
     // Getters and Setters
 
@@ -110,9 +106,18 @@ public class Restaurant {
         return seller;
     }
 
-    public void setSeller(User seller) {
-        this.seller = seller;
+    public Set<Menu> getMenus() {
+        return menus;
     }
+
+
+
+
+
+
+
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -127,4 +132,5 @@ public class Restaurant {
     }
 
 }
+
 

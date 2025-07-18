@@ -1,6 +1,5 @@
 package org.foodapp.dao;
 import org.foodapp.model.User;
-import org.foodapp.model.UserStatus;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -54,6 +53,9 @@ public class UserDao {
             session.close();
         }
     }
+
+
+
     public User findById(Long id) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         User user = session.get(User.class, id);
@@ -61,24 +63,13 @@ public class UserDao {
         return user;
     }
 
+
+
     public List<User> findAll() {
             try (Session session = HibernateUtil.getSessionFactory().openSession()) {
                 return session.createQuery("FROM User", User.class).list();
             }
-        }
-
-    public void updateStatus(Long userId, UserStatus status) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Transaction tx = session.beginTransaction();
-            User user = session.get(User.class, userId);
-            if (user != null) {
-                user.setStatus(status);
-                session.update(user);
-            }
-            tx.commit();
-        }
     }
-
 
 
 }
