@@ -134,12 +134,24 @@ public class AuthHandler implements HttpHandler {
                 return;
             }
             String token = JwtUtil.generateToken(user.getId().toString(), user.getRole().toString());
-            AuthLoginResponse response = new AuthLoginResponse(
+            AuthProfileResponse response = new AuthProfileResponse(
+                    user.getId(),
+                    user.getFullName(),
+                    user.getPhoneNumber(),
+                    user.getEmail(),
+                    user.getRole(),
+                    user.getAddress(),
+                    user.getProfileImageBase64(),
+                    user.getBankName(),
+                    user.getAccountNumber()
+            );
+
+            AuthLoginResponse res = new AuthLoginResponse(
                     "User logged in successfully",
                     token,
-                    user
+                    response
             );
-            sendJson(exchange, 200, gson.toJson(response));
+            sendJson(exchange, 200, gson.toJson(res));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -164,7 +176,18 @@ public class AuthHandler implements HttpHandler {
                 sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
                 return;
             }
-            sendJson(exchange, 200, gson.toJson(user));
+            AuthProfileResponse response = new AuthProfileResponse(
+                    user.getId(),
+                    user.getFullName(),
+                    user.getPhoneNumber(),
+                    user.getEmail(),
+                    user.getRole(),
+                    user.getAddress(),
+                    user.getProfileImageBase64(),
+                    user.getBankName(),
+                    user.getAccountNumber()
+            );
+            sendJson(exchange, 200, gson.toJson(response));
         }
         catch (NumberFormatException e) {
             sendJson(exchange, 400, "{\"error\": \"invalid_input\"}");

@@ -5,9 +5,9 @@ import org.foodapp.model.User;
 public class AuthLoginResponse {
     public String message;
     public String token;
-    public User user;
+    public AuthProfileResponse user;
 
-    public AuthLoginResponse(String message, String token, User user) {
+    public AuthLoginResponse(String message, String token,AuthProfileResponse user) {
         this.message = message;
         this.token = token;
         this.user = user;
@@ -20,11 +20,10 @@ public class AuthLoginResponse {
         this.token = token;
     }
 
-    public User getUser() {
+    public AuthProfileResponse getUser() {
         return user;
     }
-
-    public void setUser(User user) {
+    public void setUser(AuthProfileResponse user) {
         this.user = user;
     }
 }

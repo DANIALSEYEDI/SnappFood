@@ -9,8 +9,6 @@ public class RestaurantResponse {
     public Integer tax_fee;
     public Integer additional_fee;
 
-    public RestaurantResponse() {}
-
     public RestaurantResponse(Long id, String name, String address, String phone, String logoBase64,
                               Integer tax_fee, Integer additional_fee) {
         this.id = id;

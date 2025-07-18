@@ -92,7 +92,7 @@ public class RestaurantHandler implements HttpHandler {
             }
 
             if (user.getRole() != Role.SELLER) {
-                sendJson(exchange, 403, "{\"error\": \"Only sellers can create restaurants\"}");
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
             RestaurantCreateRequest request = gson.fromJson(
@@ -100,7 +100,7 @@ public class RestaurantHandler implements HttpHandler {
                     RestaurantCreateRequest.class
             );
             if (request.name == null || request.address == null || request.phone == null) {
-                sendJson(exchange, 400, "{\"error\": \"Missing required fields: name, address, or phone\"}");
+                sendJson(exchange, 400, "{\"error\": \"invalid_input\"}");
                 return;
             }
 
@@ -128,7 +128,7 @@ public class RestaurantHandler implements HttpHandler {
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
 
