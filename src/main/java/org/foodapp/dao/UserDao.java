@@ -1,26 +1,35 @@
 package org.foodapp.dao;
-
 import org.foodapp.model.User;
 import org.foodapp.model.UserStatus;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
-
 import java.util.List;
 
 public class UserDao {
 
-    public void save(User user) {
+    public User findByPhone(String phone) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            session.beginTransaction();
-            session.persist(user);
-            session.getTransaction().commit();
+            Query<User> query = session.createQuery("FROM User WHERE phoneNumber = :phone", User.class);
+            query.setParameter("phone", phone);
+            return query.uniqueResult();
         } finally {
             session.close();
         }
     }
+
+
+    public void save(User user) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction tx = session.beginTransaction();
+            session.persist(user);
+            tx.commit();
+        }
+    }
+
+
 
     public void update(User user) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -33,16 +42,6 @@ public class UserDao {
         }
     }
 
-    public User findByPhone(String phone) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            Query<User> query = session.createQuery("FROM User WHERE phoneNumber = :phone", User.class);
-            query.setParameter("phone", phone);
-            return query.uniqueResult();
-        } finally {
-            session.close();
-        }
-    }
 
     public User findByPhoneAndPassword(String phone, String password) {
         Session session = HibernateUtil.getSessionFactory().openSession();

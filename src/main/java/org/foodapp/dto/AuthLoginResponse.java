@@ -12,15 +12,6 @@ public class AuthLoginResponse {
         this.token = token;
         this.user = user;
     }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
     public String getToken() {
         return token;
     }

@@ -44,7 +44,10 @@ public class User {
     private BigDecimal walletBalance = BigDecimal.ZERO;
 
     //  SELLER و COURIER
+    @Column(name = "bank_name")
     private String bankName;
+
+    @Column(name = "account_number")
     private String accountNumber;
 
 
