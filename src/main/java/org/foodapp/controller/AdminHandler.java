@@ -65,7 +65,6 @@ public class AdminHandler implements HttpHandler {
         else if (method.equals("GET") && path.equals("/admin/orders")) {
             handleGetAdminOrders(exchange);
         }
-
         else {
             sendJson(exchange, 404, "{\"error\": \"Path Not found\"}");
         }
@@ -86,14 +85,14 @@ public class AdminHandler implements HttpHandler {
                     .map(AdminUserResponse::fromEntity)
                     .collect(Collectors.toList());
             if (response.isEmpty()) {
-                sendJson(exchange, 404, "{\"error\": \"No users found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found users\"}");
                 return;
             }
             sendJson(exchange, 200, response);
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
 
     }
@@ -123,7 +122,7 @@ public class AdminHandler implements HttpHandler {
 
             String statusStr = body.get("status");
             if (statusStr == null) {
-                sendJson(exchange, 400, Map.of("error", "Missing status"));
+                sendJson(exchange, 400, Map.of("error", "invalid_input"));
                 return;
             }
 
@@ -136,16 +135,16 @@ public class AdminHandler implements HttpHandler {
             }
             User user = userDao.findById(userId);
             if (user == null) {
-                sendJson(exchange, 404, Map.of("error", "User not found"));
+                sendJson(exchange, 404, Map.of("error", "not_found user"));
                 return;
             }
             user.setStatus(status);
             userDao.update(user);
-            sendJson(exchange, 200, Map.of("message", "User status updated"));
+            sendJson(exchange, 200, Map.of("message", "Status updated"));
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
 
@@ -167,7 +166,7 @@ public class AdminHandler implements HttpHandler {
                     .map(AdminTransactionResponse::fromEntity)
                     .collect(Collectors.toList());
             if (response.isEmpty()) {
-                sendJson(exchange, 404, Map.of("error", "No transactions"));
+                sendJson(exchange, 404, Map.of("error", "not_found transactions"));
                 return;
             }
 
@@ -175,7 +174,7 @@ public class AdminHandler implements HttpHandler {
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
 
@@ -220,7 +219,7 @@ public class AdminHandler implements HttpHandler {
             try {
                 type = CouponType.valueOf(typeStr.toUpperCase());
             } catch (IllegalArgumentException e) {
-                sendJson(exchange, 400, Map.of("error", "Invalid coupon type"));
+                sendJson(exchange, 400, Map.of("error", "invalid_input"));
                 return;
             }
 
@@ -239,11 +238,11 @@ public class AdminHandler implements HttpHandler {
             coupon.setEndDate(LocalDate.parse(endDateStr));
 
             couponDao.save(coupon);
-
-            sendJson(exchange, 201, Map.of("message", "Coupon created"));
+            CouponResponse response = CouponResponse.fromEntity(coupon);
+            sendJson(exchange, 201, response);
         } catch (Exception e) {
             e.printStackTrace();
-           sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+           sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
 
@@ -263,7 +262,7 @@ public class AdminHandler implements HttpHandler {
                     .map(CouponResponse::fromEntity)
                     .toList();
             if (result.isEmpty()) {
-                sendJson(exchange, 404, Map.of("error", "No coupons"));
+                sendJson(exchange, 404, Map.of("error", "not_found coupons"));
                 return;
             }
             sendJson(exchange, 200, result);
@@ -286,7 +285,7 @@ public class AdminHandler implements HttpHandler {
 
             Coupon coupon = couponDao.findById(id);
             if (coupon == null) {
-                sendJson(exchange, 404, Map.of("error", "Coupon not found"));
+                sendJson(exchange, 404, Map.of("error", "not_found coupon"));
                 return;
             }
 
@@ -294,9 +293,12 @@ public class AdminHandler implements HttpHandler {
             sendJson(exchange, 200, response);
         } catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, Map.of("error", "Internal server error"));
+            sendJson(exchange, 500, Map.of("error", "internal_server_error"));
         }
     }
+
+
+
 
 
 
@@ -307,17 +309,18 @@ public class AdminHandler implements HttpHandler {
 
             Coupon coupon = couponDao.findById(id);
             if (coupon == null) {
-                sendJson(exchange, 404, Map.of("error", "Coupon not found"));
+                sendJson(exchange, 404, Map.of("error", "not_found coupon"));
                 return;
             }
-
             couponDao.delete(coupon);
             sendJson(exchange, 200, Map.of("message", "Coupon deleted"));
         } catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, Map.of("error", "Internal Server Error"));
+            sendJson(exchange, 500, Map.of("error", "internal_server_error"));
         }
     }
+
+
 
 
     private void handleUpdateCoupon(HttpExchange exchange, long id) throws IOException {
@@ -332,7 +335,7 @@ public class AdminHandler implements HttpHandler {
 
             Coupon coupon = couponDao.findById(id);
             if (coupon == null) {
-                sendJson(exchange, 404, Map.of("error", "Coupon not found"));
+                sendJson(exchange, 404, Map.of("error", "not_found coupon"));
                 return;
             }
 
@@ -400,14 +403,18 @@ public class AdminHandler implements HttpHandler {
 
 
             couponDao.update(coupon);
-            sendJson(exchange, 200, Map.of("message", "Coupon updated"));
-
-
+            CouponResponse response = CouponResponse.fromEntity(coupon);
+            sendJson(exchange, 200, response);
         } catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, Map.of("error", "Internal Server Error"));
+            sendJson(exchange, 500, Map.of("error", "internal_server_error"));
         }
     }
+
+
+
+
+
 
 
 

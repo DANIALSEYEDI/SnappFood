@@ -23,7 +23,6 @@ public class Coupon {
     @Column(name = "min_price", nullable = false)
     private Integer minPrice;
 
-
     @Column(name = "user_count", nullable = false)
     private Integer userCount;
 

@@ -35,7 +35,7 @@ public class WalletHandler implements HttpHandler {
         if (path.equals("/wallet/top-up") && method.equalsIgnoreCase("POST")) {
             handleTopUp(exchange);
         } else {
-            sendJson(exchange, 404,"Path not found");
+            sendJson(exchange, 404,"not_found path");
         }
     }
 
@@ -53,14 +53,6 @@ public class WalletHandler implements HttpHandler {
             tx.setCreatedAt(LocalDateTime.now());
 
 
-            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
-            if (contentType == null || !contentType.contains("application/json")) {
-                tx.setStatus(PaymentStatus.FAILED);
-                transactionDao.save(tx);
-                sendJson(exchange, 415, Map.of("error", "Unsupported Media Type"));
-                return;
-            }
-
             Map<String, Object> body = gson.fromJson(
                     new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
                     Map.class
@@ -69,7 +61,7 @@ public class WalletHandler implements HttpHandler {
             if (body == null || !body.containsKey("amount") ||  body.get("amount") == null) {
                 tx.setStatus(PaymentStatus.FAILED);
                 transactionDao.save(tx);
-                sendJson(exchange, 400, Map.of("error", "Amount is required"));
+                sendJson(exchange, 400, Map.of("error", "invalid_input"));
                 return;
             }
 
@@ -79,7 +71,7 @@ public class WalletHandler implements HttpHandler {
             } catch (NumberFormatException e) {
                 tx.setStatus(PaymentStatus.FAILED);
                 transactionDao.save(tx);
-                sendJson(exchange, 400, Map.of("error", "Invalid amount format"));
+                sendJson(exchange, 400, Map.of("error", "invalid_input"));
                 return;
             }
 
@@ -88,7 +80,7 @@ public class WalletHandler implements HttpHandler {
                 tx.setAmount(amount);
                 tx.setStatus(PaymentStatus.FAILED);
                 transactionDao.save(tx);
-                sendJson(exchange, 400, Map.of("error", "Amount must be positive"));
+                sendJson(exchange, 400, Map.of("error", "invalid_input"));
                 return;
             }
 
@@ -96,20 +88,15 @@ public class WalletHandler implements HttpHandler {
             user.setWalletBalance(current.add(amount));
             userDao.update(user);
 
-
             tx.setAmount(amount);
             tx.setStatus(PaymentStatus.SUCCESS);
-
-
             transactionDao.save(tx);
-
             sendJson(exchange, 200, Map.of("message", "Wallet topped up successfully"));
-
         } catch (Exception e) {
             e.printStackTrace();
             tx.setStatus(PaymentStatus.FAILED);
             transactionDao.save(tx);
-            sendJson(exchange, 500, Map.of("error", "Internal server error"));
+            sendJson(exchange, 500, Map.of("error", "Internal_server_error"));
         }
     }
 

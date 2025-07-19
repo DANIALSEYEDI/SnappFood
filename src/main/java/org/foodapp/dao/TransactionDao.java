@@ -33,13 +33,16 @@ public class TransactionDao {
         }
     }
 
+
+
     public List<Transaction> findByFilters(Map<String, String> params) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             StringBuilder hql = new StringBuilder("FROM Transaction t WHERE 1=1");
 
-            if (params.containsKey("user")) {
-                hql.append(" AND t.user.phoneNumber LIKE :user");
+            if (params.containsKey("user") && !params.get("user").isBlank()) {
+                hql.append(" AND (LOWER(t.user.phoneNumber) LIKE :user OR LOWER(t.user.fullName) LIKE :user)");
             }
+
             if (params.containsKey("method")) {
                 hql.append(" AND t.method = :method");
             }
@@ -52,9 +55,10 @@ public class TransactionDao {
 
             Query<Transaction> query = session.createQuery(hql.toString(), Transaction.class);
 
-            if (params.containsKey("user")) {
-                query.setParameter("user", "%" + params.get("user") + "%");
+            if (params.containsKey("user") && !params.get("user").isBlank()) {
+                query.setParameter("user", "%" + params.get("user").toLowerCase() + "%");
             }
+
             if (params.containsKey("method")) {
                 try {
                     PaymentMethod method = PaymentMethod.valueOf(params.get("method").toUpperCase());
@@ -76,8 +80,5 @@ public class TransactionDao {
             return query.list();
         }
     }
-
-
-
 
 }

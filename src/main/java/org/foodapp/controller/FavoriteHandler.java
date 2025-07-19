@@ -26,24 +26,21 @@ public class FavoriteHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
-
         User user = authenticate(exchange);
         if (user == null) {
             sendJson(exchange, 401,  "Unauthorized");
             return;
         }
-
         if (path.equals("/favorites") && method.equals("GET")) {
             handleGetFavorites(exchange, user);
         } else if (path.matches("/favorites/\\d+")) {
             long restaurantId = Long.parseLong(path.substring(path.lastIndexOf("/") + 1));
-
             if (method.equals("PUT")) {
                 handleAddFavorite(exchange, user, restaurantId);
             } else if (method.equals("DELETE")) {
                 handleRemoveFavorite(exchange, user, restaurantId);
             } else {
-                sendJson(exchange, 405, "Method Not Allowed");
+                sendJson(exchange, 404, "{\"error\": \"not_found method\"}");
             }
         } else {
             sendJson(exchange, 404,"Path not found");
@@ -56,13 +53,15 @@ public class FavoriteHandler implements HttpHandler {
 
     private void handleGetFavorites(HttpExchange exchange, User user) throws IOException {
         try {
-
-            List<Restaurant> favorites = user.getFavorites();
-            if (favorites == null || favorites.isEmpty()) {
-                sendJson(exchange, 404, "{\"error\": \"No favorite restaurants found\"}");
+            if (user.getRole() != Role.BUYER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
-
+            List<Restaurant> favorites = user.getFavorites();
+            if (favorites == null || favorites.isEmpty()) {
+                sendJson(exchange, 404, "{\"error\": \"not_found favorite\"}");
+                return;
+            }
             List<RestaurantResponse> dtoList = favorites.stream()
                     .map(r -> new RestaurantResponse(
                             r.getId(),
@@ -74,11 +73,10 @@ public class FavoriteHandler implements HttpHandler {
                             r.getAdditionalFee()
                     ))
                     .toList();
-
-            sendJson(exchange, 200, gson.toJson(dtoList));
+            sendJson(exchange, 200, dtoList);
         }
         catch (Exception e) {
-            sendJson(exchange, 500, "Internal Server Error");
+            sendJson(exchange, 500, "internal_server_error");
         }
     }
 
@@ -90,12 +88,11 @@ public class FavoriteHandler implements HttpHandler {
         try {
             Restaurant restaurant = restaurantDao.findById(restaurantId);
             if (user.getRole() != Role.BUYER) {
-                sendJson(exchange, 403, "{\"error\": \"Only buyers can add favorites\"}");
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
-
             if (restaurant == null) {
-                sendJson(exchange, 404, "Restaurant not found");
+                sendJson(exchange, 404, "not_found Restaurant");
                 return;
             }
             List<Restaurant> favorites = user.getFavorites();
@@ -109,7 +106,7 @@ public class FavoriteHandler implements HttpHandler {
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "Internal Server Error");
+            sendJson(exchange, 500, "Internal_Server_Error");
         }
     }
 
@@ -125,12 +122,12 @@ public class FavoriteHandler implements HttpHandler {
                 return;
             }
             if (restaurant == null) {
-                sendJson(exchange, 404, "Restaurant not found");
+                sendJson(exchange, 404, "not_found restaurant");
                 return;
             }
             List<Restaurant> favorites = user.getFavorites();
             if (!favorites.contains(restaurant)) {
-                sendJson(exchange, 404, "{\"error\": \"Restaurant is not in favorites\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found favorite\"}");
                 return;
             }
             favorites.remove(restaurant);
@@ -139,9 +136,12 @@ public class FavoriteHandler implements HttpHandler {
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "Internal Server Error");
+            sendJson(exchange, 500, "internal_server_error");
         }
     }
+
+
+
 
 
 
@@ -162,9 +162,6 @@ public class FavoriteHandler implements HttpHandler {
         }
         return new UserDao().findById(Long.parseLong(decoded.getSubject()));
     }
-
-
-
 
 
 
