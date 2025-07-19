@@ -47,12 +47,14 @@ public class Order {
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @Enumerated(EnumType.STRING)
+    private OrderRestaurantStatus restaurantStatus;
+
+    @Enumerated(EnumType.STRING)
+    private OrderDeliveryStatus deliveryStatus;
+
     public Order() {}
 
-    @PreUpdate
-    public void setUpdateTime() {
-        updatedAt = LocalDateTime.now();
-    }
     // Getters and Setters
     public Long getId() { return id; }
     public String getDeliveryAddress() { return deliveryAddress; }
@@ -93,5 +95,13 @@ public class Order {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public OrderRestaurantStatus getRestaurantStatus() { return restaurantStatus; }
+    public OrderDeliveryStatus getDeliveryStatus() { return deliveryStatus; }
+    public void setDeliveryStatus(OrderDeliveryStatus deliveryStatus) { this.deliveryStatus = deliveryStatus; }
+    public void setRestaurantStatus(OrderRestaurantStatus restaurantStatus) { this.restaurantStatus = restaurantStatus; }
 }
 

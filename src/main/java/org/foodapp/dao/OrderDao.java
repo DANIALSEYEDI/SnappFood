@@ -50,31 +50,6 @@ public class OrderDao {
         session.close();
     }
 
-    public List<Order> findHistoryByUser(User user, String search, String vendorName) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        String hql = "FROM Order o WHERE o.user = :user";
-
-        if (search != null && !search.isBlank()) {
-            hql += " AND lower(o.deliveryAddress) LIKE :search";
-        }
-        if (vendorName != null && !vendorName.isBlank()) {
-            hql += " AND lower(o.restaurant.name) LIKE :vendor";
-        }
-
-        Query<Order> query = session.createQuery(hql, Order.class);
-        query.setParameter("user", user);
-        if (search != null && !search.isBlank()) {
-            query.setParameter("search", "%" + search.toLowerCase() + "%");
-        }
-        if (vendorName != null && !vendorName.isBlank()) {
-            query.setParameter("vendor", "%" + vendorName.toLowerCase() + "%");
-        }
-
-        List<Order> results = query.list();
-        session.close();
-        return results;
-    }
-
     public void save(Order order) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
@@ -110,27 +85,6 @@ public class OrderDao {
 
 
 
-
-
-    public Order findByIdWithItems(Long orderId) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Order order = session.createQuery(
-                        "SELECT o FROM Order o " +
-                                "LEFT JOIN FETCH o.itemsOfOrder i " +
-                                "LEFT JOIN FETCH i.item " +
-                                "LEFT JOIN FETCH o.restaurant " +
-                                "LEFT JOIN FETCH o.courier " +
-                                "WHERE o.id = :id", Order.class)
-                .setParameter("id", orderId)
-                .uniqueResult();
-        session.close();
-        return order;
-    }
-
-
-
-
-
     public List<Order> findHistoryForUser(Long userId, String search, String vendorName) {
         Session session = HibernateUtil.getSessionFactory().openSession();
 
@@ -155,6 +109,7 @@ public class OrderDao {
         return orders;
     }
 
+
     public List<Order> findDeliveryHistoryByCourier(User courier, String search, String vendor, String userPhone) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             String hql = """
@@ -177,6 +132,7 @@ public class OrderDao {
             return query.list();
         }
     }
+
 
     public List<Order> findByAdminFilters(Map<String, String> params) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {

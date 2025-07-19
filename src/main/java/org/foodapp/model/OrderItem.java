@@ -23,12 +23,6 @@ public class OrderItem {
 
     public OrderItem() {}
 
-    public OrderItem(Order order, FoodItem item, Integer quantity) {
-        this.order = order;
-        this.item = item;
-        this.quantity = quantity;
-    }
-
     public Long getId() {
         return id;
     }

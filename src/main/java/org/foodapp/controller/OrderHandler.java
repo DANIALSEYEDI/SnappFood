@@ -12,6 +12,8 @@ import org.foodapp.util.QueryUtil;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class OrderHandler implements HttpHandler {
@@ -36,7 +38,7 @@ public class OrderHandler implements HttpHandler {
         } else if (path.equals("/orders/history") && method.equals("GET")) {
             handleGetOrderHistory(exchange);
         } else {
-            sendJson(exchange, 404, "{\"error\": \"Not found\"}");
+            sendJson(exchange, 404, "{\"error\": \"not_found\"}");
         }
     }
 
@@ -47,10 +49,12 @@ public class OrderHandler implements HttpHandler {
     private void handleSubmitOrder(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
-            if (user == null || user.getRole() != Role.BUYER) {
-                sendJson(exchange, 403, "{\"error\": \"Only buyers can submit orders\"}");
+            if (user == null) return;
+            if (user.getRole() != Role.BUYER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
+
             String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
             if (contentType == null || !contentType.contains("application/json")) {
                 sendJson(exchange, 415, "{\"error\": \"Unsupported Media Type\"}");
@@ -59,22 +63,32 @@ public class OrderHandler implements HttpHandler {
 
             OrderSubmitRequest req = gson.fromJson(new InputStreamReader(exchange.getRequestBody()), OrderSubmitRequest.class);
             if (req.vendor_id == null || req.delivery_address == null || req.items == null || req.items.isEmpty()) {
-                sendJson(exchange, 400, "{\"error\": \"Missing required fields\"}");
+                sendJson(exchange, 400, "{\"error\": \"invalid_input\"}");
                 return;
             }
 
             Restaurant vendor = restaurantDao.findById(req.vendor_id);
             if (vendor == null) {
-                sendJson(exchange, 404, "{\"error\": \"Vendor not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found vendor\"}");
                 return;
             }
 
-            Coupon coupon = null;
 
+            Coupon coupon = null;
             if (req.coupon_id != null) {
                 coupon = couponDao.findById(req.coupon_id);
                 if (coupon == null) {
-                    sendJson(exchange, 404, "{\"error\": \"Coupon not found\"}");
+                    sendJson(exchange, 404, Map.of("error", "not_found coupon"));
+                    return;
+                }
+                LocalDate now = LocalDate.now();
+                if (now.isBefore(coupon.getStartDate()) || now.isAfter(coupon.getEndDate())) {
+                    sendJson(exchange, 400, Map.of("error", "Coupon expired or not active"));
+                    return;
+                }
+                int used = orderDao.countOrdersByCoupon(coupon);
+                if (used >= coupon.getUserCount()) {
+                    sendJson(exchange, 400, Map.of("error", "Coupon usage limit reached"));
                     return;
                 }
             }
@@ -82,31 +96,75 @@ public class OrderHandler implements HttpHandler {
             Order order = new Order();
             order.setRestaurant(vendor);
             order.setDeliveryAddress(req.delivery_address);
-            order.setStatus(OrderStatus.SUBMITTED);
+            order.setStatus(OrderStatus.UNPAID_AND_CANCELLED);
             order.setUser(user);
+            order.setAdditionalFee(vendor.getAdditionalFee());
+            order.setTaxFee(vendor.getTaxFee());
+            order.setRestaurantStatus(OrderRestaurantStatus.PENDING);
+            order.setDeliveryStatus(OrderDeliveryStatus.PENDING);
+            order.setCreatedAt(LocalDateTime.now());
+            order.setUpdatedAt(LocalDateTime.now());
+
             order.setItemsOfOrder(new ArrayList<>());
-            for (OrderItemRequest itemRequest : req.items) {
-                FoodItem food = foodItemDao.findById(itemRequest.item_id);
-                if (food == null || !food.getRestaurant().getId().equals(vendor.getId())) {
-                    sendJson(exchange, 404, "{\"error\": \"Invalid food item or not in this restaurant\"}");
-                    return;
+
+            int rawPrice = 0;
+
+            for (OrderItemRequest itemReq : req.items) {
+                FoodItem foodItem = foodItemDao.findById(itemReq.item_id);
+                if (foodItem == null || !foodItem.getRestaurant().getId().equals(vendor.getId())) {
+                    continue;
                 }
+
+                if (itemReq.quantity <= 0 || itemReq.quantity > foodItem.getSupply()) {
+                    continue;
+                }
+                foodItem.setSupply(foodItem.getSupply() - itemReq.quantity);
+                foodItemDao.update(foodItem);
                 OrderItem orderItem = new OrderItem();
-                orderItem.setItem(food);
-                orderItem.setQuantity(itemRequest.quantity);
+                orderItem.setItem(foodItem);
+                orderItem.setQuantity(itemReq.quantity);
                 orderItem.setOrder(order);
                 order.getItemsOfOrder().add(orderItem);
+                rawPrice += foodItem.getPrice() * itemReq.quantity;
+            }
+            int courierPrice = (int) (rawPrice*0.1);
+            int payprice=rawPrice+ vendor.getAdditionalFee()+vendor.getTaxFee()+courierPrice;
+            if (order.getItemsOfOrder().isEmpty()) {
+                sendJson(exchange, 400, Map.of("error", "No valid items to submit in order"));
+                return;
+            }
+            if (coupon != null && payprice < coupon.getMinPrice()) {
+                sendJson(exchange, 400, Map.of("error", "Order price below coupon minimum"));
+                return;
+            }
+            order.setRawPrice(rawPrice);
+            order.setCoupon(coupon);
+            order.setCourierFee((courierPrice));
+            int discount=0;
+            if (coupon != null) {
+                if (coupon.getType() == CouponType.FIXED) {
+                    discount = coupon.getValue().intValue();
+                } else if (coupon.getType() == CouponType.PERCENT) {
+                    discount = rawPrice * coupon.getValue().intValue() / 100;
+                }
             }
 
-            orderDao.save(order);
-            sendJson(exchange, 200, "{\"message\": \"Order submitted successfully\"}");
+            order.setPayPrice(Math.max(0, payprice - discount));
 
+
+
+            orderDao.save(order);
+            sendJson(exchange, 200, OrderResponse.fromEntity(order));
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
+
+
+
+
 
 
 
@@ -119,31 +177,25 @@ public class OrderHandler implements HttpHandler {
     private void handleGetOrder(HttpExchange exchange, long id) throws IOException {
         try {
             User user = authenticate(exchange);
-            if (user == null || user.getRole() != Role.BUYER) {
-                sendJson(exchange, 403, "{\"error\": \"Only buyers can access this endpoint\"}");
+            if (user == null) return;
+            if (user.getRole() != Role.BUYER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
-
-            Order order = orderDao.findByIdWithItems(id);
+            Order order = orderDao.findById(id);
             if (order == null) {
-                sendJson(exchange, 404, "{\"error\": \"Order not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found order\"}");
                 return;
             }
             if (!order.getUser().getId().equals(user.getId())) {
-                sendJson(exchange, 403, "{\"error\": \"You are not authorized to view this order\"}");
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
-            order.getItemsOfOrder().size();
-            if (order.getCourier() != null) order.getCourier().getPhoneNumber();
-            order.getRestaurant().getName();
-
-
-            OrderAdminResponse dto =OrderAdminResponse.fromEntity(order);
-            sendJson(exchange, 200, gson.toJson(dto));
+            sendJson(exchange, 200, OrderResponse.fromEntity(order));
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
 
@@ -156,23 +208,24 @@ public class OrderHandler implements HttpHandler {
     private void handleGetOrderHistory(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
-            if (user == null || user.getRole() != Role.BUYER) {
-                sendJson(exchange, 403, "{\"error\": \"Only buyers can access order history\"}");
+            if (user == null) return;
+            if (user.getRole() != Role.BUYER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
             Map<String, String> queryParams = QueryUtil.getQueryParams(exchange.getRequestURI().getRawQuery());
             String search = queryParams.get("search");
             String vendor = queryParams.get("vendor");
             List<Order> orders = orderDao.findHistoryForUser(user.getId(), search, vendor);
-            List<OrderAdminResponse> response = orders.stream()
-                    .map(OrderAdminResponse::fromEntity)
+            List<OrderResponse> response = orders.stream()
+                    .map(OrderResponse::fromEntity)
                     .toList();
 
-            sendJson(exchange, 200, gson.toJson(response));
+            sendJson(exchange, 200, response);
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
 
