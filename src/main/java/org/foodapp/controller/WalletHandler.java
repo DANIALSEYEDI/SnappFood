@@ -52,7 +52,6 @@ public class WalletHandler implements HttpHandler {
             tx.setMethod(PaymentMethod.WALLET);
             tx.setCreatedAt(LocalDateTime.now());
 
-
             Map<String, Object> body = gson.fromJson(
                     new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
                     Map.class

@@ -424,19 +424,18 @@ public class AdminHandler implements HttpHandler {
             if (admin == null) return;
 
             Map<String, String> params = QueryUtil.getQueryParams(exchange.getRequestURI().getQuery());
-
             List<Order> orders = orderDao.findByAdminFilters(params);
+            if (orders.isEmpty()) {
+                sendJson(exchange, 404, Map.of("error", "not_found order"));
+                return;
+            }
             List<OrderResponse> response = orders.stream()
                     .map(OrderResponse::fromEntity)
                     .collect(Collectors.toList());
-            if (response.isEmpty()) {
-                sendJson(exchange, 404, Map.of("error", "Order not found"));
-                return;
-            }
             sendJson(exchange, 200, response);
         } catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, Map.of("error", "Internal server error"));
+            sendJson(exchange, 500, Map.of("error", "internal_server_error"));
         }
     }
 

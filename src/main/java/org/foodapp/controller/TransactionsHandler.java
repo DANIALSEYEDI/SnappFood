@@ -21,9 +21,6 @@ import java.util.stream.Collectors;
 public class TransactionsHandler implements HttpHandler {
 
     private final TransactionDao transactionDao = new TransactionDao();
-    private final UserDao userDao = new UserDao();
-    private final Gson gson = new Gson();
-
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();
@@ -32,7 +29,7 @@ public class TransactionsHandler implements HttpHandler {
         if (path.equals("/transactions") && method.equals("GET")) {
             handleGetTransactions(exchange);
         } else {
-            sendJson(exchange, 404,"Path not found");
+            sendJson(exchange, 404,"not_found path");
         }
     }
 
@@ -48,13 +45,17 @@ public class TransactionsHandler implements HttpHandler {
                 return;
             }
             List<Transaction> transactions = transactionDao.findByUser(user);
+            if (transactions.isEmpty()) {
+                sendJson(exchange, 404, "not found");
+                return;
+            }
             List<TransactionsResponse> response = transactions.stream()
                     .map(TransactionsResponse::from)
                     .toList();
 
             sendJson(exchange, 200, response);
         } catch (Exception e) {
-            sendJson(exchange, 500, Map.of("error", "Internal server error"));
+            sendJson(exchange, 500, Map.of("error", "internal_server_error"));
         }
 
     }

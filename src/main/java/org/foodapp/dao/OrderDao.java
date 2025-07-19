@@ -136,38 +136,77 @@ public class OrderDao {
 
     public List<Order> findByAdminFilters(Map<String, String> params) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            StringBuilder hql = new StringBuilder("FROM Order o WHERE 1=1");
+            StringBuilder hql = new StringBuilder("""
+            SELECT DISTINCT o FROM Order o
+            LEFT JOIN FETCH o.itemsOfOrder i
+            LEFT JOIN FETCH i.item f
+            LEFT JOIN FETCH o.user u
+            LEFT JOIN FETCH o.restaurant r
+            LEFT JOIN FETCH o.courier c
+            WHERE 1=1
+        """);
 
             if (params.containsKey("search")) {
-                hql.append(" AND o.deliveryAddress LIKE :search");
+                hql.append("""
+                AND (
+                    LOWER(o.deliveryAddress) LIKE :search
+                    OR LOWER(f.name) LIKE :search
+                    OR STR(o.id) = :searchExact
+                )
+            """);
             }
+
             if (params.containsKey("vendor")) {
-                hql.append(" AND o.restaurant.name LIKE :vendor");
+                hql.append("""
+                AND (
+                    LOWER(r.name) LIKE :vendor
+                    OR STR(r.id) = :vendor
+                )
+            """);
             }
+
             if (params.containsKey("courier")) {
-                hql.append(" AND o.courier.phoneNumber LIKE :courier");
+                hql.append("""
+                AND (
+                    LOWER(c.fullName) LIKE :courier
+                    OR STR(c.id) = :courier
+                )
+            """);
             }
+
             if (params.containsKey("customer")) {
-                hql.append(" AND o.user.phoneNumber LIKE :customer");
+                hql.append("""
+                AND (
+                    LOWER(u.fullName) LIKE :customer
+                    OR STR(u.id) = :customer
+                )
+            """);
             }
+
             if (params.containsKey("status")) {
-                hql.append(" AND o.status = :status");
+                hql.append(" AND o.status = :status ");
             }
 
             Query<Order> query = session.createQuery(hql.toString(), Order.class);
 
             if (params.containsKey("search")) {
-                query.setParameter("search", "%" + params.get("search") + "%");
+                String search = params.get("search").toLowerCase();
+                query.setParameter("search", "%" + search + "%");
+                query.setParameter("searchExact", search);
             }
+
             if (params.containsKey("vendor")) {
-                query.setParameter("vendor", "%" + params.get("vendor") + "%");
+                query.setParameter("vendor", params.get("vendor").toLowerCase());
             }
+
             if (params.containsKey("courier")) {
-                query.setParameter("courier", "%" + params.get("courier") + "%");
+                query.setParameter("courier", params.get("courier").toLowerCase());
             }
+
             if (params.containsKey("customer")) {
-                query.setParameter("customer", "%" + params.get("customer") + "%");
+                query.setParameter("customer", params.get("customer").toLowerCase());
             }
+
             if (params.containsKey("status")) {
                 try {
                     OrderStatus status = OrderStatus.valueOf(params.get("status").toUpperCase().replace(" ", "_"));
@@ -177,9 +216,11 @@ public class OrderDao {
                 }
             }
 
-            return query.list();
+            return query.getResultList();
         }
     }
+
+
 
 
 

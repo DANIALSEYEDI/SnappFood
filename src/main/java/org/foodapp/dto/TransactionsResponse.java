@@ -11,7 +11,7 @@ public class TransactionsResponse {
     public static TransactionsResponse from(Transaction tx) {
         TransactionsResponse dto = new TransactionsResponse();
         dto.id = tx.getId();
-        dto.order_id = tx.getOrder() != null ? tx.getOrder().getId() : null;
+        dto.order_id = tx.getOrder() != null ? tx.getOrder().getId() : 0;
         dto.user_id = tx.getUser() != null ? tx.getUser().getId() : null;
         dto.method = tx.getMethod().name().toLowerCase();
         dto.status = tx.getStatus().name().toLowerCase();

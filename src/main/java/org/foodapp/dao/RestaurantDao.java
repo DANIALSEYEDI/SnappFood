@@ -105,9 +105,5 @@ public class RestaurantDao {
             session.close();
         }
     }
-
-
-
-
 }
 

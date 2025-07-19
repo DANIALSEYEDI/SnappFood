@@ -31,18 +31,18 @@ public class PaymentHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
-
         if (path.equals("/payment/online") && method.equalsIgnoreCase("POST")) {
             handlePayment(exchange);
         } else {
-            exchange.sendResponseHeaders(404, -1);
+            sendJson(exchange, 404, "{\"error\": \"not_found\"}");
         }
     }
+
+
 
     private void handlePayment(HttpExchange exchange) throws IOException {
         try {
             Transaction transaction = new Transaction();
-
             User user = authenticate(exchange);
             if (user == null) return;
             transaction.setUser(user);
@@ -52,33 +52,31 @@ public class PaymentHandler implements HttpHandler {
                     new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
                     PaymentRequest.class
             );
+
             if (request == null || request.order_id == null || request.method == null) {
-                sendJson(exchange, 400, Map.of("error", "Missing order_id or method"));
+                sendJson(exchange, 400, Map.of("error", "invalid_input"));
                 return;
             }
             PaymentMethod method;
             try {
                 method = PaymentMethod.valueOf(request.method.toUpperCase());
             } catch (IllegalArgumentException e) {
-                sendJson(exchange, 400, Map.of("error", "Invalid payment method"));
+                sendJson(exchange, 400, Map.of("error", "Invalid_input method"));
                 return;
             }
             transaction.setMethod(method);
             Order order = orderDao.findById(request.order_id);
             if (order == null || !order.getUser().getId().equals(user.getId())) {
-                sendJson(exchange, 404, Map.of("error", "Order not found"));
+                sendJson(exchange, 404, Map.of("error", "not_found order"));
                 return;
             }
-            if (order.getStatus() == OrderStatus.COMPLETED ||
-                    order.getStatus() == OrderStatus.CANCELLED ||
-                    order.getStatus() == OrderStatus.UNPAID_AND_CANCELLED) {
-                sendJson(exchange, 409, Map.of("error", "Order cannot be paid again"));
+            if (!(order.getStatus()==OrderStatus.UNPAID_AND_CANCELLED) ) {
+                sendJson(exchange, 409, Map.of("error", "Order cannot be paid"));
                 return;
             }
             transaction.setOrder(order);
 
             BigDecimal payAmount = BigDecimal.valueOf(order.getPayPrice());
-
             if (method == PaymentMethod.WALLET) {
                 if (user.getWalletBalance().compareTo(payAmount) < 0) {
                     transaction.setStatus(PaymentStatus.FAILED);
@@ -95,17 +93,17 @@ public class PaymentHandler implements HttpHandler {
             }
 
             transaction.setAmount(payAmount);
+            order.setStatus(OrderStatus.SUBMITTED);
             TransactionDao.save(transaction);
-
-            order.setStatus(OrderStatus.WAITING_VENDOR);
-            orderDao.save(order);
+            orderDao.update(order);
             sendJson(exchange, 200, transactionsResponse.from(transaction));
-
             } catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, Map.of("error", "Payment failed"));
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
+
+
 
 
 
@@ -117,6 +115,8 @@ public class PaymentHandler implements HttpHandler {
         exchange.getResponseBody().write(bytes);
         exchange.getResponseBody().close();
     }
+
+
 
 
     private User authenticate(HttpExchange exchange) throws IOException {
