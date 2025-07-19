@@ -38,6 +38,8 @@ public class FoodItemDao {
         session.close();
     }
 
+
+
     public List<FoodItem> findByFilters(String search, Integer price, List<String> keywords) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         String hql = "SELECT f FROM FoodItem f WHERE 1=1";
@@ -71,6 +73,9 @@ public class FoodItemDao {
         }
         return results;
     }
+
+
+
 
 }
 

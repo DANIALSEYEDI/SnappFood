@@ -1,9 +1,7 @@
 package org.foodapp.controller;
-
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.FoodItemDao;
@@ -14,9 +12,7 @@ import org.foodapp.model.FoodItem;
 import org.foodapp.model.Role;
 import org.foodapp.model.User;
 import org.foodapp.util.JwtUtil;
-
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +22,7 @@ import java.util.stream.Collectors;
 public class ItemsHandler implements HttpHandler{
     private final FoodItemDao foodItemDao = new FoodItemDao();
     private final Gson gson = new Gson();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
@@ -40,12 +37,12 @@ public class ItemsHandler implements HttpHandler{
                 handleGetItem(exchange, id);
             }
          else {
-                sendJson(exchange, 404, "{\"error\": \"Not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found\"}");
             }
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"Internal_server_error\"}");
         }
     }
 
@@ -56,13 +53,8 @@ public class ItemsHandler implements HttpHandler{
     private void handleFilterItems(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
-            if (user == null || user.getRole() != Role.BUYER) {
-                sendJson(exchange, 403, "{\"error\": \"Only buyers can access this endpoint\"}");
-                return;
-            }
-            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
-            if (contentType == null || !contentType.contains("application/json")) {
-                sendJson(exchange, 415, "{\"error\": \"Unsupported Media Type\"}");
+            if (user.getRole() != Role.BUYER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
@@ -73,23 +65,17 @@ public class ItemsHandler implements HttpHandler{
 
             List<FoodItem> items = foodItemDao.findByFilters(request.search, request.price, request.keywords);
             if (items.isEmpty()) {
-                sendJson(exchange, 404, "{\"error\": \"No items found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found items\"}");
                 return;
             }
-
             List<FoodItemResponse> response = items.stream()
                     .map(FoodItemResponse::new)
                     .collect(Collectors.toList());
-
-
-            sendJson(exchange, 200, gson.toJson(response));
-        }
-        catch (JsonSyntaxException e) {
-            sendJson(exchange, 400, "{\"error\": \"Invalid input format\"}");
+            sendJson(exchange, 200, response);
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 400, Map.of("error", "Invalid input"));
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
 
@@ -101,30 +87,27 @@ public class ItemsHandler implements HttpHandler{
         try {
             User user = authenticate(exchange);
             if (user == null) {
-                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
                 return;
             }
 
             if (user.getRole() != Role.BUYER) {
-                sendJson(exchange, 403, "{\"error\": \"Only buyers can access this endpoint\"}");
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
-
-
             FoodItem item = foodItemDao.findById(id);
             if (item == null) {
-                sendJson(exchange, 404, Map.of("error", "Item not found"));
+                sendJson(exchange, 404, Map.of("error", "not_found item"));
                 return;
             }
             FoodItemResponse response = new FoodItemResponse(item);
-            sendJson(exchange, 200, gson.toJson(response));
+            sendJson(exchange, 200, response);
         }
         catch (NumberFormatException e) {
-            sendJson(exchange, 400, "{\"error\": \"Invalid item ID\"}");
+            sendJson(exchange, 400, "{\"error\": \"invalid_input\"}");
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, Map.of("error", "Internal server error"));
+            sendJson(exchange, 500, Map.of("error", "Internal_server_error"));
         }
     }
 
@@ -132,11 +115,6 @@ public class ItemsHandler implements HttpHandler{
 
 
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    private <T> T readJson(InputStream inputStream, Class<T> clazz) throws IOException {
-        return objectMapper.readValue(inputStream, clazz);
-    }
 
     private void sendJson(HttpExchange exchange, int statusCode, Object data) throws IOException {
         byte[] jsonBytes = objectMapper.writeValueAsBytes(data);
@@ -173,7 +151,6 @@ public class ItemsHandler implements HttpHandler{
             sendJson(exchange, 401, "{\"error\": \"Invalid token\"}");
             return null;
         }
-
         return new UserDao().findById(Long.parseLong(decoded.getSubject()));
     }
 }

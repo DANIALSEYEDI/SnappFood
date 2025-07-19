@@ -1,8 +1,5 @@
 package org.foodapp.dao;
-import org.foodapp.model.Order;
-import org.foodapp.model.OrderStatus;
-import org.foodapp.model.OrderRestaurantStatus;
-import org.foodapp.model.User;
+import org.foodapp.model.*;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -227,6 +224,24 @@ public class OrderDao {
             return query.list();
         }
     }
+
+
+
+    public int countOrdersByCoupon(Coupon coupon) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Long count = session.createQuery(
+                            "SELECT COUNT(o) FROM Order o " +
+                                    "WHERE o.coupon = :coupon " +
+                                    "AND o.status NOT IN (:cancelStatuses)", Long.class
+                    )
+                    .setParameter("coupon", coupon)
+                    .setParameterList("cancelStatuses", List.of(OrderStatus.CANCELLED, OrderStatus.UNPAID_AND_CANCELLED))
+                    .uniqueResult();
+
+            return count != null ? count.intValue() : 0;
+        }
+    }
+
 
 
 

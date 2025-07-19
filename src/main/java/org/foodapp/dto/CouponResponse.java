@@ -1,10 +1,6 @@
 package org.foodapp.dto;
-
-
 import org.foodapp.model.Coupon;
-
 import java.math.BigDecimal;
-
 public class CouponResponse {
     public Long id;
     public String coupon_code;
@@ -26,6 +22,5 @@ public class CouponResponse {
         dto.start_date = c.getStartDate().toString();
         dto.end_date = c.getEndDate().toString();
         return dto;
-
     }
 }

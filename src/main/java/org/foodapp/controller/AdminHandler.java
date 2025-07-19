@@ -367,12 +367,14 @@ public class AdminHandler implements HttpHandler {
                     return;
                 }
             }
-            Object countObj = body.get("user_count");
-            if (countObj instanceof Number) {
-                coupon.setUserCount(((Number) countObj).intValue());
-            } else {
-                sendJson(exchange, 400, Map.of("error", "Invalid user_count"));
-                return;
+            if(body.containsKey("user_count")) {
+                Object countObj = body.get("user_count");
+                if (countObj instanceof Number) {
+                    coupon.setUserCount(((Number) countObj).intValue());
+                } else {
+                    sendJson(exchange, 400, Map.of("error", "Invalid user_count"));
+                    return;
+                }
             }
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 

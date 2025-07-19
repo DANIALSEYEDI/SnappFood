@@ -9,7 +9,7 @@ public class FoodItemResponse {
     public Integer price;
     public Integer supply;
     public List<String> keywords;
-    public Long restaurantId;
+    public Long vendor_id;
 
     public FoodItemResponse(FoodItem item) {
         this.id = item.getId();
@@ -18,6 +18,6 @@ public class FoodItemResponse {
         this.price = item.getPrice();
         this.supply = item.getSupply();
         this.keywords = item.getKeywords();
-        this.restaurantId = item.getRestaurant().getId();
+        vendor_id = item.getRestaurant().getId();
     }
 }
