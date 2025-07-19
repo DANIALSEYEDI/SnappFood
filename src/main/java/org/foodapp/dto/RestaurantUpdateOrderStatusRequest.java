@@ -1,7 +1,7 @@
 package org.foodapp.dto;
 
 public class RestaurantUpdateOrderStatusRequest {
-    private String status; // accepted, rejected, served
+    private String status;
 
     public String getStatus() {
         return status;

@@ -1,7 +1,5 @@
 package org.foodapp.dto;
-
 import org.foodapp.model.Rating;
-
 import java.time.LocalDateTime;
 import java.util.List;
 

@@ -6,27 +6,83 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import java.util.*;
 public class OrderDao {
-    public List<Order> findByFilters(Long restaurantId, String status, String search, String userId, String courierId) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            String hql = "SELECT o FROM Order o WHERE o.restaurant.id = :restaurantId";
-            if (status != null) hql += " AND o.status = :status";
-            if (search != null) hql += " AND (o.customer.fullName LIKE :search OR o.notes LIKE :search)";
-            if (userId != null) hql += " AND o.customer.id = :userId";
-            if (courierId != null) hql += " AND o.courier.id = :courierId";
+
+
+    public List<Order> findByFilters(Long restaurantId, String status, String search, String user, String courier) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            String hql = """
+            SELECT DISTINCT o FROM Order o
+            LEFT JOIN FETCH o.itemsOfOrder i
+            LEFT JOIN FETCH i.item fi
+            LEFT JOIN FETCH o.user u
+            LEFT JOIN FETCH o.courier c
+            WHERE o.restaurant.id = :restaurantId
+        """;
+
+            if (status != null && !status.isBlank()) {
+                hql += " AND o.status = :status";
+            }
+
+            if (user != null && !user.isBlank()) {
+                hql += """
+            AND (
+                LOWER(u.fullName) LIKE :user
+                OR u.phoneNumber LIKE :user
+                OR CAST(u.id AS string) = :user
+            )
+            """;
+            }
+
+            if (courier != null && !courier.isBlank()) {
+                hql += """
+            AND (
+                LOWER(c.fullName) LIKE :courier
+                OR c.phoneNumber LIKE :courier
+                OR CAST(c.id AS string) = :courier
+            )
+            """;
+            }
+
+            if (search != null && !search.isBlank()) {
+                hql += """
+            AND (
+                CAST(o.id AS string) LIKE :search
+                OR LOWER(o.deliveryAddress) LIKE :search
+                OR LOWER(fi.name) LIKE :search
+            )
+            """;
+            }
 
             Query<Order> query = session.createQuery(hql, Order.class);
             query.setParameter("restaurantId", restaurantId);
-            if (status != null) query.setParameter("status", status);
-            if (search != null) query.setParameter("search", "%" + search + "%");
-            if (userId != null) query.setParameter("userId", Long.parseLong(userId));
-            if (courierId != null) query.setParameter("courierId", Long.parseLong(courierId));
 
-            return query.list();
-        } finally {
-            session.close();
+            if (status != null && !status.isBlank()) {
+                try {
+                    OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase().replace(" ", "_"));
+                    query.setParameter("status", orderStatus);
+                } catch (IllegalArgumentException e) {
+                    return List.of();
+                }
+            }
+
+            if (user != null && !user.isBlank()) {
+                query.setParameter("user", "%" + user.toLowerCase() + "%");
+            }
+
+            if (courier != null && !courier.isBlank()) {
+                query.setParameter("courier", "%" + courier.toLowerCase() + "%");
+            }
+
+            if (search != null && !search.isBlank()) {
+                query.setParameter("search", "%" + search.toLowerCase() + "%");
+            }
+
+            return query.getResultList();
         }
     }
+
+
+
 
     public Order findById(Long id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {

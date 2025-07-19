@@ -1,8 +1,5 @@
 package org.foodapp.dto;
-
 import org.foodapp.model.Rating;
-
-
 import java.util.List;
 import java.util.stream.Collectors;
 

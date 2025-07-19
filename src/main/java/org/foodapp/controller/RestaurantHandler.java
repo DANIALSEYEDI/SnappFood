@@ -692,18 +692,25 @@ public class RestaurantHandler implements HttpHandler {
         try {
             User user = authenticate(exchange);
             if (user == null) {
-                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+            if (user.getStatus() != UserStatus.APPROVED) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
-            if (user.getRole() != Role.SELLER) {
-                sendJson(exchange, 403, "{\"error\": \"Only sellers can view their orders\"}");
-                return;
-            }
 
             Restaurant restaurant = restaurantDao.findById(restaurantId);
-            if (restaurant == null || !restaurant.getSeller().getId().equals(user.getId())) {
-                sendJson(exchange, 403, "{\"error\": \"Access denied\"}");
+            if (restaurant == null) {
+                sendJson(exchange, 404, "{\"error\": \"not_found Restaurant\"}");
+                return;
+            }
+            if ( !restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
@@ -714,21 +721,21 @@ public class RestaurantHandler implements HttpHandler {
             String courier = queryParams.get("courier");
 
             List<Order> orders = orderDao.findByFilters(restaurantId, status, search, userParam, courier);
+            if (orders.isEmpty()) {
+                sendJson(exchange, 404, "{\"error\": \"not_found order\"}");
+                return;
+            }
 
             List<OrderResponse> response = orders.stream()
                     .map(OrderResponse::fromEntity)
                     .toList();
-
             sendJson(exchange, 200, new Gson().toJson(response));
 
         } catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal_server_error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
 
 
 
@@ -741,7 +748,6 @@ public class RestaurantHandler implements HttpHandler {
         try {
             User user = authenticate(exchange);
             if (user == null) {
-                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
                 return;
             }
 
@@ -749,46 +755,54 @@ public class RestaurantHandler implements HttpHandler {
                 sendJson(exchange, 403, "{\"error\": \"Only sellers can change order status\"}");
                 return;
             }
+            if (user.getStatus() != UserStatus.APPROVED) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
 
             RestaurantUpdateOrderStatusRequest request = new ObjectMapper()
                     .readValue(exchange.getRequestBody(), RestaurantUpdateOrderStatusRequest.class);
 
             if (request.getStatus() == null) {
-                sendJson(exchange, 400, "{\"error\": \"Missing status in request body\"}");
+                sendJson(exchange, 400, "{\"error\": \"invalid_input\"}");
                 return;
             }
 
             Order order = orderDao.findById(orderId);
             if (order == null) {
-                sendJson(exchange, 404, "{\"error\": \"Order not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found order\"}");
                 return;
             }
 
 
             if (!order.getRestaurant().getSeller().getId().equals(user.getId())) {
-                sendJson(exchange, 403, "{\"error\": \"Access denied: You cannot change this order\"}");
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
             try {
                 OrderRestaurantStatus newStatus = OrderRestaurantStatus.valueOf(request.getStatus().toUpperCase());
-             //   order.setStatus(newStatus);
+                order.setRestaurantStatus(newStatus);
+                if (newStatus == OrderRestaurantStatus.REJECTED) {
+                    order.setStatus(OrderStatus.CANCELLED);
+                }
+                if (newStatus == OrderRestaurantStatus.ACCEPTED) {
+                    order.setStatus(OrderStatus.WAITING_VENDOR);
+                }
+                if (newStatus == OrderRestaurantStatus.SERVED) {
+                    order.setStatus(OrderStatus.FINDING_COURIER);
+                }
                 orderDao.update(order);
             } catch (IllegalArgumentException e) {
-                sendJson(exchange, 400, "{\"error\": \"Invalid status value\"}");
+                sendJson(exchange, 400, "{\"error\": \"Invalid_input\"}");
                 return;
             }
-
             sendJson(exchange, 200, "{\"message\": \"Order status changed successfully\"}");
-
         } catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
 
 
 

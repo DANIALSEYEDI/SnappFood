@@ -9,15 +9,12 @@ import org.foodapp.model.*;
 import org.foodapp.dto.*;
 import org.foodapp.util.GsonProvider;
 import org.foodapp.util.JwtUtil;
-import org.foodapp.util.LocalDateTimeAdapter;
 
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class RatingHandler implements HttpHandler {
 
@@ -46,7 +43,7 @@ public class RatingHandler implements HttpHandler {
             long itemId = extractId(path, "/ratings/items/");
             handleGetRatingsForItem(exchange, itemId);
         } else {
-            sendJson(exchange, 404, "Path not found");
+            sendJson(exchange, 404, "not_found path");
         }
     }
 
@@ -76,8 +73,6 @@ public class RatingHandler implements HttpHandler {
                 sendJson(exchange, 404, Map.of("error", "Order not found"));
                 return;
             }
-
-
             List<OrderItem> items = order.getItemsOfOrder();
             if (items == null || items.isEmpty()) {
                 sendJson(exchange, 400, Map.of("error", "Order has no items"));
@@ -103,6 +98,11 @@ public class RatingHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
     }
+
+
+
+
+
 
 
     private void handleGetRatingsForItem(HttpExchange exchange, long itemId) throws IOException {
@@ -136,6 +136,9 @@ public class RatingHandler implements HttpHandler {
     }
 
 
+
+
+
     private void handleGetRating(HttpExchange exchange, long id) throws IOException {
         try {
             User user = authenticate(exchange);
@@ -154,6 +157,9 @@ public class RatingHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
     }
+
+
+
 
 
 
@@ -180,6 +186,10 @@ public class RatingHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
     }
+
+
+
+
 
 
 
@@ -241,6 +251,9 @@ public class RatingHandler implements HttpHandler {
 
 
 
+
+
+
     private User authenticate(HttpExchange exchange) throws IOException {
         List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
         if (authHeaders == null || authHeaders.isEmpty()) {
@@ -258,6 +271,8 @@ public class RatingHandler implements HttpHandler {
         return userDao.findById(Long.parseLong(decoded.getSubject()));
     }
 
+
+
     private long extractId(String path, String prefix) {
         try {
             return Long.parseLong(path.substring(prefix.length()));
@@ -265,6 +280,8 @@ public class RatingHandler implements HttpHandler {
             return -1;
         }
     }
+
+
 
     private void sendJson(HttpExchange exchange, int status, Object data) throws IOException {
         String json = gson.toJson(data);
