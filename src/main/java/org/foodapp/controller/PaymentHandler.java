@@ -95,6 +95,7 @@ public class PaymentHandler implements HttpHandler {
             transaction.setAmount(payAmount);
             order.setStatus(OrderStatus.SUBMITTED);
             TransactionDao.save(transaction);
+            order.setUpdatedAt(LocalDateTime.now());
             orderDao.update(order);
             sendJson(exchange, 200, transactionsResponse.from(transaction));
             } catch (Exception e) {

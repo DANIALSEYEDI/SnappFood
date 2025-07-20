@@ -11,8 +11,10 @@ import org.foodapp.model.*;
 import org.foodapp.util.JwtUtil;
 import org.foodapp.util.QueryParser;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,16 +28,15 @@ public class DeliveryHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
-
         if (path.equals("/deliveries/available") && method.equals("GET")) {
             handleAvailableDeliveries(exchange);
         } else if (path.equals("/deliveries/history") && method.equals("GET")) {
             handleDeliveryHistory(exchange);
         } else if (path.matches("/deliveries/\\d+") && method.equalsIgnoreCase("PATCH")) {
             long id = extractId(path, "/deliveries/");
-           // handleUpdateDeliveryStatus(exchange, id);
+           handleUpdateDeliveryStatus(exchange, id);
         } else {
-            sendJson(exchange, 404,"Path not found");
+            sendJson(exchange, 404,"not_found path");
         }
     }
 
@@ -50,20 +51,19 @@ public class DeliveryHandler implements HttpHandler {
             if (user == null) {
                 return;
             }
-            if (user.getRole() != Role.COURIER) {
-                sendJson(exchange, 403, Map.of("error", "Only couriers can access this endpoint"));
+            if (user.getRole() != Role.COURIER || user.getStatus()==UserStatus.REJECTED) {
+                sendJson(exchange, 403, Map.of("error", "forbidden User"));
                 return;
             }
-
-            List<Order> orders = orderDao.findByStatus(OrderRestaurantStatus.PENDING);
-            List<DeliveryResponse> result = orders.stream()
-                    .map(DeliveryResponse::fromEntity)
+            List<Order> orders = orderDao.findAvailableForDelivery();
+            List<OrderResponse> result = orders.stream()
+                    .map(OrderResponse::fromEntity)
                     .collect(Collectors.toList());
             sendJson(exchange, 200, result);
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, Map.of("error", "Internal server error"));
+            sendJson(exchange, 500, Map.of("error", "internal_server_error"));
         }
     }
 
@@ -74,11 +74,14 @@ public class DeliveryHandler implements HttpHandler {
 
 
 
-    private void handleDeliveryHistory(HttpExchange exchange) throws IOException {
+   private void handleDeliveryHistory(HttpExchange exchange) throws IOException {
         try {
             User courier = authenticate(exchange);
-            if (courier == null || courier.getRole() != Role.COURIER) {
-                sendJson(exchange, 403, Map.of("error", "Only couriers can access this endpoint"));
+            if (courier==null) {
+                return;
+            }
+            if (courier.getStatus()==UserStatus.REJECTED|| courier.getRole() != Role.COURIER) {
+                sendJson(exchange, 403, Map.of("error", "forbidden User"));
                 return;
             }
             Map<String, String> params = QueryParser.parse(exchange.getRequestURI().getQuery());
@@ -87,15 +90,15 @@ public class DeliveryHandler implements HttpHandler {
             String userPhone = params.getOrDefault("user", null);
 
             List<Order> orders = orderDao.findDeliveryHistoryByCourier(courier, search, vendor, userPhone);
-            List<DeliveryResponse> result = orders.stream()
-                    .map(DeliveryResponse::fromEntity)
+            List<OrderResponse> result = orders.stream()
+                    .map(OrderResponse::fromEntity)
                     .collect(Collectors.toList());
 
             sendJson(exchange, 200, result);
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, Map.of("error", "Internal server error"));
+            sendJson(exchange, 500, Map.of("error", "Internal_server_error"));
         }
     }
 
@@ -107,37 +110,54 @@ public class DeliveryHandler implements HttpHandler {
 
 
 
-   /* private void handleUpdateDeliveryStatus(HttpExchange exchange, long id) throws IOException {
+    private void handleUpdateDeliveryStatus(HttpExchange exchange, long id) throws IOException {
         try {
             User courier = authenticate(exchange);
             if (courier == null) return;
-
-            if (courier.getRole() != Role.COURIER) {
-                sendJson(exchange, 403, Map.of("error", "Only couriers can update deliveries"));
+            if (courier.getRole() != Role.COURIER || courier.getStatus()==UserStatus.REJECTED) {
+                sendJson(exchange, 403, Map.of("error", "forbidden User"));
+                return;
+            }
+            DeliveryStatusUpdateRequest request = gson.fromJson(
+                    new InputStreamReader(exchange.getRequestBody()),
+                    DeliveryStatusUpdateRequest.class
+            );
+            if (request.status == null) {
+                sendJson(exchange, 400, Map.of("error", "invalid_input"));
+                return;
+            }
+            OrderDeliveryStatus newStatus;
+            try {
+                newStatus = OrderDeliveryStatus.valueOf(request.status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                sendJson(exchange, 400, Map.of("error", "Invalid_input delivery status"));
                 return;
             }
 
             Order order = orderDao.findById(id);
             if (order == null) {
-                sendJson(exchange, 404, Map.of("error", "Order not found"));
+                sendJson(exchange, 404, Map.of("error", "not_found Order"));
                 return;
             }
 
-            DeliveryStatusUpdateRequest request = gson.fromJson(
-                    new InputStreamReader(exchange.getRequestBody()),
-                    DeliveryStatusUpdateRequest.class
-            );
-
-            if (request.status == null) {
-                sendJson(exchange, 400, Map.of("error", "Missing status"));
+            if (order.getStatus()==OrderStatus.CANCELLED || order.getStatus()==OrderStatus.UNPAID_AND_CANCELLED ||
+                    order.getStatus()==OrderStatus.SUBMITTED || order.getStatus()==OrderStatus.WAITING_VENDOR
+            ){
+                sendJson(exchange, 403, Map.of("error", "Order not ready for delivery"));
                 return;
             }
 
-            DeliveryStatus newStatus;
-            try {
-                newStatus = DeliveryStatus.valueOf(request.status.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                sendJson(exchange, 400, Map.of("error", "Invalid delivery status"));
+            // بررسی روند منطقی تغییر وضعیت
+            OrderDeliveryStatus current = order.getDeliveryStatus();
+            boolean isValidTransition = switch (current) {
+                case PENDING -> newStatus == OrderDeliveryStatus.ACCEPTED;
+                case ACCEPTED -> newStatus == OrderDeliveryStatus.RECEIVED;
+                case RECEIVED -> newStatus == OrderDeliveryStatus.DELIVERED;
+                default -> false;
+            };
+
+            if (!isValidTransition) {
+                sendJson(exchange, 400, Map.of("error", "Invalid delivery status transition"));
                 return;
             }
 
@@ -148,20 +168,32 @@ public class DeliveryHandler implements HttpHandler {
                 return;
             }
 
+            if (newStatus==OrderDeliveryStatus.ACCEPTED){
+                order.setStatus(OrderStatus.ON_THE_WAY);
+            }
+            else if (newStatus==OrderDeliveryStatus.RECEIVED){
+                order.setStatus(OrderStatus.ON_THE_WAY);
+            }
+            else if(newStatus==OrderDeliveryStatus.DELIVERED){
+                order.setStatus(OrderStatus.COMPLETED);
+            }
             order.setDeliveryStatus(newStatus);
+            order.setUpdatedAt(LocalDateTime.now());
             orderDao.update(order);
             sendJson(exchange, 200, Map.of(
-                    "message", "Delivery status updated",
-                    "order", DeliveryResponse.fromEntity(order)
+                    "message", "Changed status successfully",
+                    "order", OrderResponse.fromEntity(order)
             ));
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, Map.of("error", "Internal server error"));
+            sendJson(exchange, 500, Map.of("error", "internal_server_error"));
         }
     }
 
-    */
+
+
+
 
 
 

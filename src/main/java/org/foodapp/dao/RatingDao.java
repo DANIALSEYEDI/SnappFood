@@ -1,6 +1,8 @@
 package org.foodapp.dao;
 
+import org.foodapp.model.Order;
 import org.foodapp.model.Rating;
+import org.foodapp.model.User;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -46,6 +48,7 @@ public class RatingDao {
                     .list();
         }
     }
+
     public void update(Rating rating) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
@@ -58,6 +61,18 @@ public class RatingDao {
             e.printStackTrace();
         } finally {
             session.close();
+        }
+    }
+
+
+    public boolean existsByUserAndOrder(User user, Order order) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            String hql = "SELECT count(r) FROM Rating r WHERE r.user = :user AND r.order = :order";
+            Long count = session.createQuery(hql, Long.class)
+                    .setParameter("user", user)
+                    .setParameter("order", order)
+                    .uniqueResult();
+            return count != null && count > 0;
         }
     }
 

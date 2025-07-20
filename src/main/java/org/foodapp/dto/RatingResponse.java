@@ -1,17 +1,27 @@
 package org.foodapp.dto;
 import org.foodapp.model.Rating;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class RatingResponse {
-    public double avg_rating;
-    public List<RatingDto> comments;
+    public Long id;
+    public Long item_id;
+    public int rating;
+    public String comment;
+    public List<String> imageBase64;
+    public Long user_id;
+    public LocalDateTime createdAt;
 
-    public RatingResponse(double avg, List<Rating> rawRatings) {
-        this.avg_rating = avg;
-        this.comments = rawRatings.stream()
-                .map(RatingDto::fromEntity)
-                .collect(Collectors.toList());
+    public static RatingResponse fromEntity(Rating r) {
+        RatingResponse dto = new RatingResponse();
+        dto.id = r.getId();
+        dto.item_id = r.getItem() != null ? r.getItem().getId() : null;
+        dto.rating = r.getRating();
+        dto.comment = r.getComment();
+        dto.user_id = r.getUser() != null ? r.getUser().getId() : null;
+        dto.imageBase64 = r.getImageBase64();
+        dto.createdAt = r.getCreatedAt();
+        return dto;
     }
-}
 
+}

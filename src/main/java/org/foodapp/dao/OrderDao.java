@@ -124,18 +124,17 @@ public class OrderDao {
 
 
 
-    public List<Order> findByStatus(OrderRestaurantStatus status) {
+    public List<Order> findAvailableForDelivery() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery("""
-            SELECT DISTINCT o FROM Order o
-            LEFT JOIN FETCH o.itemsOfOrder i
-            LEFT JOIN FETCH i.item
-            WHERE o.status = :status
-        """, Order.class)
-                    .setParameter("status", status)
-                    .list();
+            return session.createQuery(
+                            "SELECT DISTINCT o FROM Order o " +
+                                    "LEFT JOIN FETCH o.itemsOfOrder i " +
+                                    "WHERE o.status = :status", Order.class)
+                    .setParameter("status", OrderStatus.FINDING_COURIER)
+                    .getResultList();
         }
     }
+
 
 
 

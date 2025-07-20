@@ -62,5 +62,8 @@ public class Rating {
     public void setId(Long id) {
         this.id = id;
     }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }
 

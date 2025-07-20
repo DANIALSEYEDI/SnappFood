@@ -14,7 +14,9 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RatingHandler implements HttpHandler {
 
@@ -51,7 +53,10 @@ public class RatingHandler implements HttpHandler {
     private void handleSubmitRating(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
-            if (user == null || user.getRole() != Role.BUYER) {
+            if (user == null) {
+                return;
+            }
+            if ( user.getRole() != Role.BUYER) {
                 sendJson(exchange, 403, "{\"error\": \"Only buyers can rate\"}");
                 return;
             }
@@ -64,18 +69,24 @@ public class RatingHandler implements HttpHandler {
 
             RatingRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody()), RatingRequest.class);
             if (request.order_id == null || request.rating == null || request.rating < 1 || request.rating > 5 || request.comment == null) {
-                sendJson(exchange, 400, Map.of("error", "Missing required fields"));
+                sendJson(exchange, 400, Map.of("error", "invalid_input"));
                 return;
             }
 
             Order order = orderDao.findById(request.order_id);
             if (order == null || !order.getUser().getId().equals(user.getId())) {
-                sendJson(exchange, 404, Map.of("error", "Order not found"));
+                sendJson(exchange, 404, Map.of("error", "not_found order"));
                 return;
             }
             List<OrderItem> items = order.getItemsOfOrder();
             if (items == null || items.isEmpty()) {
                 sendJson(exchange, 400, Map.of("error", "Order has no items"));
+                return;
+            }
+
+
+            if (ratingDao.existsByUserAndOrder(user, order)) {
+                sendJson(exchange, 400, Map.of("error", "Rating already submitted for this order"));
                 return;
             }
 
@@ -87,15 +98,15 @@ public class RatingHandler implements HttpHandler {
                 rating.setComment(request.comment);
                 rating.setImageBase64(request.imageBase64 != null ? request.imageBase64 : List.of());
                 rating.setItem(item.getItem());
-
+                rating.setCreatedAt(LocalDateTime.now());
                 ratingDao.save(rating);
             }
-            sendJson(exchange, 200, "{\"message\": \"Rating submitted successfully\"}");
+            sendJson(exchange, 200, Map.of("message", "Rating submitted"));
         } catch (JsonSyntaxException e) {
-            sendJson(exchange, 400, "{\"error\": \"Invalid input format\"}");
+            sendJson(exchange, 400, "{\"error\": \"Invalid_input format\"}");
         } catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
 
@@ -114,21 +125,23 @@ public class RatingHandler implements HttpHandler {
 
             FoodItem item = foodItemDao.findById(itemId);
             if (item == null) {
-                sendJson(exchange, 404, "{\"error\": \"Item not found\"}");
+                sendJson(exchange, 404, "{\"error\": \"not_found item\"}");
                 return;
             }
 
             List<Rating> ratings = ratingDao.findByItemId(itemId);
             if (ratings.isEmpty()) {
-                sendJson(exchange, 200, gson.toJson(new RatingResponse(0.0, List.of())));
+                sendJson(exchange, 404, "{\"error\": \"not_found rating\"}");
                 return;
             }
 
             double avg = ratings.stream().mapToInt(Rating::getRating).average().orElse(0.0);
-            RatingResponse response = new RatingResponse(avg, ratings);
-            sendJson(exchange, 200, gson.toJson(response));
+            List<RatingResponse> comments = ratings.stream()
+                    .map(RatingResponse::fromEntity)
+                    .collect(Collectors.toList());
 
-
+            RatingItemResponse response = new RatingItemResponse(avg, comments);
+            sendJson(exchange, 200, response);
         } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
@@ -147,14 +160,14 @@ public class RatingHandler implements HttpHandler {
             }
             Rating rating = ratingDao.findById(id);
             if (rating == null) {
-                sendJson(exchange, 404, Map.of("error", "Rating not found"));
+                sendJson(exchange, 404, Map.of("error", "not_found Rating"));
                 return;
             }
-            RatingDto dto = RatingDto.fromEntity(rating);
-            sendJson(exchange, 200, gson.toJson(dto));
+            RatingResponse dto = RatingResponse.fromEntity(rating);
+            sendJson(exchange, 200, dto);
         } catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
 
@@ -170,20 +183,19 @@ public class RatingHandler implements HttpHandler {
             if (user == null) return;
             Rating rating = ratingDao.findById(id);
             if (rating == null) {
-                sendJson(exchange, 404, Map.of("error", "Rating not found"));
+                sendJson(exchange, 404, Map.of("error", "not_found Rating"));
                 return;
             }
             if (!rating.getUser().getId().equals(user.getId())) {
                 sendJson(exchange, 403, Map.of("error", "You can only delete your own rating"));
                 return;
             }
-
             ratingDao.delete(rating);
             sendJson(exchange, 200, Map.of("message", "Rating deleted"));
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
 
@@ -204,14 +216,13 @@ public class RatingHandler implements HttpHandler {
                 return;
             }
 
-
             Rating rating = ratingDao.findById(id);
             if (rating == null) {
-                sendJson(exchange, 404, Map.of("error", "Rating not found"));
+                sendJson(exchange, 404, Map.of("error", "not_found Rating"));
                 return;
             }
             if (!rating.getUser().getId().equals(user.getId())) {
-                sendJson(exchange, 403, Map.of("error", "You can only edit your own rating"));
+                sendJson(exchange, 403, Map.of("error", "forbidden"));
                 return;
             }
 
@@ -219,7 +230,7 @@ public class RatingHandler implements HttpHandler {
             if (body.has("rating")) {
                 int newRating = body.get("rating").getAsInt();
                 if (newRating < 1 || newRating > 5) {
-                    sendJson(exchange, 400, Map.of("error", "Rating must be between 1 and 5"));
+                    sendJson(exchange, 400, Map.of("error", "invalid_input rating"));
                     return;
                 }
                 rating.setRating(newRating);
@@ -238,12 +249,12 @@ public class RatingHandler implements HttpHandler {
             }
 
             ratingDao.update(rating);
-            RatingDto dto = RatingDto.fromEntity(rating);
-            sendJson(exchange, 200, gson.toJson(dto));
+            RatingResponse dto = RatingResponse.fromEntity(rating);
+            sendJson(exchange, 200, dto);
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
 

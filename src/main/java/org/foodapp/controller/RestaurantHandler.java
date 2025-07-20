@@ -11,9 +11,12 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import java.io.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.foodapp.util.QueryUtil;
+
+import static org.foodapp.model.OrderDeliveryStatus.RECEIVED;
 
 
 public class RestaurantHandler implements HttpHandler {
@@ -774,29 +777,42 @@ public class RestaurantHandler implements HttpHandler {
                 return;
             }
 
-
             if (!order.getRestaurant().getSeller().getId().equals(user.getId())) {
                 sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
 
-            try {
-                OrderRestaurantStatus newStatus = OrderRestaurantStatus.valueOf(request.getStatus().toUpperCase());
-                order.setRestaurantStatus(newStatus);
-                if (newStatus == OrderRestaurantStatus.REJECTED) {
-                    order.setStatus(OrderStatus.CANCELLED);
-                }
-                if (newStatus == OrderRestaurantStatus.ACCEPTED) {
-                    order.setStatus(OrderStatus.WAITING_VENDOR);
-                }
-                if (newStatus == OrderRestaurantStatus.SERVED) {
-                    order.setStatus(OrderStatus.FINDING_COURIER);
-                }
-                orderDao.update(order);
-            } catch (IllegalArgumentException e) {
-                sendJson(exchange, 400, "{\"error\": \"Invalid_input\"}");
+            if (order.getStatus()==OrderStatus.CANCELLED || order.getStatus()==OrderStatus.UNPAID_AND_CANCELLED || order.getStatus()==OrderStatus.ON_THE_WAY || order.getStatus()==OrderStatus.COMPLETED) {
+                sendJson(exchange, 403, "{\"error\": \"Order not ready for  change restaurant status\"}");
                 return;
             }
+
+            OrderRestaurantStatus newRestaurantStatus;
+            try {
+                newRestaurantStatus = OrderRestaurantStatus.valueOf(request.getStatus().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                sendJson(exchange, 400, "{\"error\": \"Invalid restaurant status value\"}");
+                return;
+            }
+            OrderRestaurantStatus currentStatus = order.getRestaurantStatus();
+            boolean isValid = switch (currentStatus) {
+                case PENDING -> newRestaurantStatus == OrderRestaurantStatus.ACCEPTED || newRestaurantStatus == OrderRestaurantStatus.REJECTED;
+                case ACCEPTED -> newRestaurantStatus == OrderRestaurantStatus.SERVED;
+                default -> false;
+            };
+
+            if (!isValid) {
+                sendJson(exchange, 400, "{\"error\": \"Invalid restaurant status transition\"}");
+                return;
+            }
+            order.setRestaurantStatus(newRestaurantStatus);
+            switch (newRestaurantStatus) {
+                case REJECTED -> order.setStatus(OrderStatus.CANCELLED);
+                case ACCEPTED -> order.setStatus(OrderStatus.WAITING_VENDOR);
+                case SERVED -> order.setStatus(OrderStatus.FINDING_COURIER);
+            }
+            order.setUpdatedAt(LocalDateTime.now());
+            orderDao.update(order);
             sendJson(exchange, 200, "{\"message\": \"Order status changed successfully\"}");
         } catch (Exception e) {
             e.printStackTrace();
