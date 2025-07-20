@@ -1,7 +1,6 @@
 package org.foodapp.dto;
 
 import org.foodapp.model.FoodItem;
-import org.foodapp.model.Order;
 import org.foodapp.model.OrderItem;
 
 public class OrderItemResponse {

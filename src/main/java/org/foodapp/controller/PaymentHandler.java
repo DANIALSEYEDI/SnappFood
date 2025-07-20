@@ -2,7 +2,6 @@ package org.foodapp.controller;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
-import com.mysql.cj.protocol.InternalDate;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.*;

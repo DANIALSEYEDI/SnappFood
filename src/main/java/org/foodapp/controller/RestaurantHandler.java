@@ -16,8 +16,6 @@ import java.util.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.foodapp.util.QueryUtil;
 
-import static org.foodapp.model.OrderDeliveryStatus.RECEIVED;
-
 
 public class RestaurantHandler implements HttpHandler {
 

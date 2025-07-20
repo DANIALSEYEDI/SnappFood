@@ -6,7 +6,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.TransactionDao;
 import org.foodapp.dao.UserDao;
-import org.foodapp.dto.WalletTopUpRequest;
 import org.foodapp.model.PaymentMethod;
 import org.foodapp.model.PaymentStatus;
 import org.foodapp.model.Transaction;
@@ -127,7 +126,6 @@ public class WalletHandler implements HttpHandler {
     private void sendJson(HttpExchange exchange, int statusCode, Object body) throws IOException {
         String json = new Gson().toJson(body);
         byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
-
         exchange.getResponseHeaders().set("Content-Type", "application/json");
         exchange.sendResponseHeaders(statusCode, bytes.length);
         try (OutputStream os = exchange.getResponseBody()) {

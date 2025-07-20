@@ -1,5 +1,4 @@
 package org.foodapp.dto;
-
 import java.util.List;
 
 public class ItemFilterRequest {
@@ -9,13 +8,5 @@ public class ItemFilterRequest {
 
     public String getSearch() {
         return search;
-    }
-
-    public Integer getPrice() {
-        return price;
-    }
-
-    public List<String> getKeywords() {
-        return keywords;
     }
 }
