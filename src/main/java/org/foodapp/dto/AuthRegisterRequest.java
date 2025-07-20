@@ -13,17 +13,6 @@ public class AuthRegisterRequest {
         public String bank_name;
         public String account_number;
     }
-    public AuthRegisterRequest(String full_name, String phone, String password, String role, String address,
-                               String email, String profileImageBase64, BankInfo bank_info) {
-        this.full_name = full_name;
-        this.phone = phone;
-        this.password = password;
-        this.role = role;
-        this.address = address;
-        this.email = email;
-        this.profileImageBase64 = profileImageBase64;
-        this.bank_info = bank_info;
-    }
     public String getRole() {
         return role;
     }
