@@ -52,7 +52,6 @@ public class AuthHandler implements HttpHandler {
             sendJson(exchange, 400, "{\"error\": \"invalid_input\"}");
             return;
         }
-
         if (userDao.findByPhone(request.phone) != null) {
             sendJson(exchange, 409, "{\"error\": \"Phone number already exists\"}");
             return;
@@ -72,15 +71,17 @@ public class AuthHandler implements HttpHandler {
 
         if ((role == Role.SELLER || role == Role.COURIER)) {
             if (request.bank_info == null || request.bank_info.bank_name == null || request.bank_info.account_number == null) {
-                sendJson(exchange, 400, "{\"error\": \"invalid_input\"}");
+                sendJson(exchange, 400, "{\"error\": \"invalid_input bank_info\"}");
                 return;
             }
         }
-        bankName = request.bank_info.bank_name;
-        accountNumber = request.bank_info.account_number;
+        if (request.bank_info != null && (request.bank_info.bank_name != null || request.bank_info.account_number != null)) {
+            bankName = request.bank_info.bank_name;
+            accountNumber = request.bank_info.account_number;
+        }
 
         if (role == Role.SELLER || role == Role.BUYER) {
-            if (request.address==null){
+            if (request.address==null ||  request.address.trim().isEmpty()){
                 sendJson(exchange, 400, "{\"error\": \"invalid_input\"}");
                 return;
             }
@@ -130,7 +131,7 @@ public class AuthHandler implements HttpHandler {
 
             User user = userDao.findByPhoneAndPassword(request.phone, request.password);
             if (user == null) {
-                sendJson(exchange, 401, "{\"error\": \"unauthorized\"}");
+                sendJson(exchange, 401, "{\"error\": \"User not found\"}");
                 return;
             }
             String token = JwtUtil.generateToken(user.getId().toString(), user.getRole().toString());
