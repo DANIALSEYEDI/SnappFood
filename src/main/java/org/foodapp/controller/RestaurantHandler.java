@@ -103,6 +103,12 @@ public class RestaurantHandler implements HttpHandler {
                 sendJson(exchange, 400, "{\"error\": \"invalid_input\"}");
                 return;
             }
+            if (request.tax_fee==null){
+                request.tax_fee=0;
+            }
+            if (request.additional_fee == null) {
+                request.additional_fee = 0;
+            }
 
             Restaurant restaurant = new Restaurant(
                     request.name,
