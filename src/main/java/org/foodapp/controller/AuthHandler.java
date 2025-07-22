@@ -227,9 +227,9 @@ public class AuthHandler implements HttpHandler {
             if (request.full_name != null) user.setFullName(request.full_name);
             if (request.phone != null) user.setPhoneNumber(request.phone);
             if (request.email != null) user.setEmail(request.email);
-            if ((user.getRole()==Role.BUYER && user.getRole()==Role.SELLER) && request.address != null) user.setAddress(request.address);
+            if (request.address != null) user.setAddress(request.address);
             if (request.profileImageBase64 != null) user.setProfileImageBase64(request.profileImageBase64);
-            if ((user.getRole() == Role.SELLER || user.getRole() == Role.COURIER) && request.bank_info != null) {
+            if (request.bank_info != null) {
                 user.setBankName(request.bank_info.bank_name);
                 user.setAccountNumber(request.bank_info.account_number);
             }
