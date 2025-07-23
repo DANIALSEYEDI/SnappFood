@@ -12,6 +12,7 @@ public class AdminUserResponse {
     public String profileImageBase64;
     public String bank_name;
     public String account_number;
+    public String status;
 
 
     public static AdminUserResponse fromEntity(User user) {
@@ -25,6 +26,7 @@ public class AdminUserResponse {
         dto.profileImageBase64 = user.getProfileImageBase64();
         dto.bank_name = user.getBankName();
         dto.account_number = user.getAccountNumber();
+        dto.status= String.valueOf(user.getStatus());
         return dto;
     }
 }

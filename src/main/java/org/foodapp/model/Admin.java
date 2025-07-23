@@ -9,19 +9,15 @@ public class Admin {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String username;
+    private String phonenumber;
 
     @Column(nullable = false)
     private String password;
 
     public Admin() {}
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-    public String getUsername() {
-        return username;
-    }
+    public void setPhonenumber(String phonenumber) {this.phonenumber = phonenumber;}
+    public String getPhonenumber() {return this.phonenumber;}
     public void setPassword(String password) {
         this.password = password;
     }

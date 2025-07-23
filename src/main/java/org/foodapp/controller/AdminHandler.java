@@ -4,10 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.*;
-import org.foodapp.dto.AdminTransactionResponse;
-import org.foodapp.dto.AdminUserResponse;
-import org.foodapp.dto.CouponResponse;
-import org.foodapp.dto.OrderResponse;
+import org.foodapp.dto.*;
 import org.foodapp.model.*;
 import org.foodapp.util.JwtUtil;
 import org.foodapp.util.QueryUtil;
@@ -69,10 +66,6 @@ public class AdminHandler implements HttpHandler {
             sendJson(exchange, 404, "{\"error\": \"Path Not found\"}");
         }
     }
-
-
-
-
 
 
 

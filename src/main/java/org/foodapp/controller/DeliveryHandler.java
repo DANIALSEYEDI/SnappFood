@@ -221,6 +221,7 @@ public class DeliveryHandler implements HttpHandler {
         try {
             decoded = JwtUtil.verifyToken(token);
         } catch (Exception e) {
+            e.printStackTrace();
             sendJson(exchange, 401, "{\"error\": \"Invalid token\"}");
             return null;
         }

@@ -6,20 +6,20 @@ import org.hibernate.Session;
 
 public class CreateAdminDao {
 
-    public Admin findByUsername(String username) {
+    public Admin findByPhonenumber(String phone) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session
-                    .createQuery("FROM Admin WHERE username = :username", Admin.class)
-                    .setParameter("username", username)
+                    .createQuery("FROM Admin WHERE phonenumber = :phone", Admin.class)
+                    .setParameter("phone", phone)
                     .uniqueResult();
         }
     }
+
     public Admin findById(Long id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.get(Admin.class, id);
         }
     }
-
     public void save(Admin admin) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             session.beginTransaction();
