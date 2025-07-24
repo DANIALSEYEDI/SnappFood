@@ -48,8 +48,6 @@ public class ItemsHandler implements HttpHandler{
 
 
 
-
-
     private void handleFilterItems(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
@@ -81,8 +79,6 @@ public class ItemsHandler implements HttpHandler{
 
 
 
-
-
     private void handleGetItem(HttpExchange exchange, long id) throws IOException {
         try {
             User user = authenticate(exchange);
@@ -110,9 +106,6 @@ public class ItemsHandler implements HttpHandler{
             sendJson(exchange, 500, Map.of("error", "Internal_server_error"));
         }
     }
-
-
-
 
 
 

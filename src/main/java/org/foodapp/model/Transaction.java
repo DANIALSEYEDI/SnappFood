@@ -1,7 +1,5 @@
 package org.foodapp.model;
-
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -36,22 +34,16 @@ public class Transaction {
 
     // Getters and Setters
     public Long getId() { return id; }
-
     public Order getOrder() { return order; }
     public void setOrder(Order order) { this.order = order; }
-
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
-
     public PaymentMethod getMethod() { return method; }
     public void setMethod(PaymentMethod method) { this.method = method; }
-
     public PaymentStatus getStatus() { return status; }
     public void setStatus(PaymentStatus status) { this.status = status; }
-
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
     public BigDecimal getAmount() { return amount; }
     public void setAmount(BigDecimal amount) { this.amount = amount; }
 

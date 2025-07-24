@@ -42,8 +42,6 @@ public class AuthHandler implements HttpHandler {
     }
 
 
-
-
     private void handleRegister(HttpExchange exchange) throws IOException {
         AuthRegisterRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), AuthRegisterRequest.class);
 
@@ -117,9 +115,6 @@ public class AuthHandler implements HttpHandler {
 
 
 
-
-
-
     private void handleLogin(HttpExchange exchange) throws IOException {
         try {
             AuthLoginRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), AuthLoginRequest.class);
@@ -144,7 +139,8 @@ public class AuthHandler implements HttpHandler {
                     user.getAddress(),
                     user.getProfileImageBase64(),
                     user.getBankName(),
-                    user.getAccountNumber()
+                    user.getAccountNumber(),
+                    user.getWalletBalance()
             );
 
             AuthLoginResponse res = new AuthLoginResponse(
@@ -159,9 +155,6 @@ public class AuthHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
 
 
 
@@ -186,7 +179,8 @@ public class AuthHandler implements HttpHandler {
                     user.getAddress(),
                     user.getProfileImageBase64(),
                     user.getBankName(),
-                    user.getAccountNumber()
+                    user.getAccountNumber(),
+                    user.getWalletBalance()
             );
             sendJson(exchange, 200, gson.toJson(response));
         }
@@ -199,8 +193,6 @@ public class AuthHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
 
 
 
@@ -244,9 +236,6 @@ public class AuthHandler implements HttpHandler {
 
 
 
-
-
-
     private void handleLogout(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
@@ -261,9 +250,6 @@ public class AuthHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
 
 
     private User authenticate(HttpExchange exchange) throws IOException {
@@ -284,7 +270,6 @@ public class AuthHandler implements HttpHandler {
     }
 
 
-
     private void sendJson(HttpExchange exchange, int statusCode, String json) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json");
         byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
@@ -294,6 +279,3 @@ public class AuthHandler implements HttpHandler {
         }
     }
 }
-
-
-

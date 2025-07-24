@@ -81,9 +81,6 @@ public class OrderDao {
         }
     }
 
-
-
-
     public Order findById(Long id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery("""
@@ -96,7 +93,6 @@ public class OrderDao {
                     .uniqueResult();
         }
     }
-
 
     public void update(Order order) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -122,8 +118,6 @@ public class OrderDao {
         }
     }
 
-
-
     public List<Order> findAvailableForDelivery() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
@@ -134,11 +128,6 @@ public class OrderDao {
                     .getResultList();
         }
     }
-
-
-
-
-
 
     public List<Order> findHistoryForUser(Long userId, String search, String vendorName) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -164,7 +153,6 @@ public class OrderDao {
         return orders;
     }
 
-
     public List<Order> findDeliveryHistoryByCourier(User courier, String search, String vendor, String userPhone) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             String hql = """
@@ -187,7 +175,6 @@ public class OrderDao {
             return query.list();
         }
     }
-
 
     public List<Order> findByAdminFilters(Map<String, String> params) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -275,10 +262,6 @@ public class OrderDao {
         }
     }
 
-
-
-
-
     public int countOrdersByCoupon(Coupon coupon) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Long count = session.createQuery(
@@ -293,9 +276,5 @@ public class OrderDao {
             return count != null ? count.intValue() : 0;
         }
     }
-
-
-
-
 }
 

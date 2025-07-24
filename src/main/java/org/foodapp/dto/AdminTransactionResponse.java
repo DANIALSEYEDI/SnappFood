@@ -1,7 +1,5 @@
 package org.foodapp.dto;
-
 import org.foodapp.model.Transaction;
-
 
 public class AdminTransactionResponse {
     public Long id;

@@ -5,9 +5,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import java.util.List;
-
 public class UserDao {
-
     public User findByPhone(String phone) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
@@ -19,7 +17,6 @@ public class UserDao {
         }
     }
 
-
     public void save(User user) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction tx = session.beginTransaction();
@@ -27,8 +24,6 @@ public class UserDao {
             tx.commit();
         }
     }
-
-
 
     public void update(User user) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -40,7 +35,6 @@ public class UserDao {
             session.close();
         }
     }
-
 
     public User findByPhoneAndPassword(String phone, String password) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -54,16 +48,12 @@ public class UserDao {
         }
     }
 
-
-
     public User findById(Long id) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         User user = session.get(User.class, id);
         session.close();
         return user;
     }
-
-
 
     public List<User> findAll() {
             try (Session session = HibernateUtil.getSessionFactory().openSession()) {

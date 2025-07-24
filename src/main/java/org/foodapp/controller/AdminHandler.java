@@ -8,7 +8,6 @@ import org.foodapp.dto.*;
 import org.foodapp.model.*;
 import org.foodapp.util.JwtUtil;
 import org.foodapp.util.QueryUtil;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
@@ -68,7 +67,6 @@ public class AdminHandler implements HttpHandler {
     }
 
 
-
     private void handleListUsers(HttpExchange exchange) throws IOException {
         try {
             Admin admin = authenticateAdmin(exchange);
@@ -87,12 +85,7 @@ public class AdminHandler implements HttpHandler {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
-
     }
-
-
-
-
 
 
 
@@ -143,10 +136,6 @@ public class AdminHandler implements HttpHandler {
 
 
 
-
-
-
-
     private void handleGetTransactions(HttpExchange exchange) throws IOException {
         try {
 
@@ -170,10 +159,6 @@ public class AdminHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
-
 
 
 
@@ -243,8 +228,6 @@ public class AdminHandler implements HttpHandler {
 
 
 
-
-
     private void handleGetListCoupons(HttpExchange exchange) throws IOException {
         try {
             Admin admin = authenticateAdmin(exchange);
@@ -264,11 +247,6 @@ public class AdminHandler implements HttpHandler {
             sendJson(exchange, 500, Map.of("error", "Internal server error"));
         }
     }
-
-
-
-
-
 
 
     private void handleGetCoupon(HttpExchange exchange, long id) throws IOException {
@@ -291,10 +269,6 @@ public class AdminHandler implements HttpHandler {
     }
 
 
-
-
-
-
     private void handleDeleteCoupon(HttpExchange exchange, long id) throws IOException {
         try {
             Admin admin = authenticateAdmin(exchange);
@@ -312,8 +286,6 @@ public class AdminHandler implements HttpHandler {
             sendJson(exchange, 500, Map.of("error", "internal_server_error"));
         }
     }
-
-
 
 
     private void handleUpdateCoupon(HttpExchange exchange, long id) throws IOException {
@@ -393,8 +365,6 @@ public class AdminHandler implements HttpHandler {
                     return;
                 }
             }
-
-
             couponDao.update(coupon);
             CouponResponse response = CouponResponse.fromEntity(coupon);
             sendJson(exchange, 200, response);
@@ -403,11 +373,6 @@ public class AdminHandler implements HttpHandler {
             sendJson(exchange, 500, Map.of("error", "internal_server_error"));
         }
     }
-
-
-
-
-
 
 
 
@@ -432,16 +397,6 @@ public class AdminHandler implements HttpHandler {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
     private long extractId2(String path, String prefix) {
         try {
             return Long.parseLong(path.substring(prefix.length()));
@@ -449,11 +404,6 @@ public class AdminHandler implements HttpHandler {
             throw new IllegalArgumentException("Invalid path format for extracting ID");
         }
     }
-
-
-
-
-
 
 
     private long extractId(String path, String prefix, String suffix) {
@@ -466,11 +416,6 @@ public class AdminHandler implements HttpHandler {
             return -1;
         }
     }
-
-
-
-
-
 
 
     private Admin authenticateAdmin(HttpExchange exchange) throws IOException {
@@ -495,8 +440,6 @@ public class AdminHandler implements HttpHandler {
             return null;
         }
     }
-
-
 
     private void sendJson(HttpExchange exchange, int status, Object data) throws IOException {
         String json = gson.toJson(data);

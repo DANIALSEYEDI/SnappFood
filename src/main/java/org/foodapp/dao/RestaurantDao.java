@@ -1,5 +1,4 @@
 package org.foodapp.dao;
-
 import org.foodapp.model.Restaurant;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
@@ -83,8 +82,6 @@ public class RestaurantDao {
             return query.getResultList();
         }
     }
-
-
 
     public Restaurant findWithMenusAndItems(Long id) {
         Session session = HibernateUtil.getSessionFactory().openSession();

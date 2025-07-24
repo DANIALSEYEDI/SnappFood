@@ -1,5 +1,4 @@
 package org.foodapp.dto;
-
 import java.util.List;
 
 public class VendorFilterRequest {

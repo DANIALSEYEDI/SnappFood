@@ -1,10 +1,8 @@
 package org.foodapp.dao;
-
 import org.foodapp.model.Coupon;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
 import java.util.List;
 
 public class CouponDao {
@@ -57,5 +55,4 @@ public class CouponDao {
             e.printStackTrace();
         }
     }
-
 }

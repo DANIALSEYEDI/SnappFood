@@ -1,6 +1,5 @@
 package org.foodapp.controller;
 
-
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
@@ -13,7 +12,6 @@ import org.foodapp.model.Coupon;
 import org.foodapp.model.User;
 import org.foodapp.util.JwtUtil;
 import org.foodapp.util.QueryUtil;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
@@ -74,10 +72,6 @@ public class CouponsHandler implements HttpHandler {
 
 
 
-
-
-
-
     private void sendJson(HttpExchange exchange, int statusCode, Object data) throws IOException {
         String response = gson.toJson(data);
         exchange.getResponseHeaders().add("Content-Type", "application/json");
@@ -85,8 +79,6 @@ public class CouponsHandler implements HttpHandler {
         exchange.getResponseBody().write(response.getBytes());
         exchange.getResponseBody().close();
     }
-
-
 
 
 
@@ -107,8 +99,4 @@ public class CouponsHandler implements HttpHandler {
         }
         return new UserDao().findById(Long.parseLong(decoded.getSubject()));
     }
-
-
-
 }
-

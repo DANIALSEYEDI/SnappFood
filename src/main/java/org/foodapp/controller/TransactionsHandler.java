@@ -1,5 +1,4 @@
 package org.foodapp.controller;
-
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
@@ -10,7 +9,6 @@ import org.foodapp.dto.TransactionsResponse;
 import org.foodapp.model.Transaction;
 import org.foodapp.model.User;
 import org.foodapp.util.JwtUtil;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -32,11 +30,6 @@ public class TransactionsHandler implements HttpHandler {
         }
     }
 
-
-
-
-
-
     private void handleGetTransactions(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
@@ -56,13 +49,7 @@ public class TransactionsHandler implements HttpHandler {
         } catch (Exception e) {
             sendJson(exchange, 500, Map.of("error", "internal_server_error"));
         }
-
     }
-
-
-
-
-
 
 
     private User authenticate(HttpExchange exchange) throws IOException {
@@ -83,9 +70,6 @@ public class TransactionsHandler implements HttpHandler {
     }
 
 
-
-
-
     private void sendJson(HttpExchange exchange, int statusCode, Object body) throws IOException {
         String json = new Gson().toJson(body);
         byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
@@ -96,8 +80,5 @@ public class TransactionsHandler implements HttpHandler {
             os.write(bytes);
         }
     }
-
-
-
 }
 

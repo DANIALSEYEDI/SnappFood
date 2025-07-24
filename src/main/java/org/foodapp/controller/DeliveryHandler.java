@@ -42,9 +42,6 @@ public class DeliveryHandler implements HttpHandler {
 
 
 
-
-
-
     private void handleAvailableDeliveries(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
@@ -66,11 +63,6 @@ public class DeliveryHandler implements HttpHandler {
             sendJson(exchange, 500, Map.of("error", "internal_server_error"));
         }
     }
-
-
-
-
-
 
 
 
@@ -101,12 +93,6 @@ public class DeliveryHandler implements HttpHandler {
             sendJson(exchange, 500, Map.of("error", "Internal_server_error"));
         }
     }
-
-
-
-
-
-
 
 
 
@@ -147,7 +133,6 @@ public class DeliveryHandler implements HttpHandler {
                 return;
             }
 
-            // بررسی روند منطقی تغییر وضعیت
             OrderDeliveryStatus current = order.getDeliveryStatus();
             boolean isValidTransition = switch (current) {
                 case PENDING -> newStatus == OrderDeliveryStatus.ACCEPTED;
@@ -193,13 +178,6 @@ public class DeliveryHandler implements HttpHandler {
 
 
 
-
-
-
-
-
-
-
     private long extractId(String path, String prefix) {
         try {
             String trimmed = path.substring(prefix.length());
@@ -229,7 +207,6 @@ public class DeliveryHandler implements HttpHandler {
     }
 
 
-
     private void sendJson(HttpExchange exchange, int statusCode, Object body) throws IOException {
         String json = new Gson().toJson(body);
         byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
@@ -240,5 +217,4 @@ public class DeliveryHandler implements HttpHandler {
             os.write(bytes);
         }
     }
-
 }

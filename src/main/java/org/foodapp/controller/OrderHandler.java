@@ -9,7 +9,6 @@ import org.foodapp.model.*;
 import org.foodapp.dto.*;
 import org.foodapp.util.JwtUtil;
 import org.foodapp.util.QueryUtil;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
@@ -41,7 +40,6 @@ public class OrderHandler implements HttpHandler {
             sendJson(exchange, 404, "{\"error\": \"not_found\"}");
         }
     }
-
 
 
 
@@ -163,17 +161,6 @@ public class OrderHandler implements HttpHandler {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
     private void handleGetOrder(HttpExchange exchange, long id) throws IOException {
         try {
             User user = authenticate(exchange);
@@ -202,9 +189,6 @@ public class OrderHandler implements HttpHandler {
 
 
 
-
-
-
     private void handleGetOrderHistory(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
@@ -228,9 +212,6 @@ public class OrderHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
 
 
     private long extractId(String path, String prefix) {
@@ -268,4 +249,3 @@ public class OrderHandler implements HttpHandler {
     }
 
 }
-

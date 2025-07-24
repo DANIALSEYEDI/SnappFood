@@ -1,5 +1,4 @@
 package org.foodapp.controller;
-
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
@@ -83,12 +82,6 @@ public class VendorsHandler implements HttpHandler {
     }
 
 
-
-
-
-
-
-
     private void handleGetVendorDetails(HttpExchange exchange, long vendorId) throws IOException {
         try {
             User user = authenticate(exchange);
@@ -128,10 +121,6 @@ public class VendorsHandler implements HttpHandler {
     }
 
 
-
-
-
-
     private User authenticate(HttpExchange exchange) throws IOException {
         List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
         if (authHeaders == null || authHeaders.isEmpty()) {
@@ -152,8 +141,6 @@ public class VendorsHandler implements HttpHandler {
     }
 
 
-
-
     private long extractId(String path, String prefix, String suffix) {
         try {
             String temp = path.substring(prefix.length());
@@ -167,8 +154,6 @@ public class VendorsHandler implements HttpHandler {
     }
 
 
-
-
     private void sendJson(HttpExchange exchange, int statusCode, String json) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json");
         byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
@@ -177,5 +162,4 @@ public class VendorsHandler implements HttpHandler {
             os.write(bytes);
         }
     }
-
 }

@@ -1,5 +1,4 @@
 package org.foodapp.model;
-
 import jakarta.persistence.*;
 import java.util.*;
 @Entity
@@ -47,76 +46,52 @@ public class Restaurant {
     }
 
 
-
     // Getters and Setters
-
     public Long getId() {
         return id;
     }
-
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
-
     public String getAddress() {
         return address;
     }
-
     public void setAddress(String address) {
         this.address = address;
     }
-
     public String getPhone() {
         return phone;
     }
-
     public void setPhone(String phone) {
         this.phone = phone;
     }
-
     public String getLogoBase64() {
         return logoBase64;
     }
-
     public void setLogoBase64(String logoBase64) {
         this.logoBase64 = logoBase64;
     }
-
     public Integer getTaxFee() {
         return taxFee;
     }
-
     public void setTaxFee(Integer taxFee) {
         this.taxFee = taxFee;
     }
-
     public Integer getAdditionalFee() {
         return additionalFee;
     }
-
     public void setAdditionalFee(Integer additionalFee) {
         this.additionalFee = additionalFee;
     }
-
     public User getSeller() {
         return seller;
     }
-
     public Set<Menu> getMenus() {
         return menus;
     }
-
-
-
-
-
-
-
-
 
     @Override
     public boolean equals(Object o) {

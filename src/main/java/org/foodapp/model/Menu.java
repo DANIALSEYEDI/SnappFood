@@ -1,5 +1,4 @@
 package org.foodapp.model;
-
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,39 +27,31 @@ public class Menu {
     public Menu() {
     }
 
-
+    //Getter and Setter
     public Long getId() {
         return id;
     }
-
     public String getTitle() {
         return title;
     }
-
     public void setTitle(String title) {
         this.title = title;
     }
-
     public Restaurant getRestaurant() {
         return restaurant;
     }
-
     public void setRestaurant(Restaurant restaurant) {
         this.restaurant = restaurant;
     }
-
     public Set<FoodItem> getItems() {
         return items;
     }
-
     public void setItems(Set<FoodItem> items) {
         this.items = items;
     }
-
     public void addItem(FoodItem item) {
         this.items.add(item);
     }
-
     public void removeItem(FoodItem item) {
         this.items.remove(item);
     }

@@ -1,9 +1,7 @@
 package org.foodapp.dao;
-
 import org.foodapp.model.Admin;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
-
 public class CreateAdminDao {
 
     public Admin findByPhonenumber(String phone) {

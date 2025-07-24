@@ -1,5 +1,4 @@
 package org.foodapp.controller;
-
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
@@ -11,7 +10,6 @@ import org.foodapp.model.PaymentStatus;
 import org.foodapp.model.Transaction;
 import org.foodapp.model.User;
 import org.foodapp.util.JwtUtil;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -39,7 +37,6 @@ public class WalletHandler implements HttpHandler {
     }
 
 
-
     private void handleTopUp(HttpExchange exchange) throws IOException {
         Transaction tx = new Transaction();
         try {
@@ -62,7 +59,6 @@ public class WalletHandler implements HttpHandler {
                 sendJson(exchange, 400, Map.of("error", "invalid_input"));
                 return;
             }
-
             BigDecimal amount;
             try {
                 amount = new BigDecimal(body.get("amount").toString());
@@ -72,8 +68,6 @@ public class WalletHandler implements HttpHandler {
                 sendJson(exchange, 400, Map.of("error", "invalid_input"));
                 return;
             }
-
-
             if (amount.compareTo(BigDecimal.ZERO) <= 0) {
                 tx.setAmount(amount);
                 tx.setStatus(PaymentStatus.FAILED);
@@ -99,10 +93,6 @@ public class WalletHandler implements HttpHandler {
     }
 
 
-
-
-
-
     private User authenticate(HttpExchange exchange) throws IOException {
         List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
         if (authHeaders == null || authHeaders.isEmpty()) {
@@ -121,8 +111,6 @@ public class WalletHandler implements HttpHandler {
     }
 
 
-
-
     private void sendJson(HttpExchange exchange, int statusCode, Object body) throws IOException {
         String json = new Gson().toJson(body);
         byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
@@ -132,5 +120,4 @@ public class WalletHandler implements HttpHandler {
             os.write(bytes);
         }
     }
-
 }

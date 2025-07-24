@@ -1,6 +1,5 @@
 package org.foodapp.model;
 
-
 public enum OrderStatus {
     SUBMITTED,
     UNPAID_AND_CANCELLED,

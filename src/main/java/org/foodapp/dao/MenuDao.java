@@ -1,16 +1,12 @@
 package org.foodapp.dao;
-
 import org.foodapp.model.Menu;
 import org.foodapp.model.Restaurant;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
 import java.util.List;
 
 public class MenuDao {
-
-
     public void save(Menu menu) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         session.beginTransaction();
@@ -62,7 +58,6 @@ public class MenuDao {
             tx.commit();
         }
     }
-
 
 }
 

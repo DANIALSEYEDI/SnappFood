@@ -16,6 +16,7 @@ public class Admin {
 
     public Admin() {}
 
+    //Getter and Setter
     public void setPhonenumber(String phonenumber) {this.phonenumber = phonenumber;}
     public String getPhonenumber() {return this.phonenumber;}
     public void setPassword(String password) {

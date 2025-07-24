@@ -11,7 +11,6 @@ import org.foodapp.model.Restaurant;
 import org.foodapp.model.Role;
 import org.foodapp.model.User;
 import org.foodapp.util.JwtUtil;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
@@ -49,8 +48,6 @@ public class FavoriteHandler implements HttpHandler {
 
 
 
-
-
     private void handleGetFavorites(HttpExchange exchange, User user) throws IOException {
         try {
             if (user.getRole() != Role.BUYER) {
@@ -82,8 +79,6 @@ public class FavoriteHandler implements HttpHandler {
 
 
 
-
-
     private void handleAddFavorite(HttpExchange exchange, User user, long restaurantId) throws IOException {
         try {
             Restaurant restaurant = restaurantDao.findById(restaurantId);
@@ -109,9 +104,6 @@ public class FavoriteHandler implements HttpHandler {
             sendJson(exchange, 500, "Internal_Server_Error");
         }
     }
-
-
-
 
 
     private void handleRemoveFavorite(HttpExchange exchange, User user, long restaurantId) throws IOException {
@@ -143,9 +135,6 @@ public class FavoriteHandler implements HttpHandler {
 
 
 
-
-
-
     private User authenticate(HttpExchange exchange) throws IOException {
         List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
         if (authHeaders == null || authHeaders.isEmpty()) {
@@ -164,7 +153,6 @@ public class FavoriteHandler implements HttpHandler {
     }
 
 
-
     public static void sendJson(HttpExchange exchange, int statusCode, Object data) throws IOException {
         String json = gson.toJson(data);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
@@ -173,7 +161,4 @@ public class FavoriteHandler implements HttpHandler {
             os.write(json.getBytes());
         }
     }
-
-
-
 }

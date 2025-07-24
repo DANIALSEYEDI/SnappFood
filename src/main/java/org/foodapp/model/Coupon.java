@@ -35,27 +35,19 @@ public class Coupon {
     public Coupon() {}
 
     // Getters and Setters
-
     public Long getId() { return id; }
-
     public String getCouponCode() { return code; }
     public void setCouponCode(String couponCode) { this.code = couponCode; }
-
     public CouponType getType() { return type; }
     public void setType(CouponType type) { this.type = type; }
-
     public BigDecimal getValue() { return value; }
     public void setValue(BigDecimal value) { this.value = value; }
-
     public Integer getMinPrice() { return minPrice; }
     public void setMinPrice(Integer minPrice) { this.minPrice = minPrice; }
-
     public Integer getUserCount() { return userCount; }
     public void setUserCount(Integer userCount) { this.userCount = userCount; }
-
     public LocalDate getStartDate() { return startDate; }
     public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
-
     public LocalDate getEndDate() { return endDate; }
     public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 }

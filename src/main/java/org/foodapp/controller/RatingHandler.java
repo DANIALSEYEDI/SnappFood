@@ -9,7 +9,6 @@ import org.foodapp.model.*;
 import org.foodapp.dto.*;
 import org.foodapp.util.GsonProvider;
 import org.foodapp.util.JwtUtil;
-
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -112,10 +111,6 @@ public class RatingHandler implements HttpHandler {
 
 
 
-
-
-
-
     private void handleGetRatingsForItem(HttpExchange exchange, long itemId) throws IOException {
         try {
             User user = authenticate(exchange);
@@ -134,7 +129,6 @@ public class RatingHandler implements HttpHandler {
                 sendJson(exchange, 404, "{\"error\": \"not_found rating\"}");
                 return;
             }
-
             double avg = ratings.stream().mapToInt(Rating::getRating).average().orElse(0.0);
             List<RatingResponse> comments = ratings.stream()
                     .map(RatingResponse::fromEntity)
@@ -147,9 +141,6 @@ public class RatingHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"Internal server error\"}");
         }
     }
-
-
-
 
 
     private void handleGetRating(HttpExchange exchange, long id) throws IOException {
@@ -170,11 +161,6 @@ public class RatingHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
-
-
 
 
     private void handleDeleteRating(HttpExchange exchange, long id) throws IOException {
@@ -198,11 +184,6 @@ public class RatingHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
-
-
 
 
 
@@ -260,11 +241,6 @@ public class RatingHandler implements HttpHandler {
 
 
 
-
-
-
-
-
     private User authenticate(HttpExchange exchange) throws IOException {
         List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
         if (authHeaders == null || authHeaders.isEmpty()) {
@@ -283,7 +259,6 @@ public class RatingHandler implements HttpHandler {
     }
 
 
-
     private long extractId(String path, String prefix) {
         try {
             return Long.parseLong(path.substring(prefix.length()));
@@ -291,8 +266,6 @@ public class RatingHandler implements HttpHandler {
             return -1;
         }
     }
-
-
 
     private void sendJson(HttpExchange exchange, int status, Object data) throws IOException {
         String json = gson.toJson(data);

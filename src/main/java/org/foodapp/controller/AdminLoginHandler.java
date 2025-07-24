@@ -20,7 +20,6 @@ public class AdminLoginHandler implements HttpHandler {
             sendJson(exchange, 405, "{\"error\": \"Method not allowed\"}");
             return;
         }
-
         try {
             AdminLoginRequest request = gson.fromJson(
                     new InputStreamReader(exchange.getRequestBody()),
@@ -45,8 +44,6 @@ public class AdminLoginHandler implements HttpHandler {
         }
 
     }
-
-
 
     private void sendJson(HttpExchange exchange, int statusCode, String json) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json");

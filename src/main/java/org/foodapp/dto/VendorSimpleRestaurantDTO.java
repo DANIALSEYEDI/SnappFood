@@ -1,5 +1,4 @@
 package org.foodapp.dto;
-
 import org.foodapp.model.Restaurant;
 
 public class VendorSimpleRestaurantDTO {

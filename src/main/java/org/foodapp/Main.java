@@ -1,9 +1,7 @@
 package org.foodapp;
 import com.sun.net.httpserver.HttpServer;
 import org.foodapp.controller.*;
-
 import java.net.InetSocketAddress;
-
 public class Main {
     public static void main(String[] args) throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);

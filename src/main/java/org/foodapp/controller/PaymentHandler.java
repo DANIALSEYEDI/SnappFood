@@ -9,7 +9,6 @@ import org.foodapp.dto.PaymentRequest;
 import org.foodapp.dto.TransactionsResponse;
 import org.foodapp.model.*;
 import org.foodapp.util.JwtUtil;
-
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -104,9 +103,6 @@ public class PaymentHandler implements HttpHandler {
     }
 
 
-
-
-
     private void sendJson(HttpExchange exchange, int status, Object response) throws IOException {
         String json = gson.toJson(response);
         byte[] bytes = json.getBytes();
@@ -115,8 +111,6 @@ public class PaymentHandler implements HttpHandler {
         exchange.getResponseBody().write(bytes);
         exchange.getResponseBody().close();
     }
-
-
 
 
     private User authenticate(HttpExchange exchange) throws IOException {
@@ -136,4 +130,3 @@ public class PaymentHandler implements HttpHandler {
         return userDao.findById(Long.parseLong(decoded.getSubject()));
     }
 }
-

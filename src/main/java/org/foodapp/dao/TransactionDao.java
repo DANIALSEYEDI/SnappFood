@@ -1,5 +1,4 @@
 package org.foodapp.dao;
-
 import org.foodapp.model.PaymentMethod;
 import org.foodapp.model.PaymentStatus;
 import org.foodapp.model.Transaction;
@@ -7,8 +6,6 @@ import org.foodapp.model.User;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-
-
 import java.util.List;
 import java.util.Map;
 
@@ -32,8 +29,6 @@ public class TransactionDao {
             e.printStackTrace();
         }
     }
-
-
 
     public List<Transaction> findByFilters(Map<String, String> params) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -76,9 +71,7 @@ public class TransactionDao {
             if (params.containsKey("search")) {
                 query.setParameter("search", "%" + params.get("search") + "%");
             }
-
             return query.list();
         }
     }
-
 }

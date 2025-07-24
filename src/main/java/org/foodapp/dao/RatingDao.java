@@ -1,12 +1,10 @@
 package org.foodapp.dao;
-
 import org.foodapp.model.Order;
 import org.foodapp.model.Rating;
 import org.foodapp.model.User;
 import org.foodapp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
 import java.util.List;
 
 public class RatingDao {
@@ -75,6 +73,4 @@ public class RatingDao {
             return count != null && count > 0;
         }
     }
-
-
 }

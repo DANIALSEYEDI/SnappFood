@@ -1,5 +1,4 @@
 package org.foodapp.controller;
-
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -37,13 +36,13 @@ public class RestaurantHandler implements HttpHandler {
                 handleGetMyRestaurants(exchange);
             } else if (path.matches("/restaurants/\\d+") && method.equalsIgnoreCase("PUT")) {
                 handleUpdate(exchange);
-            }else if (path.matches("/restaurants/\\d+/item") && method.equals("POST")) {
+            } else if (path.matches("/restaurants/\\d+/item") && method.equals("POST")) {
                 handleAddItem(exchange);
             } else if (path.matches("/restaurants/\\d+/item/\\d+") && method.equals("PUT")) {
                 handleEditItem(exchange);
             } else if (path.matches("/restaurants/\\d+/item/\\d+") && method.equals("DELETE")) {
                 handleDeleteItem(exchange);
-            }else if (path.matches("/restaurants/\\d+/menu") && method.equals("POST")) {
+            } else if (path.matches("/restaurants/\\d+/menu") && method.equals("POST")) {
                 long id = extractId(path, "/restaurants/", "/menu");
                 handleCreateMenu(exchange, id);
             } else if (path.matches("/restaurants/\\d+/menu/[^/]+") && method.equals("DELETE")) {
@@ -60,14 +59,13 @@ public class RestaurantHandler implements HttpHandler {
                 String title = parts[4];
                 long itemId = Long.parseLong(parts[5]);
                 handleRemoveItemFromMenu(exchange, id, title, itemId);
-            }else if (path.matches("/restaurants/\\d+/orders") && method.equalsIgnoreCase("GET")) {
+            } else if (path.matches("/restaurants/\\d+/orders") && method.equalsIgnoreCase("GET")) {
                 long id = extractId(path, "/restaurants/", "/orders");
                 handleGetOrdersForRestaurant(exchange, id);
             } else if (path.matches("/restaurants/orders/\\d+") && method.equalsIgnoreCase("PATCH")) {
                 long oid = extractId(path, "/restaurants/orders/", "");
                 handleUpdateOrderStatus(exchange, oid);
-            }
-            else {
+            } else {
                 sendJson(exchange, 404, "{\"error\": \"not_found\"}");
             }
         } catch (Exception e) {
@@ -75,8 +73,6 @@ public class RestaurantHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
 
 
     private void handleCreate(HttpExchange exchange) throws IOException {
@@ -103,8 +99,8 @@ public class RestaurantHandler implements HttpHandler {
                 sendJson(exchange, 400, "{\"error\": \"invalid_input\"}");
                 return;
             }
-            if (request.tax_fee==null){
-                request.tax_fee=0;
+            if (request.tax_fee == null) {
+                request.tax_fee = 0;
             }
             if (request.additional_fee == null) {
                 request.additional_fee = 0;
@@ -131,19 +127,11 @@ public class RestaurantHandler implements HttpHandler {
                     restaurant.getAdditionalFee()
             );
             sendJson(exchange, 201, gson.toJson(response));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
-
-
-
-
 
 
     private void handleGetMyRestaurants(HttpExchange exchange) throws IOException {
@@ -158,7 +146,6 @@ public class RestaurantHandler implements HttpHandler {
                 sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
-
 
             if (user.getRole() != Role.SELLER) {
                 sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
@@ -181,21 +168,11 @@ public class RestaurantHandler implements HttpHandler {
                     ))
                     .toList();
             sendJson(exchange, 200, gson.toJson(responseList));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
-
-
-
-
-
-
 
     private void handleUpdate(HttpExchange exchange) throws IOException {
         try {
@@ -253,23 +230,11 @@ public class RestaurantHandler implements HttpHandler {
                     restaurant.getAdditionalFee()
             );
             sendJson(exchange, 200, gson.toJson(response));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
-
-
-
-
-
-
-
-
 
 
     private void handleAddItem(HttpExchange exchange) throws IOException {
@@ -312,19 +277,11 @@ public class RestaurantHandler implements HttpHandler {
             new FoodItemDao().save(item);
             FoodItemResponse response = new FoodItemResponse(item);
             sendJson(exchange, 200, gson.toJson(response));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
-
-
-
-
 
 
     private void handleEditItem(HttpExchange exchange) throws IOException {
@@ -363,7 +320,6 @@ public class RestaurantHandler implements HttpHandler {
                 sendJson(exchange, 404, "{\"error\": \"not_found item\"}");
                 return;
             }
-
             RestaurantFoodItemRequest request = gson.fromJson(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8), RestaurantFoodItemRequest.class);
             if (request.name != null) item.setName(request.name);
             if (request.imageBase64 != null) item.setImageBase64(request.imageBase64);
@@ -375,24 +331,11 @@ public class RestaurantHandler implements HttpHandler {
             new FoodItemDao().update(item);
             FoodItemResponse response = new FoodItemResponse(item);
             sendJson(exchange, 200, gson.toJson(response));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     private void handleDeleteItem(HttpExchange exchange) throws IOException {
@@ -426,7 +369,7 @@ public class RestaurantHandler implements HttpHandler {
                 sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
-            if(item==null) {
+            if (item == null) {
                 sendJson(exchange, 404, "{\"error\": \"not_found item\"}");
                 return;
             }
@@ -438,25 +381,16 @@ public class RestaurantHandler implements HttpHandler {
 
             new FoodItemDao().delete(item);
             sendJson(exchange, 200, "{\"message\": \"Food item removed successfully\"}");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
 
 
-
-
-
-
-
-
     private long extractIdFromPath(String path, String prefix, String suffix) {
         return Long.parseLong(path.replace(prefix, "").replace(suffix, "").split("/")[0]);
     }
-
-
 
 
     private void handleCreateMenu(HttpExchange exchange, long restaurantId) throws IOException {
@@ -503,18 +437,11 @@ public class RestaurantHandler implements HttpHandler {
             restaurant.getMenus().add(menu);
             menuDao.save(menu);
             sendJson(exchange, 200, gson.toJson(Map.of("title", menu.getTitle())));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
-
-
-
 
 
     private void handleDeleteMenu(HttpExchange exchange, long restaurantId, String title) throws IOException {
@@ -556,18 +483,11 @@ public class RestaurantHandler implements HttpHandler {
             restaurantDao.update(restaurant);
             menuDao.delete(toRemove);
             sendJson(exchange, 200, "{\"message\": \"Food menu removed from restaurant successfully\"}");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
-
-
-
 
 
     private void handleAddItemToMenu(HttpExchange exchange, long restaurantId, String title) throws IOException {
@@ -623,15 +543,6 @@ public class RestaurantHandler implements HttpHandler {
     }
 
 
-
-
-
-
-
-
-
-
-
     private void handleRemoveItemFromMenu(HttpExchange exchange, long restaurantId, String title, long itemId) throws IOException {
         try {
             User user = authenticate(exchange);
@@ -679,20 +590,11 @@ public class RestaurantHandler implements HttpHandler {
             menu.removeItem(item);
             menuDao.update(menu);
             sendJson(exchange, 200, "{\"message\": \"Item removed from restaurant menu successfully\"}");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"Internal_server_error\"}");
         }
     }
-
-
-
-
-
-
-
-
 
 
     private void handleGetOrdersForRestaurant(HttpExchange exchange, long restaurantId) throws IOException {
@@ -716,7 +618,7 @@ public class RestaurantHandler implements HttpHandler {
                 sendJson(exchange, 404, "{\"error\": \"not_found Restaurant\"}");
                 return;
             }
-            if ( !restaurant.getSeller().getId().equals(user.getId())) {
+            if (!restaurant.getSeller().getId().equals(user.getId())) {
                 sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
@@ -743,12 +645,6 @@ public class RestaurantHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
-
-
-
-
-
 
 
     private void handleUpdateOrderStatus(HttpExchange exchange, long orderId) throws IOException {
@@ -786,7 +682,7 @@ public class RestaurantHandler implements HttpHandler {
                 return;
             }
 
-            if (order.getStatus()==OrderStatus.CANCELLED || order.getStatus()==OrderStatus.UNPAID_AND_CANCELLED || order.getStatus()==OrderStatus.ON_THE_WAY || order.getStatus()==OrderStatus.COMPLETED) {
+            if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.UNPAID_AND_CANCELLED || order.getStatus() == OrderStatus.ON_THE_WAY || order.getStatus() == OrderStatus.COMPLETED) {
                 sendJson(exchange, 403, "{\"error\": \"Order not ready for  change restaurant status\"}");
                 return;
             }
@@ -800,7 +696,8 @@ public class RestaurantHandler implements HttpHandler {
             }
             OrderRestaurantStatus currentStatus = order.getRestaurantStatus();
             boolean isValid = switch (currentStatus) {
-                case PENDING -> newRestaurantStatus == OrderRestaurantStatus.ACCEPTED || newRestaurantStatus == OrderRestaurantStatus.REJECTED;
+                case PENDING ->
+                        newRestaurantStatus == OrderRestaurantStatus.ACCEPTED || newRestaurantStatus == OrderRestaurantStatus.REJECTED;
                 case ACCEPTED -> newRestaurantStatus == OrderRestaurantStatus.SERVED;
                 default -> false;
             };
@@ -825,11 +722,6 @@ public class RestaurantHandler implements HttpHandler {
     }
 
 
-
-
-
-
-
     private User authenticate(HttpExchange exchange) throws IOException {
         List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
         if (authHeaders == null || authHeaders.isEmpty()) {
@@ -850,7 +742,6 @@ public class RestaurantHandler implements HttpHandler {
     }
 
 
-
     private long extractId(String path, String prefix, String suffix) {
         try {
             if (!path.startsWith(prefix)) {
@@ -865,14 +756,11 @@ public class RestaurantHandler implements HttpHandler {
                     temp = temp.substring(0, endIndex);
                 }
             }
-
             return Long.parseLong(temp);
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid path format for extracting ID: " + path);
         }
     }
-
-
 
 
     private void sendJson(HttpExchange exchange, int statusCode, String json) throws IOException {
@@ -883,6 +771,4 @@ public class RestaurantHandler implements HttpHandler {
             os.write(bytes);
         }
     }
-
-
 }

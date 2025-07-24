@@ -1,5 +1,4 @@
 package org.foodapp.dto;
-
 public class AuthRegisterResponse {
     public String message;
     public Long user_id;
@@ -16,5 +15,4 @@ public class AuthRegisterResponse {
     public void setToken(String token) {
         this.token = token;
     }
-
 }

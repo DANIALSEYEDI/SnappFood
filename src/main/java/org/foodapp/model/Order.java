@@ -59,46 +59,32 @@ public class Order {
     public Long getId() { return id; }
     public String getDeliveryAddress() { return deliveryAddress; }
     public void setDeliveryAddress(String deliveryAddress) { this.deliveryAddress = deliveryAddress; }
-
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
-
     public Restaurant getRestaurant() { return restaurant; }
     public void setRestaurant(Restaurant restaurant) { this.restaurant = restaurant; }
-
     public User getCourier() { return courier; }
     public void setCourier(User courier) { this.courier = courier; }
-
     public List<OrderItem> getItemsOfOrder() { return itemsOfOrder; }
     public void setItemsOfOrder(List<OrderItem> itemsOfOrder) { this.itemsOfOrder = itemsOfOrder; }
-
     public Coupon getCoupon() { return coupon; }
     public void setCoupon(Coupon coupon) { this.coupon = coupon; }
-
     public Integer getRawPrice() { return rawPrice; }
     public void setRawPrice(Integer rawPrice) { this.rawPrice = rawPrice; }
-
     public Integer getTaxFee() { return taxFee; }
     public void setTaxFee(Integer taxFee) { this.taxFee = taxFee; }
-
     public Integer getAdditionalFee() { return additionalFee; }
     public void setAdditionalFee(Integer additionalFee) { this.additionalFee = additionalFee; }
-
     public Integer getCourierFee() { return courierFee; }
     public void setCourierFee(Integer courierFee) { this.courierFee = courierFee; }
-
     public Integer getPayPrice() { return payPrice; }
     public void setPayPrice(Integer payPrice) { this.payPrice = payPrice; }
-
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
-
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
-
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-
     public OrderRestaurantStatus getRestaurantStatus() { return restaurantStatus; }
     public OrderDeliveryStatus getDeliveryStatus() { return deliveryStatus; }
     public void setDeliveryStatus(OrderDeliveryStatus deliveryStatus) { this.deliveryStatus = deliveryStatus; }

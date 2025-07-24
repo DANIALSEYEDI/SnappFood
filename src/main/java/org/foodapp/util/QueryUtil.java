@@ -1,10 +1,8 @@
 package org.foodapp.util;
-
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-
 public class QueryUtil {
     public static Map<String, String> getQueryParams(String query) {
         Map<String, String> map = new HashMap<>();
