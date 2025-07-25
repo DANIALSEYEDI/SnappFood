@@ -67,12 +67,6 @@ public class AuthHandler implements HttpHandler {
         String accountNumber=null ;
         UserStatus userStatus = UserStatus.REJECTED;
 
-        if ((role == Role.SELLER || role == Role.COURIER)) {
-            if (request.bank_info == null || request.bank_info.bank_name == null || request.bank_info.account_number == null) {
-                sendJson(exchange, 400, "{\"error\": \"invalid_input bank_info\"}");
-                return;
-            }
-        }
         if (request.bank_info != null && (request.bank_info.bank_name != null || request.bank_info.account_number != null)) {
             bankName = request.bank_info.bank_name;
             accountNumber = request.bank_info.account_number;
