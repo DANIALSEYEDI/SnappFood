@@ -3,6 +3,7 @@ package org.foodapp.dto.Response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.foodapp.model.Order;
 import org.foodapp.model.OrderDeliveryStatus;
+import org.foodapp.model.OrderRestaurantStatus;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -24,6 +25,8 @@ public class OrderResponse {
     public String updated_at;
     @JsonProperty("delivery_status")
     private OrderDeliveryStatus deliveryStatus;
+    @JsonProperty("restaurant_status")
+    private OrderRestaurantStatus restaurantStatus;
 
     public static OrderResponse fromEntity(Order order) {
         OrderResponse dto = new OrderResponse();
@@ -45,6 +48,7 @@ public class OrderResponse {
         dto.created_at = order.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         dto.updated_at = order.getUpdatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         dto.deliveryStatus = order.getDeliveryStatus();
+        dto.restaurantStatus = order.getRestaurantStatus();
         return dto;
     }
 }

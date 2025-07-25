@@ -249,5 +249,4 @@ public class OrderHandler implements HttpHandler {
         }
         return userDao.findById(Long.parseLong(decoded.getSubject()));
     }
-
 }
