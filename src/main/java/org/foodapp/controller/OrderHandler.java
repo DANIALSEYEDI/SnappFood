@@ -92,7 +92,6 @@ public class OrderHandler implements HttpHandler {
                     return;
                 }
             }
-
             Order order = new Order();
             order.setRestaurant(vendor);
             order.setDeliveryAddress(req.delivery_address);
@@ -104,17 +103,13 @@ public class OrderHandler implements HttpHandler {
             order.setDeliveryStatus(OrderDeliveryStatus.PENDING);
             order.setCreatedAt(LocalDateTime.now());
             order.setUpdatedAt(LocalDateTime.now());
-
             order.setItemsOfOrder(new ArrayList<>());
-
             int rawPrice = 0;
-
             for (OrderItemRequest itemReq : req.items) {
                 FoodItem foodItem = foodItemDao.findById(itemReq.item_id);
                 if (foodItem == null || !foodItem.getRestaurant().getId().equals(vendor.getId())) {
                     continue;
                 }
-
                 if (itemReq.quantity <= 0 || itemReq.quantity > foodItem.getSupply()) {
                     continue;
                 }
@@ -148,11 +143,7 @@ public class OrderHandler implements HttpHandler {
                     discount = rawPrice * coupon.getValue().intValue() / 100;
                 }
             }
-
             order.setPayPrice(Math.max(0, payprice - discount));
-
-
-
             orderDao.save(order);
             sendJson(exchange, 200, OrderResponse.fromEntity(order));
         }

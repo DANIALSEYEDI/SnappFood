@@ -16,8 +16,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DeliveryHandler implements HttpHandler {
@@ -53,10 +55,14 @@ public class DeliveryHandler implements HttpHandler {
                 sendJson(exchange, 403, Map.of("error", "forbidden User"));
                 return;
             }
-            List<Order> orders = orderDao.findAvailableForDelivery();
-            List<OrderResponse> result = orders.stream()
+            List<Order> assignedOrders = orderDao.findOrdersAssignedToCourier(user.getId());
+            List<Order> availableOrders = orderDao.findAvailableForDelivery();
+            Set<Order> allOrders = new HashSet<>();
+            allOrders.addAll(availableOrders);
+            allOrders.addAll(assignedOrders);
+            List<OrderResponse> result = allOrders.stream()
                     .map(OrderResponse::fromEntity)
-                    .collect(Collectors.toList());
+                    .toList();
             sendJson(exchange, 200, result);
         }
         catch (Exception e) {
@@ -64,8 +70,6 @@ public class DeliveryHandler implements HttpHandler {
             sendJson(exchange, 500, Map.of("error", "internal_server_error"));
         }
     }
-
-
 
    private void handleDeliveryHistory(HttpExchange exchange) throws IOException {
         try {

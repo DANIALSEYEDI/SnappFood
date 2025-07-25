@@ -129,6 +129,20 @@ public class OrderDao {
         }
     }
 
+    public List<Order> findOrdersAssignedToCourier(Long courierId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                            "SELECT DISTINCT o FROM Order o " +
+                                    "LEFT JOIN FETCH o.itemsOfOrder i " +
+                                    "WHERE o.status = :status " +
+                                    "AND o.courier.id = :courierId", Order.class)
+                    .setParameter("status", OrderStatus.ON_THE_WAY)
+                    .setParameter("courierId", courierId)
+                    .getResultList();
+        }
+    }
+
+
     public List<Order> findHistoryForUser(Long userId, String search, String vendorName) {
         Session session = HibernateUtil.getSessionFactory().openSession();
 

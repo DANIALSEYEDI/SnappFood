@@ -58,14 +58,11 @@ public class VendorsHandler implements HttpHandler {
                     new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8),
                     VendorFilterRequest.class
             );
-
             List<Restaurant> vendors = restaurantDao.findByFilters(request.search, request.keywords);
-
             if (vendors == null || vendors.isEmpty()) {
                 sendJson(exchange, 404, "{\"error\": \"not_found vendors\"}");
                 return;
             }
-
             List<RestaurantResponse> responseList = vendors.stream()
                     .map(r -> new RestaurantResponse(
                             r.getId(),
