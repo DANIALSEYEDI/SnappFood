@@ -6,7 +6,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.RestaurantDao;
 import org.foodapp.dao.UserDao;
-import org.foodapp.dto.RestaurantResponse;
+import org.foodapp.dto.Response.RestaurantResponse;
 import org.foodapp.model.Restaurant;
 import org.foodapp.model.Role;
 import org.foodapp.model.User;

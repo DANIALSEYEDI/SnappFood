@@ -1,4 +1,4 @@
-package org.foodapp.dto;
+package org.foodapp.dto.Response;
 import org.foodapp.model.Rating;
 import java.time.LocalDateTime;
 import java.util.List;

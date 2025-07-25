@@ -3,7 +3,7 @@ package org.foodapp.controller;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.CreateAdminDao;
-import org.foodapp.dto.AdminLoginRequest;
+import org.foodapp.dto.Request.AdminLoginRequest;
 import org.foodapp.model.Admin;
 import org.foodapp.util.JwtUtil;
 import com.google.gson.Gson;

@@ -1,4 +1,4 @@
-package org.foodapp.dto;
+package org.foodapp.dto.Response;
 public class AuthRegisterResponse {
     public String message;
     public Long user_id;

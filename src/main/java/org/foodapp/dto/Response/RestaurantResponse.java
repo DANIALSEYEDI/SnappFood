@@ -1,4 +1,4 @@
-package org.foodapp.dto;
+package org.foodapp.dto.Response;
 
 public class RestaurantResponse {
     public Long id;

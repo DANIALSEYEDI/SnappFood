@@ -1,4 +1,4 @@
-package org.foodapp.dto;
+package org.foodapp.dto.Response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.foodapp.model.Order;

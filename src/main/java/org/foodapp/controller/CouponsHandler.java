@@ -7,7 +7,7 @@ import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.CouponDao;
 import org.foodapp.dao.OrderDao;
 import org.foodapp.dao.UserDao;
-import org.foodapp.dto.CouponResponse;
+import org.foodapp.dto.Response.CouponResponse;
 import org.foodapp.model.Coupon;
 import org.foodapp.model.User;
 import org.foodapp.util.JwtUtil;

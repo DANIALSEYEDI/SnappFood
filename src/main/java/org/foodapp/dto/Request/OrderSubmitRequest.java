@@ -1,4 +1,5 @@
-package org.foodapp.dto;
+package org.foodapp.dto.Request;
+
 import java.util.List;
 
 public class OrderSubmitRequest {

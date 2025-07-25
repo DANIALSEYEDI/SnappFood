@@ -1,4 +1,4 @@
-package org.foodapp.dto;
+package org.foodapp.dto.Request;
 
 public class PaymentRequest {
     public Long order_id;

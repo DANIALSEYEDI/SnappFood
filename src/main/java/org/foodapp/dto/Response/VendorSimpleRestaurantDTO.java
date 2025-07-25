@@ -1,4 +1,4 @@
-package org.foodapp.dto;
+package org.foodapp.dto.Response;
 import org.foodapp.model.Restaurant;
 
 public class VendorSimpleRestaurantDTO {

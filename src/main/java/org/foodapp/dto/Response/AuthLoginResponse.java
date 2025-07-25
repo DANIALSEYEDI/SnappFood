@@ -1,4 +1,5 @@
-package org.foodapp.dto;
+package org.foodapp.dto.Response;
+
 public class AuthLoginResponse {
     public String message;
     public String token;

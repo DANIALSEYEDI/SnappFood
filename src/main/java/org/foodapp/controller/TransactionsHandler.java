@@ -5,7 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.foodapp.dao.TransactionDao;
 import org.foodapp.dao.UserDao;
-import org.foodapp.dto.TransactionsResponse;
+import org.foodapp.dto.Response.TransactionsResponse;
 import org.foodapp.model.Transaction;
 import org.foodapp.model.User;
 import org.foodapp.util.JwtUtil;
