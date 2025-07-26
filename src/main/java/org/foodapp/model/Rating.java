@@ -21,6 +21,7 @@ public class Rating {
     @Column(name = "image")
     private List<String> imageBase64;
 
+
     @ManyToOne
     private User user;
 
