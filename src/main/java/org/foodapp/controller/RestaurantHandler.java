@@ -15,6 +15,8 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.foodapp.util.QueryUtil;
 
@@ -62,7 +64,11 @@ public class RestaurantHandler implements HttpHandler {
                 String title = parts[4];
                 long itemId = Long.parseLong(parts[5]);
                 handleRemoveItemFromMenu(exchange, id, title, itemId);
-            } else if (path.matches("/restaurants/\\d+/orders") && method.equalsIgnoreCase("GET")) {
+            }
+            else if (path.matches("/restaurants/\\d+/menus/list") && method.equalsIgnoreCase("GET")) {
+                long id = extractId(path, "/restaurants/", "/menus/list");
+                handleGetMenus(exchange, id);
+            }else if (path.matches("/restaurants/\\d+/orders") && method.equalsIgnoreCase("GET")) {
                 long id = extractId(path, "/restaurants/", "/orders");
                 handleGetOrdersForRestaurant(exchange, id);
             } else if (path.matches("/restaurants/orders/\\d+") && method.equalsIgnoreCase("PATCH")) {
@@ -717,7 +723,54 @@ public class RestaurantHandler implements HttpHandler {
             }
             order.setUpdatedAt(LocalDateTime.now());
             orderDao.update(order);
-            sendJson(exchange, 200, "{\"message\": \"Order status changed successfully\"}");
+            sendJson(exchange, 200, String.format("{\"message\": \"Order status changed successfully\", \"restaurant_status\": \"%s\", \"status\": \"%s\"}",
+                    order.getRestaurantStatus().name(), order.getStatus().name()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
+        }
+    }
+
+
+
+    private void handleGetMenus(HttpExchange exchange, long restaurantId) throws IOException {
+        try {
+            User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+            if (user.getStatus() != UserStatus.APPROVED) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+
+            Restaurant restaurant = restaurantDao.findById(restaurantId);
+            if (restaurant == null) {
+                sendJson(exchange, 404, "{\"error\": \"not_found Restaurant\"}");
+                return;
+            }
+
+            if (!restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+            List<Menu> menus = menuDao.findByRestaurantId(restaurantId);
+            List<Map<String, Object>> menuList = menus.stream()
+                    .map(menu -> {
+                        Map<String, Object> menuMap = new HashMap<>();
+                        menuMap.put("id", menu.getId());
+                        menuMap.put("title", menu.getTitle());
+                        return menuMap;
+                    })
+                    .collect(Collectors.toList());
+
+            String jsonResponse = gson.toJson(menuList);
+            sendJson(exchange, 200, jsonResponse);
         } catch (Exception e) {
             e.printStackTrace();
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
@@ -750,9 +803,7 @@ public class RestaurantHandler implements HttpHandler {
             if (!path.startsWith(prefix)) {
                 throw new IllegalArgumentException("Path does not start with expected prefix");
             }
-
             String temp = path.substring(prefix.length());
-
             if (suffix != null && !suffix.isEmpty()) {
                 int endIndex = temp.indexOf(suffix);
                 if (endIndex != -1) {

@@ -59,5 +59,15 @@ public class MenuDao {
         }
     }
 
+    public List<Menu> findByRestaurantId(Long restaurantId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                            "FROM Menu m WHERE m.restaurant.id = :restaurantId", Menu.class
+                    )
+                    .setParameter("restaurantId", restaurantId)
+                    .list();
+        }
+    }
+
 }
 
