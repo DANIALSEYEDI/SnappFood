@@ -12,11 +12,11 @@ import org.foodapp.util.JwtUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import java.io.*;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.foodapp.util.QueryUtil;
 
@@ -64,6 +64,12 @@ public class RestaurantHandler implements HttpHandler {
                 String title = parts[4];
                 long itemId = Long.parseLong(parts[5]);
                 handleRemoveItemFromMenu(exchange, id, title, itemId);
+            }
+            else if (path.matches("/restaurants/\\d+/menu/[^/]+/items") && method.equalsIgnoreCase("GET")) { // endpoint جدید
+                long id = extractId(path, "/restaurants/", "/menu/");
+                String title = URLDecoder.decode(path.substring(path.indexOf("/menu/") + 6, path.lastIndexOf("/items")), StandardCharsets.UTF_8);
+                System.out.println("Decoded restaurantId: " + id + ", menuTitle: " + title);
+                handleGetMenuItems(exchange, id, title);
             }
             else if (path.matches("/restaurants/\\d+/menus/list") && method.equalsIgnoreCase("GET")) {
                 long id = extractId(path, "/restaurants/", "/menus/list");
@@ -114,7 +120,6 @@ public class RestaurantHandler implements HttpHandler {
             if (request.additional_fee == null) {
                 request.additional_fee = 0;
             }
-
             Restaurant restaurant = new Restaurant(
                     request.name,
                     request.address,
@@ -124,7 +129,6 @@ public class RestaurantHandler implements HttpHandler {
                     request.additional_fee,
                     user
             );
-
             restaurantDao.save(restaurant);
             RestaurantResponse response = new RestaurantResponse(
                     restaurant.getId(),
@@ -187,7 +191,6 @@ public class RestaurantHandler implements HttpHandler {
         try {
             User user = authenticate(exchange);
             if (user == null) {
-                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
                 return;
             }
             if (user.getStatus() != UserStatus.APPROVED) {
@@ -227,7 +230,6 @@ public class RestaurantHandler implements HttpHandler {
             if (request.logoBase64 != null) restaurant.setLogoBase64(request.logoBase64);
             if (request.tax_fee != null) restaurant.setTaxFee(request.tax_fee);
             if (request.additional_fee != null) restaurant.setAdditionalFee(request.additional_fee);
-
             restaurantDao.update(restaurant);
             RestaurantResponse response = new RestaurantResponse(
                     restaurant.getId(),
@@ -261,7 +263,6 @@ public class RestaurantHandler implements HttpHandler {
                 sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
-
             long restaurantId = extractIdFromPath(exchange.getRequestURI().getPath(), "/restaurants/", "/item");
             Restaurant restaurant = new RestaurantDao().findById(restaurantId);
             if (restaurant == null) {
@@ -322,8 +323,6 @@ public class RestaurantHandler implements HttpHandler {
                 sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
                 return;
             }
-
-
             FoodItem item = new FoodItemDao().findById(itemId);
             if (item == null || !item.getRestaurant().getId().equals(restaurantId)) {
                 sendJson(exchange, 404, "{\"error\": \"not_found item\"}");
@@ -777,6 +776,65 @@ public class RestaurantHandler implements HttpHandler {
         }
     }
 
+    private void handleGetMenuItems(HttpExchange exchange, long restaurantId, String menuTitle) throws IOException {
+        try {
+            User user = authenticate(exchange);
+            if (user == null) {
+                sendJson(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                return;
+            }
+            if (user.getStatus() != UserStatus.APPROVED) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+            if (user.getRole() != Role.SELLER) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+
+            Restaurant restaurant = restaurantDao.findById(restaurantId);
+            if (restaurant == null) {
+                sendJson(exchange, 404, "{\"error\": \"not_found Restaurant\"}");
+                return;
+            }
+
+            if (!restaurant.getSeller().getId().equals(user.getId())) {
+                sendJson(exchange, 403, "{\"error\": \"forbidden\"}");
+                return;
+            }
+
+            Menu menu = menuDao.findByRestaurantAndTitleWithItems(restaurantId, menuTitle);
+            if (menu == null) {
+                sendJson(exchange, 404, "{\"error\": \"not_found Menu\"}");
+                return;
+            }
+
+            List<Map<String, Object>> itemsList = menu.getItems().stream()
+                    .map(item -> {
+                        Map<String, Object> itemMap = new HashMap<>();
+                        itemMap.put("id", item.getId());
+                        itemMap.put("name", item.getName());
+                        itemMap.put("imageBase64", item.getImageBase64());
+                        itemMap.put("description", item.getDescription());
+                        System.out.println(item.getRestaurant().getId());
+                        Long vendorId = (item.getRestaurant() != null && item.getRestaurant().getId() != null)
+                                ? item.getRestaurant().getId()
+                                : restaurantId;
+                        itemMap.put("vendor_id", vendorId);
+                        itemMap.put("price", item.getPrice());
+                        itemMap.put("supply", item.getSupply());
+                        itemMap.put("keywords", item.getKeywords());
+                        return itemMap;
+                    })
+                    .collect(Collectors.toList());
+
+            String jsonResponse = gson.toJson(itemsList);
+            sendJson(exchange, 200, jsonResponse);
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
+        }
+    }
 
     private User authenticate(HttpExchange exchange) throws IOException {
         List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
@@ -784,7 +842,6 @@ public class RestaurantHandler implements HttpHandler {
             sendJson(exchange, 401, "{\"error\": \"Missing Authorization header\"}");
             return null;
         }
-
         String token = authHeaders.get(0).replace("Bearer ", "");
         DecodedJWT decoded;
         try {
@@ -815,7 +872,6 @@ public class RestaurantHandler implements HttpHandler {
             throw new IllegalArgumentException("Invalid path format for extracting ID: " + path);
         }
     }
-
 
     private void sendJson(HttpExchange exchange, int statusCode, String json) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json");
