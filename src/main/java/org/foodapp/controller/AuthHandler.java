@@ -268,7 +268,6 @@ public class AuthHandler implements HttpHandler {
         return userDao.findById(Long.parseLong(decoded.getSubject()));
     }
 
-
     private void sendJson(HttpExchange exchange, int statusCode, String json) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json");
         byte[] bytes = json.getBytes(StandardCharsets.UTF_8);

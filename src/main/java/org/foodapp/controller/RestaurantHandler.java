@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.foodapp.util.QueryUtil;
 
-
 public class RestaurantHandler implements HttpHandler {
 
     private final Gson gson = new Gson();

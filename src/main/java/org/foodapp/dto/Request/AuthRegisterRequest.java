@@ -20,4 +20,3 @@ public class AuthRegisterRequest {
         this.role = role;
     }
 }
-

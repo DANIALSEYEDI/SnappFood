@@ -4,4 +4,3 @@ public enum PaymentMethod {
     WALLET,
     ONLINE
 }
-

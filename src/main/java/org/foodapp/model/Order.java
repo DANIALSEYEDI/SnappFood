@@ -27,7 +27,6 @@ public class Order {
     @JoinColumn(name = "courier_id")
     private User courier;
 
-
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> itemsOfOrder = new ArrayList<>();
 
@@ -90,4 +89,3 @@ public class Order {
     public void setDeliveryStatus(OrderDeliveryStatus deliveryStatus) { this.deliveryStatus = deliveryStatus; }
     public void setRestaurantStatus(OrderRestaurantStatus restaurantStatus) { this.restaurantStatus = restaurantStatus; }
 }
-

@@ -105,7 +105,4 @@ public class Restaurant {
     public int hashCode() {
         return Objects.hash(id);
     }
-
 }
-
-

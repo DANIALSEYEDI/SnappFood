@@ -10,4 +10,3 @@ public class RestaurantUpdateOrderStatusRequest {
         this.status = status;
     }
 }
-

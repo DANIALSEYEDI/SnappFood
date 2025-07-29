@@ -26,30 +26,22 @@ public class OrderItem {
     public Long getId() {
         return id;
     }
-
     public Order getOrder() {
         return order;
     }
-
     public void setOrder(Order order) {
         this.order = order;
     }
-
     public FoodItem getItem() {
         return item;
     }
-
     public void setItem(FoodItem item) {
         this.item = item;
     }
-
     public Integer getQuantity() {
         return quantity;
     }
-
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 }
-
-

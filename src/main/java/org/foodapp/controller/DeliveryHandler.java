@@ -44,7 +44,6 @@ public class DeliveryHandler implements HttpHandler {
     }
 
 
-
     private void handleAvailableDeliveries(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
@@ -98,7 +97,6 @@ public class DeliveryHandler implements HttpHandler {
             sendJson(exchange, 500, Map.of("error", "Internal_server_error"));
         }
     }
-
 
 
     private void handleUpdateDeliveryStatus(HttpExchange exchange, long id) throws IOException {

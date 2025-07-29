@@ -46,5 +46,4 @@ public class Transaction {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public BigDecimal getAmount() { return amount; }
     public void setAmount(BigDecimal amount) { this.amount = amount; }
-
 }

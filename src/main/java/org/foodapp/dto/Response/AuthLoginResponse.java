@@ -23,4 +23,3 @@ public class AuthLoginResponse {
         this.user = user;
     }
 }
-

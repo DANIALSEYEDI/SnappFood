@@ -60,5 +60,4 @@ public class UserDao {
                 return session.createQuery("FROM User", User.class).list();
             }
     }
-
 }

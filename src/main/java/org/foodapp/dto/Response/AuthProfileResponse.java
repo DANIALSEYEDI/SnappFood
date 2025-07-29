@@ -1,7 +1,5 @@
 package org.foodapp.dto.Response;
-
 import org.foodapp.model.Role;
-
 import java.math.BigDecimal;
 
 public class AuthProfileResponse {

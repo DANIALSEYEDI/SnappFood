@@ -1,5 +1,4 @@
 package org.foodapp.dto.Response;
-
 import java.util.List;
 
 public class RatingItemResponse {
@@ -11,4 +10,3 @@ public class RatingItemResponse {
         this.comments = list;
     }
 }
-

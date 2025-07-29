@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.foodapp.model.Order;
 import org.foodapp.model.OrderDeliveryStatus;
 import org.foodapp.model.OrderRestaurantStatus;
-
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,4 +51,3 @@ public class OrderResponse {
         return dto;
     }
 }
-

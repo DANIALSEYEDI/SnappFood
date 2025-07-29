@@ -133,8 +133,6 @@ public class FavoriteHandler implements HttpHandler {
     }
 
 
-
-
     private User authenticate(HttpExchange exchange) throws IOException {
         List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
         if (authHeaders == null || authHeaders.isEmpty()) {

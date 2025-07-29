@@ -91,7 +91,6 @@ public class FoodItem {
         this.restaurant = restaurant;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -105,5 +104,3 @@ public class FoodItem {
         return Objects.hash(id);
     }
 }
-
-

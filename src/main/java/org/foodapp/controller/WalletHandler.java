@@ -36,7 +36,6 @@ public class WalletHandler implements HttpHandler {
         }
     }
 
-
     private void handleTopUp(HttpExchange exchange) throws IOException {
         Transaction tx = new Transaction();
         try {

@@ -44,8 +44,6 @@ public class OrderHandler implements HttpHandler {
     }
 
 
-
-
     private void handleSubmitOrder(HttpExchange exchange) throws IOException {
         try {
             User user = authenticate(exchange);
@@ -178,7 +176,6 @@ public class OrderHandler implements HttpHandler {
             sendJson(exchange, 500, "{\"error\": \"internal_server_error\"}");
         }
     }
-
 
 
 

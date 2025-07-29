@@ -1,5 +1,4 @@
 package org.foodapp.dto.Request;
-
 import java.util.List;
 
 public class OrderSubmitRequest {
@@ -8,4 +7,3 @@ public class OrderSubmitRequest {
     public Long coupon_id;
     public List<OrderItemRequest> items;
 }
-
