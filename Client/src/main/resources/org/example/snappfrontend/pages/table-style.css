@@ -1,0 +1,50 @@
+
+.table-view {
+    -fx-background-color: #f4f4f4;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1px;
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
+    -fx-padding: 5;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0.1, 0, 2);
+}
+.table-view .table-cell {
+    -fx-font-weight: bold;
+}
+.table-row-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+
+.table-cell:empty {
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: #ccc;
+    -fx-border-width: 0 0 1px 0;
+}
+.table-cell {
+    -fx-padding: 8px;
+    -fx-border-color: #ccc;
+    -fx-border-width: 0 1px 0 0; /* فقط خط بین ستون‌ها */
+}
+.table-view .scroll-bar:vertical,
+.table-view .scroll-bar:horizontal {
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-opacity: 0;
+    -fx-padding: 0;
+}
+
+.table-view .virtual-flow .clipped-container > .sheet > .scroll-bar:vertical {
+    -fx-opacity: 0;
+    -fx-max-width: 0;
+}
+/* مخفی کردن بخش داخلی اسکرول‌بار */
+.scroll-bar .thumb {
+    -fx-background-color: transparent;
+}

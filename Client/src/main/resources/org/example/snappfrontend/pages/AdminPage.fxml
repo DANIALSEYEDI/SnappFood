@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: sandybrown;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.snappfrontend.controllers.AdminController">
+    <stylesheets>
+        <URL value="@table-style.css" />
+        <URL value="@headertable_style.css" />
+    </stylesheets>
+    <left>
+        <VBox alignment="TOP_CENTER" prefHeight="550.0" prefWidth="156.0" spacing="15" style="-fx-background-color: sandybrown;" styleClass="sidebar">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="30" />
+            </padding>
+            <ListView fx:id="actionList" prefHeight="500.0" prefWidth="124.0" style="-fx-background-color: tea;;" styleClass="action-list" VBox.vgrow="ALWAYS" />
+        </VBox>
+    </left>
+
+    <center>
+        <TabPane fx:id="mainTabPane" prefHeight="550.0" prefWidth="642.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+            <tabs>
+                <Tab text="Users view">
+                    <content>
+                        <VBox alignment="TOP_LEFT" prefHeight="510.0" prefWidth="632.0" spacing="20" style="-fx-background-color: sandybrown; -fx-padding: 30;">
+                     <HBox prefHeight="60.0" prefWidth="583.0">
+                        <children>
+                                  <Label prefHeight="50.0" prefWidth="259.0" styleClass="section-title" text="System Users">
+                              <font>
+                                 <Font name="Berlin Sans FB" size="44.0" />
+                              </font>
+                           </Label>
+                        </children>
+                     </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: teal;" />
+                            <TableView fx:id="usersTable" prefHeight="310.0" prefWidth="583.0" style="-fx-background-color: lightblue;" styleClass="data-table" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="userIdColumn" prefWidth="67.99999856948853" style="-fx-border-color: black; -fx-background-color: lightblue;" text="ID" />
+                                    <TableColumn fx:id="userNameColumn" prefWidth="74.40003204345703" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Full Name" />
+                                    <TableColumn fx:id="userPhoneColumn" minWidth="6.39996337890625" prefWidth="48.79998779296875" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Phone" />
+                                    <TableColumn fx:id="userEmailColumn" minWidth="0.0" prefWidth="56.800048828125" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Email" />
+                                    <TableColumn fx:id="userRoleColumn" prefWidth="68.79998779296875" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Role" />
+                                    <TableColumn fx:id="userAddressColumn" prefWidth="120.0" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Address" />
+                                    <TableColumn fx:id="userStatusColumn" prefWidth="72.800048828125" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Status" />
+                                    <TableColumn fx:id="userBanknameColumn" prefWidth="80.80001831054688" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Bank name" />
+                                </columns>
+                                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+                            </TableView>
+                        </VBox>
+                    </content>
+                </Tab>
+
+                <Tab text="Orders View">
+                    <content>
+                        <VBox alignment="TOP_LEFT" spacing="20" style="-fx-background-color: sandybrown; -fx-padding: 30;">
+                     <HBox prefHeight="100.0" prefWidth="200.0">
+                        <children>
+                                  <Label styleClass="section-title" text="System Orders">
+                              <font>
+                                 <Font name="Berlin Sans FB" size="38.0" />
+                              </font>
+                           </Label>
+                           <Label prefHeight="111.0" prefWidth="10.0" />
+                            <ImageView fitHeight="53.0" fitWidth="67.0" layoutX="630.0" layoutY="183.0" pickOnBounds="true" preserveRatio="true">
+                                <image>
+                                    <Image url="@../images/Pic4.png" />
+                                </image>
+                            </ImageView>
+                        </children>
+                     </HBox>
+                            <TableView fx:id="ordersTable" prefHeight="390.0" prefWidth="710.0" style="-fx-background-color: lightblue;" styleClass="data-table" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="orderIdColumn" prefWidth="46.399961948394775" style="-fx-background-color: lightblue; -fx-border-color: black;" text="ID" />
+                                    <TableColumn fx:id="orderCustomerIdColumn" prefWidth="84.0" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Customer ID" />
+                                    <TableColumn fx:id="orderVendorIdColumn" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Vendor ID" />
+                                    <TableColumn fx:id="orderStatusColumn" prefWidth="86.4000244140625" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Status" />
+                                    <TableColumn fx:id="orderPriceColumn" prefWidth="52.0" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Price" />
+                                    <TableColumn fx:id="orderAddressColumn" prefWidth="157.5999755859375" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Delivery Address" />
+                                    <TableColumn fx:id="orderCreatedAtColumn" prefWidth="89.59994506835938" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Created At" />
+                                </columns>
+                                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+                            </TableView>
+                        </VBox>
+                    </content>
+                </Tab>
+
+                <Tab text="Transactions View">
+                    <content>
+                        <VBox alignment="TOP_LEFT" spacing="20" style="-fx-background-color: sandybrown; -fx-padding: 30;">
+                            <Label prefHeight="44.0" prefWidth="333.0" styleClass="section-title" text="System Transactions">
+                        <font>
+                           <Font name="Berlin Sans FB" size="40.0" />
+                        </font>
+                     </Label>
+                            <TableView fx:id="transactionsTable" prefHeight="358.0" prefWidth="583.0" style="-fx-background-color: lightblue;" styleClass="data-table" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="transactionIdColumn" prefWidth="50.0" style="-fx-border-color: black; -fx-background-color: lightblue;" text="ID" />
+                                    <TableColumn fx:id="transactionOrderIdColumn" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Order ID" />
+                                    <TableColumn fx:id="transactionUserIdColumn" style="-fx-border-color: black; -fx-background-color: lightblue;" text="User ID" />
+                                    <TableColumn fx:id="transactionMethodColumn" prefWidth="100.0" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Method" />
+                                    <TableColumn fx:id="transactionStatusColumn" prefWidth="100" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Status" />
+                                </columns>
+                                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+                            </TableView>
+                        </VBox>
+                    </content>
+                </Tab>
+
+                <Tab text="Coupons View">
+                    <content>
+                        <VBox alignment="TOP_LEFT" prefHeight="521.0" prefWidth="599.0" spacing="20" style="-fx-background-color: sandybrown; -fx-padding: 30;">
+                     <HBox prefHeight="100.0" prefWidth="200.0">
+                        <children>
+                                  <Label styleClass="section-title" text="System Coupons">
+                              <font>
+                                 <Font name="Berlin Sans FB" size="37.0" />
+                              </font>
+                           </Label>
+                           <Label prefHeight="59.0" prefWidth="118.0" />
+                            <ImageView fitHeight="67.0" fitWidth="133.0" layoutX="630.0" layoutY="183.0" pickOnBounds="true" preserveRatio="true">
+                                <image>
+                                    <Image url="@../images/Pic25.png" />
+                                </image>
+                            </ImageView>
+                        </children>
+                     </HBox>
+                            <TableView fx:id="couponsTable" prefHeight="400" prefWidth="600" style="-fx-background-color: lightblue;" styleClass="data-table" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="couponIdColumn" prefWidth="50" style="-fx-background-color: lightblue; -fx-border-color: black;" text="ID" />
+                                    <TableColumn fx:id="couponCodeColumn" prefWidth="100" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Code" />
+                                    <TableColumn fx:id="couponTypeColumn" prefWidth="80" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Type" />
+                                    <TableColumn fx:id="couponValueColumn" prefWidth="80" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Value" />
+                                    <TableColumn fx:id="couponMinPriceColumn" prefWidth="100" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Min Price" />
+                                    <TableColumn fx:id="couponUserCountColumn" prefWidth="100" style="-fx-background-color: lightblue; -fx-border-color: black;" text="User Count" />
+                                    <TableColumn fx:id="couponStartDateColumn" prefWidth="120" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Start Date" />
+                                    <TableColumn fx:id="couponEndDateColumn" prefWidth="120" style="-fx-background-color: lightblue; -fx-border-color: black;" text="End Date" />
+                                </columns>
+                                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+                            </TableView>
+                        </VBox>
+                    </content>
+                </Tab>
+            <Tab text="Add New Coupon">
+              <content>
+                  <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="522.0" prefWidth="646.0" style="-fx-background-color: sandybrown;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1">
+                      <children>
+                          <VBox layoutX="55.0" layoutY="79.0" prefHeight="348.0" prefWidth="538.0" style="-fx-background-color: sandybrown;">
+                              <children>
+                                  <VBox prefHeight="57.0" prefWidth="456.0">
+                                      <children>
+                                          <Label text="Coupon code">
+                                              <font>
+                                                  <Font name="Arial Black" size="17.0" />
+                                              </font>
+                                          </Label>
+                                          <TextField fx:id="codeField" prefHeight="25.0" prefWidth="302.0" promptText="code" />
+                                      </children>
+                                      <padding>
+                                          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                      </padding>
+                                  </VBox>
+                                  <VBox prefHeight="40.0" prefWidth="499.0">
+                                      <children>
+                                          <Label text="Type">
+                                              <font>
+                                                  <Font name="Arial Black" size="14.0" />
+                                              </font>
+                                          </Label>
+                                          <ComboBox fx:id="typeComboBox" />
+                                      </children>
+                                      <padding>
+                                          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                      </padding>
+                                  </VBox>
+                                  <VBox prefHeight="40.0" prefWidth="499.0">
+                                      <children>
+                                          <Label text="Value">
+                                              <font>
+                                                  <Font name="Arial Black" size="13.0" />
+                                              </font>
+                                          </Label>
+                                          <TextField fx:id="valueField" promptText="value" />
+                                      </children>
+                                      <padding>
+                                          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                      </padding>
+                                  </VBox>
+                                  <VBox prefHeight="40.0" prefWidth="499.0">
+                                      <children>
+                                          <Label text="Min Price">
+                                              <font>
+                                                  <Font name="Arial Black" size="13.0" />
+                                              </font>
+                                          </Label>
+                                          <PasswordField fx:id="minPriceField" promptText="min price" />
+                                      </children>
+                                      <padding>
+                                          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                      </padding>
+                                  </VBox>
+                                  <VBox prefHeight="40.0" prefWidth="499.0">
+                                      <children>
+                                          <Label text="User Count">
+                                              <font>
+                                                  <Font name="Arial Black" size="13.0" />
+                                              </font>
+                                          </Label>
+                                          <TextField fx:id="userCountField" promptText="user count" />
+                                      </children>
+                                      <padding>
+                                          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                      </padding>
+                                  </VBox>
+                                  <HBox prefHeight="39.0" prefWidth="628.0">
+                                      <children>
+                                          <VBox prefHeight="55.0" prefWidth="436.0">
+                                              <children>
+                                                  <Label text="Start Date">
+                                                      <font>
+                                                          <Font name="Arial Black" size="13.0" />
+                                                      </font>
+                                                  </Label>
+                                                  <DatePicker fx:id="startDateField" prefHeight="26.0" prefWidth="234.0" />
+                                              </children>
+                                          </VBox>
+                                          <VBox prefHeight="55.0" prefWidth="461.0">
+                                              <children>
+                                                  <Label text="End Date">
+                                                      <font>
+                                                          <Font name="Arial Black" size="13.0" />
+                                                      </font>
+                                                  </Label>
+                                                  <DatePicker fx:id="endDateField" prefHeight="25.0" prefWidth="312.0" />
+                                              </children>
+                                          </VBox>
+                                      </children>
+                                  </HBox>
+                              </children>
+                              <padding>
+                                  <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                              </padding>
+                          </VBox>
+                          <ImageView fitHeight="71.0" fitWidth="182.0" layoutX="337.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" rotate="29.1">
+                              <image>
+                                  <Image url="@../images/Pic23.png" />
+                              </image>
+                          </ImageView>
+                          <Label alignment="CENTER" layoutX="62.0" layoutY="24.0" prefHeight="51.0" prefWidth="282.0" text="Add New Coupon">
+                              <font>
+                                  <Font name="Bauhaus 93" size="34.0" />
+                              </font>
+                          </Label>
+                          <HBox alignment="CENTER" layoutX="79.0" layoutY="449.0" prefHeight="32.0" prefWidth="484.0">
+                              <children>
+                                  <Button fx:id="addButton" alignment="CENTER" mnemonicParsing="false" onAction="#addCoupon" prefHeight="39.0" prefWidth="182.0" style="-fx-background-color: red;" text="ADD">
+                                      <font>
+                                          <Font name="Bauhaus 93" size="20.0" />
+                                      </font>
+                                  </Button>
+                              </children>
+                          </HBox>
+                      </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+   <bottom>
+      <HBox alignment="CENTER" prefHeight="50.0" prefWidth="800.0" style="-fx-background-color: sandybrown;" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="errorMessageLabel" alignment="CENTER" prefHeight="50.0" prefWidth="714.0" style="-fx-background-color: sandybrown;" textFill="RED">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <Button fx:id="homeButton" mnemonicParsing="false" onAction="#handleHomeButton" prefHeight="38.0" prefWidth="102.0" style="-fx-background-color: gold; -fx-border-color: black;" text="Home">
+               <font>
+                  <Font name="Bauhaus 93" size="19.0" />
+               </font>
+            </Button>
+         </children>
+         <padding>
+            <Insets right="20.0" />
+         </padding>
+      </HBox>
+   </bottom>
+</BorderPane>

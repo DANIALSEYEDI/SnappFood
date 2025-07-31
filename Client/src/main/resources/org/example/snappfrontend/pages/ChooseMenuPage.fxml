@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: sandybrown;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.snappfrontend.controllers.ChooseMenuController">
+   <children>
+      <Label alignment="CENTER" layoutX="240.0" layoutY="14.0" prefHeight="88.0" prefWidth="517.0" text="CHOOSE MENU TO ADD FOOD ">
+         <font>
+            <Font name="Bauhaus 93" size="34.0" />
+         </font>
+      </Label>
+      <Button fx:id="backButton" layoutX="689.0" layoutY="540.0" mnemonicParsing="false" onAction="#backHandle" prefHeight="46.0" prefWidth="91.0" style="-fx-background-color: yellow;" text="BACK">
+         <font>
+            <Font name="Bauhaus 93" size="20.0" />
+         </font>
+      </Button>
+      <Button fx:id="submitButton" layoutX="419.0" layoutY="256.0" mnemonicParsing="false" prefHeight="46.0" prefWidth="159.0" style="-fx-background-color: steelblue;" text="Submit">
+         <font>
+            <Font name="Bauhaus 93" size="25.0" />
+         </font>
+      </Button>
+      <Label layoutX="302.0" layoutY="158.0" prefHeight="42.0" prefWidth="173.0" text="Select Menu : ">
+         <font>
+            <Font name="Berlin Sans FB Demi Bold" size="28.0" />
+         </font>
+      </Label>
+      <ComboBox fx:id="menuComboBox" layoutX="507.0" layoutY="157.0" prefHeight="45.0" prefWidth="189.0" promptText="Choose Menu" style="-fx-background-color: aliceblue;" />
+      <ImageView fitHeight="337.0" fitWidth="239.0" layoutX="25.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/Pic22.png" />
+         </image>
+      </ImageView>
+   </children>
+</AnchorPane>

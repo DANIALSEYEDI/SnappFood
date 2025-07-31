@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: sandybrown;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.snappfrontend.controllers.ProfileController">
+   <children>
+      <VBox layoutX="19.0" layoutY="112.0" prefHeight="360.0" prefWidth="487.0">
+         <children>
+            <VBox prefHeight="80.0" prefWidth="500.0">
+               <children>
+                  <Label text="Full name">
+                     <font>
+                        <Font name="Arial Black" size="15.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="nameField" prefHeight="51.0" prefWidth="613.0" promptText="name" style="-fx-background-color: linen;" />
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </VBox>
+            <VBox prefHeight="61.0" prefWidth="622.0">
+               <children>
+                  <Label text="Phone number">
+                     <font>
+                        <Font name="Arial Black" size="15.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="numberField" promptText="phone number" style="-fx-background-color: linen;" />
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </VBox>
+            <VBox prefHeight="40.0" prefWidth="499.0">
+               <children>
+                  <Label text="Role">
+                     <font>
+                        <Font name="Arial Black" size="15.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="roleField" prefHeight="50.0" prefWidth="613.0" promptText="role" style="-fx-background-color: linen;" />
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </VBox>
+            <VBox prefHeight="40.0" prefWidth="499.0">
+               <children>
+                  <Label text="Address">
+                     <font>
+                        <Font name="Arial Black" size="15.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="addressField" prefHeight="17.0" prefWidth="551.0" promptText="address" style="-fx-background-color: linen;" />
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </VBox>
+            <VBox prefHeight="40.0" prefWidth="499.0">
+               <children>
+                  <Label text="Email">
+                     <font>
+                        <Font name="Arial Black" size="15.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="emailField" prefHeight="37.0" prefWidth="613.0" promptText="email" style="-fx-background-color: linen;" />
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </VBox>
+            <VBox prefHeight="51.0" prefWidth="628.0">
+               <children>
+                  <HBox prefHeight="16.0" prefWidth="618.0" />
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </VBox>
+            <HBox prefHeight="62.0" prefWidth="628.0">
+               <children>
+                  <VBox prefHeight="48.0" prefWidth="301.0">
+                     <children>
+                        <Label text="Bank name">
+                           <font>
+                              <Font name="Arial Black" size="15.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="bankField" prefHeight="49.0" prefWidth="289.0" promptText="bank name" style="-fx-background-color: linen;" />
+                     </children>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </VBox>
+                  <VBox prefHeight="75.0" prefWidth="326.0">
+                     <children>
+                        <Label text="Account number">
+                           <font>
+                              <Font name="Arial Black" size="15.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="accountField" prefHeight="39.0" prefWidth="314.0" promptText="account number" style="-fx-background-color: linen;" />
+                     </children>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      <Label alignment="CENTER" layoutX="170.0" layoutY="36.0" prefHeight="35.0" prefWidth="167.0" text="PROFILE" textFill="#030303">
+         <font>
+            <Font name="Bauhaus 93" size="41.0" />
+         </font>
+      </Label>
+      <HBox alignment="CENTER" layoutX="-117.0" layoutY="537.0" prefHeight="35.0" prefWidth="546.0" />
+      <Button fx:id="homeButton" layoutX="695.0" layoutY="551.0" mnemonicParsing="false" onAction="#handleGoHome" prefHeight="35.0" prefWidth="69.0" style="-fx-background-color: yellow;" text="HOME">
+         <font>
+            <Font name="Bauhaus 93" size="17.0" />
+         </font></Button>
+      <Label fx:id="errorLabel" alignment="CENTER" graphicTextGap="3.0" layoutX="306.0" layoutY="510.0" prefHeight="48.0" prefWidth="324.0">
+         <font>
+            <Font name="Arial Black" size="17.0" />
+         </font>
+      </Label>
+      <ImageView fx:id="imageView" fitHeight="160.0" fitWidth="160.0" layoutX="615.0" layoutY="14.0" pickOnBounds="true" preserveRatio="false" />
+      <Button fx:id="uploadButton" layoutX="666.0" layoutY="199.0" mnemonicParsing="false" onAction="#handleUploadImage" prefHeight="28.0" prefWidth="70.0" style="-fx-background-color: red;" text="Upload">
+         <font>
+            <Font name="Arial Black" size="13.0" />
+         </font>
+      </Button>
+      <Button fx:id="saveButton" alignment="CENTER" layoutX="74.0" layoutY="514.0" mnemonicParsing="false" onAction="#handleSaveProfile" prefHeight="40.0" prefWidth="81.0" style="-fx-background-color: steelblue;" text="SAVE" textFill="#231f1f">
+         <font>
+            <Font name="Arial Black" size="18.0" />
+         </font>
+      </Button>
+      <Button fx:id="editButton" layoutX="164.0" layoutY="514.0" mnemonicParsing="false" onAction="#handleEditProfile" prefHeight="40.0" prefWidth="81.0" style="-fx-background-color: ivory;" text="EDIT" textFill="#3e3c3c">
+         <font>
+            <Font name="Arial Black" size="18.0" />
+         </font>
+      </Button>
+      <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="601.0" layoutY="350.0" pickOnBounds="true" preserveRatio="true" />
+   </children>
+</AnchorPane>

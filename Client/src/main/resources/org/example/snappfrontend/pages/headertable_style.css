@@ -1,0 +1,43 @@
+.tab-pane > .tab-header-area {
+    -fx-background-color: sandybrown !important;
+}
+/* رنگ نوار تب‌ها (سمت چپ TabPane) */
+.tab-pane > .tab-header-area {
+    -fx-background-color: sandybrown;
+}
+
+/* رنگ تب‌ها */
+.tab-pane .tab {
+    -fx-background-color: lightblue;
+    -fx-text-base-color: black;
+}
+
+/* رنگ تب انتخاب‌شده */
+.tab-pane .tab:selected {
+    -fx-background-color: deepskyblue;
+    -fx-text-base-color: white;
+}
+
+/* رنگ پس‌زمینه ListView */
+.list-view {
+    -fx-background-color: sandybrown;
+    -fx-border-color: black;
+}
+
+/* رنگ سلول‌های داخل ListView */
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+}
+
+.list-cell:filled:selected, .list-cell:filled:selected:hover {
+    -fx-background-color: #ffcc99; /* رنگ آیتم انتخاب‌شده */
+    -fx-text-fill: black;
+}
+/* مخفی کردن اسکرول‌بار افقی ListView */
+.list-view .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-pref-height: 0;
+    -fx-max-height: 0;
+    -fx-min-height: 0;
+}

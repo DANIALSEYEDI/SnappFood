@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: sandybrown;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.snappfrontend.controllers.SellersController">
+    <stylesheets>
+        <URL value="@table-style.css" />
+        <URL value="@headertable_style.css" />
+    </stylesheets>
+    <center>
+        <TabPane fx:id="mainTabPane" prefHeight="554.0" prefWidth="681.0" style="-fx-background-color: sandybrown;" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+            <tabs>
+            <Tab style="-fx-background-color: sandybrown;" text="Create New Restaurant">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="527.0" prefWidth="690.0">
+                     <children>
+                                 <VBox layoutX="39.0" layoutY="131.0" prefHeight="324.0" prefWidth="604.0">
+                                     <children>
+                                         <VBox prefHeight="23.0" prefWidth="628.0">
+                                             <children>
+                                                 <Label text="name" textFill="BLACK">
+                                                     <font>
+                                                         <Font name="Arial Black" size="15.0" />
+                                                     </font>
+                                                 </Label>
+                                                 <TextField fx:id="restaurantNameField" prefHeight="25.0" prefWidth="477.0" promptText="name" />
+                                             </children>
+                                             <padding>
+                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                             </padding>
+                                         </VBox>
+                                         <VBox prefHeight="40.0" prefWidth="499.0">
+                                             <children>
+                                                 <Label text="Phone number" textFill="BLACK">
+                                                     <font>
+                                                         <Font name="Arial Black" size="15.0" />
+                                                     </font>
+                                                 </Label>
+                                                 <TextField fx:id="numberField" promptText="phone number" />
+                                             </children>
+                                             <padding>
+                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                             </padding>
+                                         </VBox>
+                                         <VBox prefHeight="55.0" prefWidth="631.0">
+                                             <children>
+                                                 <Label text="Address" textFill="BLACK">
+                                                     <font>
+                                                         <Font name="Arial Black" size="15.0" />
+                                                     </font>
+                                                 </Label>
+                                                 <TextField fx:id="addressField" prefHeight="17.0" prefWidth="551.0" promptText="address" />
+                                             </children>
+                                             <padding>
+                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                             </padding>
+                                         </VBox>
+                                         <VBox prefHeight="46.0" prefWidth="706.0">
+                                             <children>
+                                                 <Label text="Image" textFill="BLACK">
+                                                     <font>
+                                                         <Font name="Arial Black" size="15.0" />
+                                                     </font>
+                                                 </Label>
+                                                 <HBox prefHeight="16.0" prefWidth="618.0">
+                                                     <children>
+                                                         <Button fx:id="restaurantUploadButton" mnemonicParsing="false" onAction="#handleUploadImage" prefHeight="30.0" prefWidth="96.0" style="-fx-background-color: red;" text="Upload">
+                                                             <font>
+                                                                 <Font name="Arial Black" size="13.0" />
+                                                             </font>
+                                                         </Button>
+                                                         <ImageView fx:id="restaurantImageView" fitHeight="30.0" fitWidth="504.0" pickOnBounds="true" preserveRatio="true" />
+                                                     </children>
+                                                 </HBox>
+                                             </children>
+                                             <padding>
+                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                             </padding>
+                                         </VBox>
+                                         <HBox prefHeight="62.0" prefWidth="628.0">
+                                             <children>
+                                                 <VBox prefHeight="48.0" prefWidth="301.0">
+                                                     <children>
+                                                         <Label text="Tax fee" textFill="BLACK">
+                                                             <font>
+                                                                 <Font name="Arial Black" size="15.0" />
+                                                             </font>
+                                                         </Label>
+                                                         <TextField fx:id="taxFeeField" promptText="tax fee" />
+                                                     </children>
+                                                     <padding>
+                                                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                                     </padding>
+                                                 </VBox>
+                                                 <VBox prefHeight="42.0" prefWidth="327.0">
+                                                     <children>
+                                                         <Label text="Additional fee" textFill="BLACK">
+                                                             <font>
+                                                                 <Font name="Arial Black" size="15.0" />
+                                                             </font>
+                                                         </Label>
+                                                         <TextField fx:id="additionalFeeField" prefHeight="25.0" prefWidth="309.0" promptText="additional fee" />
+                                                     </children>
+                                                     <padding>
+                                                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                                     </padding>
+                                                 </VBox>
+                                             </children>
+                                         </HBox>
+                                     </children>
+                                 </VBox>
+                                 <Label alignment="CENTER" layoutX="156.0" layoutY="34.0" prefHeight="77.0" prefWidth="335.0" text="CREATE NEW RESTAURANT" textFill="BLACK">
+                                     <font>
+                                         <Font name="Bauhaus 93" size="28.0" />
+                                     </font>
+                                 </Label>
+                                 <HBox alignment="CENTER" layoutX="50.0" layoutY="489.0" prefHeight="48.0" prefWidth="546.0" />
+                                   <Button fx:id="submitRestaurantButton" alignment="CENTER" layoutX="270.0" layoutY="459.0" mnemonicParsing="false" onAction="#createRestaurant" prefHeight="50.0" prefWidth="127.0" style="-fx-background-color: teal;" text="SUBMIT">
+                                       <font>
+                                           <Font name="Bauhaus 93" size="20.0" />
+                                       </font>
+                                   </Button>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+                <Tab style="-fx-background-color: sandybrown;" text="My Restaurants">
+                    <content>
+                        <VBox alignment="TOP_LEFT" prefHeight="527.0" prefWidth="650.0" spacing="20" style="-fx-padding: 5;">
+                     <HBox alignment="CENTER" prefHeight="35.0" prefWidth="671.0">
+                        <children>
+                                  <Label alignment="CENTER" prefHeight="42.0" prefWidth="190.0" styleClass="section-title" text="My Restaurants">
+                              <font>
+                                 <Font name="Bauhaus 93" size="22.0" />
+                              </font>
+                           </Label>
+                        </children>
+                     </HBox>
+                            <TableView fx:id="myRestaurantsTable" prefHeight="390.0" prefWidth="661.0" style="-fx-background-color: lightblue; -fx-border-color: black; -fx-border-width: 1; -fx-font-weight: bold;" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="myRestaurantIdColumn" prefWidth="50" style="-fx-border-color: black; -fx-background-color: lightblue;" text="ID" />
+                                    <TableColumn fx:id="myRestaurantNameColumn" prefWidth="150" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Name" />
+                                    <TableColumn fx:id="myRestaurantAddressColumn" prefWidth="200" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Address" />
+                                    <TableColumn fx:id="myRestaurantPhoneColumn" prefWidth="100" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Phone" />
+                                    <TableColumn fx:id="myRestaurantTaxFeeColumn" prefWidth="80" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Tax Fee" />
+                                    <TableColumn fx:id="myRestaurantAdditionalFeeColumn" prefWidth="80" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Add. Fee" />
+                                </columns>
+                                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+                        <styleClass>
+                           <String fx:value="data-table" />
+                           <String fx:value=".bordered-table .column-header,.bordered-table .filler {    -fx-border-color: black;    -fx-border-width: 0 1 1 0;}.bordered-table .table-cell {    -fx-border-color: black;    -fx-border-width: 0 1 1 0;}" />
+                           <String fx:value=".table-view .column-header .label {    -fx-font-weight: bold;    -fx-font-size: 14px;}" />
+                           <String fx:value=".scroll-bar .thumb {    -fx-background-color: lightblue;}" />
+                        </styleClass>
+                            </TableView>
+                     <Button fx:id="saveRestaurantChangesButton" mnemonicParsing="false" onAction="#saveRestaurantChanges" prefHeight="42.0" prefWidth="185.0" style="-fx-background-color: steelblue;" text="Save Changes">
+                        <font>
+                           <Font name="Arial Black" size="16.0" />
+                        </font></Button>
+                        </VBox>
+                    </content>
+                </Tab>
+
+                <Tab style="-fx-background-color: sandybrown;" text="Manage menu">
+                    <content>
+                        <VBox alignment="CENTER" prefHeight="536.0" prefWidth="681.0" spacing="20" style="-fx-padding: 30;">
+                            <Label alignment="CENTER" prefHeight="36.0" prefWidth="263.0" styleClass="section-title" text="Manage menu">
+                        <font>
+                           <Font name="Bauhaus 93" size="28.0" />
+                        </font></Label>
+                            <HBox alignment="CENTER_LEFT" prefHeight="26.0" prefWidth="373.0" spacing="10">
+                                <Label prefHeight="22.0" prefWidth="124.0" text="Select Restaurant:">
+                           <font>
+                              <Font name="Berlin Sans FB" size="16.0" />
+                           </font></Label>
+                                <ComboBox fx:id="selectRestaurantForMenu" prefHeight="25.0" prefWidth="142.0" promptText="Choose Restaurant" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="22.0" prefWidth="138.0" text="Select Menu :">
+                           <font>
+                              <Font name="Berlin Sans FB" size="16.0" />
+                           </font></Label>
+                        <ComboBox fx:id="selectMenuComboBox" prefHeight="26.0" prefWidth="169.0" promptText="Choose Menu" />
+
+                            </HBox>
+                            <HBox />
+                            <TableView fx:id="foodItemTable" prefHeight="200" prefWidth="600" style="-fx-background-color: lightblue; -fx-border-color: black; -fx-border-width: 1; -fx-font-weight: bold;" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="foodItemIdColumn" prefWidth="47.19995355606079" style="-fx-border-color: black; -fx-background-color: lightblue;" text="ID" />
+                                    <TableColumn fx:id="foodItemNameColumn" prefWidth="68.79998779296875" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Name" />
+                                    <TableColumn fx:id="foodItemDescription" prefWidth="117.59996795654297" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Description" />
+                                    <TableColumn fx:id="foodItemVendorId" prefWidth="75.20001220703125" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Vendor ID" />
+                                    <TableColumn fx:id="foodItemPrice" prefWidth="70.4000244140625" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Price" />
+                                    <TableColumn fx:id="foodItemSupply" prefWidth="95.199951171875" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Supply" />
+                                    <TableColumn fx:id="foodItemKeywords" prefWidth="153.59994506835938" style="-fx-border-color: black; -fx-background-color: lightblue;" text="Keywords" />
+                                </columns>
+                                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /> </columnResizePolicy>
+                        <styleClass>
+                           <String fx:value="data-table" />
+                           <String fx:value=".bordered-table .column-header,.bordered-table .filler {    -fx-border-color: black;    -fx-border-width: 0 1 1 0;}.bordered-table .table-cell {    -fx-border-color: black;    -fx-border-width: 0 1 1 0;}" />
+                           <String fx:value=".table-view .column-header .label {    -fx-font-weight: bold;    -fx-font-size: 14px;}" />
+                           <String fx:value=".scroll-bar .thumb {    -fx-background-color: lightblue;}" />
+                        </styleClass>
+                            </TableView>
+                     <Button fx:id="deletebutton" mnemonicParsing="false" onAction="#handleDeleteItem" style="-fx-background-color: red;" text="delete">
+                        <font>
+                           <Font name="Bauhaus 93" size="13.0" />
+                        </font>
+                     </Button>
+                        </VBox>
+                    </content>
+                </Tab>
+                <Tab style="-fx-background-color: sandybrown;" text="Restaurant Orders">
+                    <content>
+                        <VBox alignment="TOP_LEFT" prefHeight="539.0" prefWidth="681.0" spacing="20" style="-fx-padding: 30;">
+                     <HBox alignment="CENTER_LEFT" prefHeight="53.0" prefWidth="621.0">
+                        <children>
+                                  <Label prefHeight="41.0" prefWidth="289.0" styleClass="section-title" text="Restaurant Orders">
+                              <font>
+                                 <Font name="Bauhaus 93" size="28.0" />
+                              </font>
+                           </Label>
+                                   <Label prefHeight="35.0" prefWidth="153.0" text="Select Restaurant:">
+                              <font>
+                                 <Font name="Berlin Sans FB" size="20.0" />
+                              </font></Label>
+                                   <ComboBox fx:id="selectRestaurantForOrders" prefHeight="26.0" prefWidth="142.0" promptText="Choose Restaurant" />
+                        </children>
+                     </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="10" />
+                            <TableView fx:id="restaurantOrdersTable" prefHeight="370.0" prefWidth="623.0" style="-fx-background-color: lightblue; -fx-border-color: black; -fx-border-width: 1; -fx-font-weight: bold;" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="sellerOrderIdColumn" prefWidth="70" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Order ID" />
+                                    <TableColumn fx:id="sellerOrderCustomerColumn" prefWidth="100" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Customer ID" />
+                                    <TableColumn fx:id="sellerOrderAddressColumn" prefWidth="115.19999694824219" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Delivery Address" />
+                                    <TableColumn fx:id="sellerOrderStatusColumn" prefWidth="67.20001220703125" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Status" />
+                                    <TableColumn fx:id="sellerOrderRestaurantStatusColumn" prefWidth="121.5999755859375" style="-fx-background-color: lightblue; -fx-border-color: black;" text="RestaurantStatus" />
+                                    <TableColumn fx:id="sellerOrderPriceColumn" minWidth="7.99993896484375" prefWidth="44.0" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Price" />
+                                    <TableColumn fx:id="sellerOrderCreatedAtColumn" prefWidth="150" style="-fx-background-color: lightblue; -fx-border-color: black;" text="Created At" />
+                                </columns>
+                                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+                        <styleClass>
+                           <String fx:value="data-table" />
+                           <String fx:value=".bordered-table .column-header,.bordered-table .filler {    -fx-border-color: black;    -fx-border-width: 0 1 1 0;}.bordered-table .table-cell {    -fx-border-color: black;    -fx-border-width: 0 1 1 0;}" />
+                           <String fx:value=".table-view .column-header .label {    -fx-font-weight: bold;    -fx-font-size: 14px;}" />
+                           <String fx:value=".scroll-bar .thumb {    -fx-background-color: lightblue;}" />
+                        </styleClass>
+                            </TableView>
+                        </VBox>
+                    </content>
+                </Tab>
+            <Tab style="-fx-background-color: sandybrown;" text="Add FoodItem To Menu">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="518.0" prefWidth="681.0">
+                             <children>
+                                 <VBox layoutX="35.0" layoutY="105.0" prefHeight="336.0" prefWidth="584.0">
+                                     <children>
+                                         <VBox prefHeight="87.0" prefWidth="584.0">
+                                             <children>
+                                                 <Label text="name" textFill="BLACK">
+                                                     <font>
+                                                         <Font name="Arial Black" size="15.0" />
+                                                     </font>
+                                                 </Label>
+                                                 <TextField fx:id="nameField" prefHeight="25.0" prefWidth="477.0" promptText="name" />
+                                             </children>
+                                             <padding>
+                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                             </padding>
+                                         </VBox>
+                                         <VBox prefHeight="40.0" prefWidth="499.0">
+                                             <children>
+                                                 <Label text="Description" textFill="BLACK">
+                                                     <font>
+                                                         <Font name="Arial Black" size="15.0" />
+                                                     </font>
+                                                 </Label>
+                                                 <TextField fx:id="descriptionField" promptText="description" />
+                                             </children>
+                                             <padding>
+                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                             </padding>
+                                         </VBox>
+                                         <VBox prefHeight="40.0" prefWidth="499.0">
+                                             <children>
+                                                 <Label prefHeight="17.0" prefWidth="52.0" text="Price" textFill="BLACK">
+                                                     <font>
+                                                         <Font name="Arial Black" size="15.0" />
+                                                     </font>
+                                                 </Label>
+                                                 <TextField fx:id="priceField" prefHeight="17.0" prefWidth="551.0" promptText="price" />
+                                             </children>
+                                             <padding>
+                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                             </padding>
+                                         </VBox>
+                                         <VBox prefHeight="40.0" prefWidth="499.0">
+                                             <children>
+                                                 <Label text="Supply" textFill="BLACK">
+                                                     <font>
+                                                         <Font name="Arial Black" size="15.0" />
+                                                     </font>
+                                                 </Label>
+                                                 <TextField fx:id="supplyField" prefHeight="17.0" prefWidth="551.0" promptText="suply" />
+                                             </children>
+                                             <padding>
+                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                             </padding>
+                                         </VBox>
+                                         <VBox prefHeight="51.0" prefWidth="628.0">
+                                             <children>
+                                                 <Label text="Image" textFill="BLACK">
+                                                     <font>
+                                                         <Font name="Arial Black" size="15.0" />
+                                                     </font>
+                                                 </Label>
+                                                 <HBox prefHeight="16.0" prefWidth="618.0">
+                                                     <children>
+                                                         <Button fx:id="uploadButton" mnemonicParsing="false" onAction="#handleUploadImage" prefHeight="34.0" prefWidth="99.0" style="-fx-background-color: red;" text="Upload">
+                                                             <font>
+                                                                 <Font name="Arial Black" size="16.0" />
+                                                             </font>
+                                                         </Button>
+                                                         <ImageView fx:id="imageView" fitHeight="30.0" fitWidth="480.0" pickOnBounds="true" preserveRatio="true" />
+                                                     </children>
+                                                 </HBox>
+                                             </children>
+                                             <padding>
+                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                             </padding>
+                                         </VBox>
+                                         <VBox prefHeight="35.0" prefWidth="584.0">
+                                             <children>
+                                                 <Label text="Keywords" textFill="BLACK">
+                                                     <font>
+                                                         <Font name="Arial Black" size="15.0" />
+                                                     </font>
+                                                 </Label>
+                                                 <TextField fx:id="keywordsField" prefHeight="17.0" prefWidth="551.0" promptText="keywords" />
+                                             </children>
+                                             <padding>
+                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                             </padding>
+                                         </VBox>
+                                     </children>
+                                 </VBox>
+                                 <Label alignment="CENTER" layoutX="128.0" layoutY="9.0" prefHeight="55.0" prefWidth="369.0" text="ADD NEW FOOD ITEM" textFill="BLACK">
+                                     <font>
+                                         <Font name="Bauhaus 93" size="28.0" />
+                                     </font>
+                                 </Label>
+                                 <HBox alignment="CENTER" layoutX="48.0" layoutY="466.0" prefHeight="51.0" prefWidth="591.0">
+                                     <children>
+                                         <Button fx:id="submitButton" alignment="CENTER" mnemonicParsing="false" onAction="#addFoodItem" prefHeight="39.0" prefWidth="127.0" style="-fx-background-color: teal;" text="SUBMIT">
+                                             <font>
+                                                 <Font name="Bauhaus 93" size="24.0" />
+                                             </font>
+                                         </Button>
+                                     </children>
+                                 </HBox>
+                        <HBox alignment="CENTER_LEFT" layoutX="35.0" layoutY="64.0" prefHeight="25.0" prefWidth="330.0" spacing="10">
+                           <children>
+                              <Label text="Select Restaurant:">
+                                 <font>
+                                    <Font name="Berlin Sans FB" size="20.0" />
+                                 </font>
+                              </Label>
+                              <ComboBox fx:id="selectRestaurantForfinditem" prefHeight="25.0" prefWidth="157.0" promptText="Choose Restaurant" />
+                           </children>
+                        </HBox>
+
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            <Tab style="-fx-background-color: sandybrown;" text="Add Menu">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <VBox layoutX="35.0" layoutY="216.0" prefHeight="242.0" prefWidth="584.0">
+                           <children>
+                              <VBox prefHeight="76.0" prefWidth="584.0">
+                                 <children>
+                                    <Label text="Menu Name" textFill="BLACK">
+                                       <font>
+                                          <Font name="Arial Black" size="15.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="menuNameField" prefHeight="27.0" prefWidth="574.0" promptText="name" />
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </VBox>
+                              <HBox alignment="CENTER" prefHeight="102.0" prefWidth="584.0">
+                                 <children>
+                                    <Button fx:id="menuSubmitButton" alignment="CENTER" mnemonicParsing="false" prefHeight="52.0" prefWidth="127.0" style="-fx-background-color: teal;" text="SUBMIT">
+                                       <font>
+                                          <Font name="Bauhaus 93" size="24.0" />
+                                       </font>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                        <Label alignment="CENTER" layoutX="64.0" layoutY="14.0" prefHeight="69.0" prefWidth="526.0" text="ADD NEW MENU TO YOUR RESTAURANT" textFill="BLACK">
+                           <font>
+                              <Font name="Bauhaus 93" size="28.0" />
+                           </font>
+                        </Label>
+                        <HBox alignment="CENTER_LEFT" layoutX="35.0" layoutY="121.0" prefHeight="41.0" prefWidth="405.0" spacing="10">
+                           <children>
+                              <Label alignment="CENTER" prefHeight="27.0" prefWidth="182.0" text="Select Restaurant:">
+                                 <font>
+                                    <Font name="Berlin Sans FB" size="20.0" />
+                                 </font>
+                              </Label>
+                              <ComboBox fx:id="selectRestaurantForaddMenu" prefHeight="32.0" prefWidth="159.0" promptText="Choose Restaurant" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+
+            </tabs>
+        </TabPane>
+    </center>
+   <left>
+      <ListView fx:id="actionList" prefHeight="556.0" prefWidth="119.0" style="-fx-background-color: sandybrown;" BorderPane.alignment="CENTER" />
+   </left>
+   <bottom>
+      <HBox alignment="CENTER" prefHeight="49.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="errorMessageLabel" alignment="CENTER" prefHeight="72.0" prefWidth="650.0" textFill="RED">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <Button fx:id="homeButton" mnemonicParsing="false" onAction="#handleGoHome" prefHeight="25.0" prefWidth="89.0" style="-fx-background-color: gold; -fx-border-color: black;" text="Home">
+               <font>
+                  <Font name="Bauhaus 93" size="22.0" />
+               </font>
+            </Button>
+         </children>
+      </HBox>
+   </bottom>
+</BorderPane>
