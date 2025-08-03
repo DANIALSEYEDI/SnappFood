@@ -1,69 +1,80 @@
 
-# 🍽️ SnappFood – Online Food Ordering Platform
+# 🍽️ SnappFood – Multi-Role Online Food Ordering System
 
-A full-stack, multi-role online food ordering system developed as a team project for the Advanced Programming course – Spring 2025 (AUT).  
-It allows customers, restaurant owners, delivery agents, and admins to interact through a real-world simulation of an online food delivery platform.
+Welcome to **SnappFood**, a dynamic full-stack Java application built for the Advanced Programming course at AUT.  
+This system replicates the real-world flow of food delivery with distinct roles: customers, restaurants, delivery agents, and admins — all tied together through a clean JavaFX interface and a robust backend.
+
+> 🍔 Whether you're hungry, managing a restaurant, or delivering delicious meals — SnappFood has a role for you.
 
 ---
 
-## 👨‍🏫 Course Details
-- **Course**: Advanced Programming – Spring 2025
+## 🧑‍🏫 Course Information
+- **Course**: Advanced Programming (Spring 2025)
 - **University**: Amirkabir University of Technology (AUT)
-- **Instructors**: Dr. Amir Kalbasi & Dr. Hossein Zeinali
+- **Instructors**: Dr. Amir Kalbasi, Dr. Hossein Zeinali
 
 ## 👨‍💻 Developers
-| Name            | Student ID   |
-|-----------------|--------------|
-| Danial Seyedi   | 40331022     |
-| Alireza Sarabi  | 40331021     |
+This project was developed collaboratively by:
+- **Danial Seyedi**
+- **Alireza Sarabi**
 
-> ✅ This project was developed collaboratively by both members. All frontend and backend components were designed and implemented as a team.
+Each team member actively contributed to both the frontend and backend components of the system.
 
 ---
 
-## 🚀 Features
-- ✅ User registration & authentication
-- 🧑 Multiple user roles: Customer, Restaurant, Delivery, Admin
-- 🛒 Cart & ordering system
-- 🍽️ Menu and restaurant management
-- 💳 Online payment and internal wallet
-- 🔔 Order tracking with notifications
-- ⭐ Ratings, comments, and image upload
-- 📊 Admin dashboard and analytics
-- 🎯 Filtering, searching, and suggestions
+## ✨ Key Features
+
+- 🔐 Role-based registration & login
+- 👤 User roles: Customer, Restaurant, Delivery, Admin
+- 🍽️ Dynamic restaurant and menu management
+- 🛒 Cart system with filtering & search
+- 💸 Online payment and internal wallet
+- 📦 Real-time order tracking & delivery
+- 📢 Push notifications for order updates
+- 🌟 Ratings, reviews, and image uploads
+- 📊 Admin dashboard & analytics
 
 ---
 
 ## 🧱 Technologies Used
 
-| Frontend                          | Backend            | Storage    | Tools |
-|----------------------------------|--------------------|------------|-------|
-| JavaFX (FXML)                    | Java OOP           | JSON files | Gson  |
-| Java 17                          | RESTful API (HTTP) |            |       |
-| Package: `org.example.snappfrontend` | Package: `server`     |            |       |
+| Layer     | Technology                             |
+|-----------|----------------------------------------|
+| Frontend  | JavaFX (FXML), SceneBuilder, Java 17   |
+| Backend   | Java OOP, RESTful API (HTTP/JSON)      |
+| Storage   | JSON Files (Local Disk with Auto-save) |
+| Utilities | Gson, JavaFX, Java HTTP Client         |
 
 ---
 
-## 📁 Project Structure
+## 📦 Project Structure
 
-```
-SnappFood/
-├── Client/
-│   └── src/main/java/org/example/snappfrontend/...
-│   └── src/main/resources/org/example/snappfrontend/...
-├── Server/
-│   └── src/...
-└── screenshots/
-    ├── screenshot1.png
-    ├── ...
-    └── screenshot7.png
-```
+### 🔹 Client Side (Frontend)
+Located at: `Client/src/main/java/org/example/snappfrontend`
+
+- `controllers/` – JavaFX page controllers  
+- `dto/` – Data transfer objects  
+- `http/` – HTTP request handlers  
+- `models/` – Core frontend models  
+- `utils/` – Helper functions and constants  
+- `resources/pages/` – FXML files (JavaFX UI)  
+- `resources/images/` – UI images and icons  
+
+### 🔹 Server Side (Backend)
+Located at: `Server/src/...`
+
+- `controller/` – REST-style endpoints  
+- `model/` – Backend data models  
+- `dao/` – File-based data access layer  
+- `service/` – Business logic layer  
+- `utils/` – Helper functions for backend  
+- `main/` – Entry point for backend execution  
 
 ---
 
 ## 🖼️ Screenshots
 
-(Place your screenshots in a folder named `screenshots` next to your `README.md`)
+(Place your screenshots in a folder named `screenshots/` next to your `README.md`)
 
 ![Screenshot 1](screenshots/screenshot1.png)  
 ![Screenshot 2](screenshots/screenshot2.png)  
@@ -75,51 +86,45 @@ SnappFood/
 
 ---
 
-## ⚙️ How to Run
+## ⚙️ How to Run the Project
 
 ### ✅ Prerequisites
-- Java 17+
-- Maven (optional, if used)
+- Java 17+ installed
+- IDE like IntelliJ IDEA or Eclipse
 
 ### ▶️ Run Backend
-```bash
-cd Server/
-# Compile & run your Java backend code
-```
+1. Open the `Server/` folder in your IDE
+2. Run the main class (entry point)
+3. Backend listens on standard HTTP endpoints
 
 ### ▶️ Run Frontend
+1. Open the `Client/` folder in your IDE
+2. Launch the JavaFX main class
+3. UI will connect to backend using RESTful HTTP
+
+> ⚠️ Ensure the backend is running before launching the frontend.
+
+---
+
+## 🧠 How to Add Screenshots in GitHub
+
+1. Create a folder named `screenshots` in the root of your GitHub project (same level as `README.md`).
+2. Name your images like: `screenshot1.png`, `screenshot2.png`, ..., `screenshot7.png`
+3. Push the images using Git:
 ```bash
-cd Client/
-# Launch JavaFX app using IDE (e.g., IntelliJ or Eclipse)
+mkdir screenshots
+mv path/to/images/*.png screenshots/
+git add screenshots/
+git commit -m "Add screenshots"
+git push
 ```
-
-> Make sure backend is running before launching the frontend.
+4. Keep image links in `README.md` like this:
+```markdown
+![Screenshot 1](screenshots/screenshot1.png)
+```
 
 ---
 
-## 📝 Notes
-- Backend is structured around RESTful APIs using standard HTTP verbs: `GET`, `POST`, `PUT`, `DELETE`.
-- Data is stored in local `.json` files with periodic autosave every few minutes.
-- Frontend UI is built with JavaFX using FXML and SceneBuilder.
-- You may need to adjust relative paths depending on how you run the project.
+## 📜 License
 
----
-
-## 📃 License
-
-This project was developed for educational purposes only under the guidelines of the AP Course – AUT 2025.
-
----
-
-## 📌 Tips for GitHub Upload
-1. Place all screenshots in `screenshots/` folder.
-2. Keep `README.md` in the root of your repository.
-3. Upload entire project including both `Client/` and `Server/`.
-
-```
-📦 SnappFood/
-├── Client/
-├── Server/
-├── screenshots/
-└── README.md
-```
+This repository is intended for educational use only as part of AUT's AP course.
