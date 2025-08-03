@@ -86,6 +86,8 @@ Located at: `Server/src/...`
 ![Screenshot 5](screenshots/screenshot5.png)  
 
 ![Screenshot 6](screenshots/screenshot6.png)  
+
+![Screenshot 7](screenshots/screenshot7.png) 
   
 
 ---
