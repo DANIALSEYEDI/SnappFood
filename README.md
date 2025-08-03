@@ -2,7 +2,7 @@
 # SnappFood 🍽️
 
 Welcome to **SnappFood**, a full-featured, multi-role food ordering system developed as a final project for the *Advanced Programming* course at Amirkabir University of Technology (AUT).  
-This Java-based application emulates real-world online food delivery operations through an intuitive JavaFX interface and a well-structured backend. It supports various user roles — Buyer,Seller, Courier, and Admin — each with a tailored experience.
+This Java-based application emulates real-world online food delivery operations through an intuitive JavaFX interface and a well-structured backend. It supports various user roles — Buyer , Seller , Courier and Admin — each with a tailored experience.
 
 >  Hungry to code? Whether you're placing an order, managing a kitchen, or delivering meals, **SnappFood** is built to serve.
 
@@ -30,12 +30,11 @@ Both developers contributed to the design and implementation of both frontend an
 ## ✨ Features at a Glance
 
 -  Secure, role-based authentication and authorization  
--  Multiple user roles: Customer, Restaurant, Delivery Agent, Admin  
+-  Multiple user roles: Buyer , Seller , Courier , Admin  
 -  Restaurant and menu management with live updates  
 - Interactive cart system with product filtering and search  
 -  Online payments & internal wallet integration  
 -  Real-time order tracking for customers and delivery agents  
--  Push notifications on order status changes  
 -  Ratings, reviews, and image uploads for dishes  
 -  Admin dashboard with analytics and insights  
 ---
@@ -101,7 +100,8 @@ Both developers contributed to the design and implementation of both frontend an
 ### ✅ Requirements
 
 - Java 17 or higher  
-- IDE (e.g., IntelliJ IDEA, Eclipse)  
+- IDE (e.g., IntelliJ IDEA, Eclipse)
+- DataBase
 
 ### 🚀 Running the Backend
 
