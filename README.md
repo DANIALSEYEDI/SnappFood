@@ -1,113 +1,125 @@
+# 🍽️ SnappFood – Multi-Role Online Food Ordering Platform
 
-# 🍽️ SnappFood – Multi-Role Online Food Ordering System
+Welcome to **SnappFood**, a full-featured, multi-role food ordering system developed as a final project for the *Advanced Programming* course at Amirkabir University of Technology (AUT).  
+This Java-based application emulates real-world online food delivery operations through an intuitive JavaFX interface and a well-structured backend. It supports various user roles — Customers, Restaurants, Delivery Agents, and Admins — each with a tailored experience.
 
-Welcome to **SnappFood**, a dynamic full-stack Java application built for the Advanced Programming course at AUT.  
-This system replicates the real-world flow of food delivery with distinct roles: customers, restaurants, delivery agents, and admins — all tied together through a clean JavaFX interface and a robust backend.
-
-> 🍔 Whether you're hungry, managing a restaurant, or delivering delicious meals — SnappFood has a role for you.
+> 🍔 Hungry to code? Whether you're placing an order, managing a kitchen, or delivering meals, **SnappFood** is built to serve.
 
 ---
 
-## 🧑‍🏫 Course Information
-- **Course**: Advanced Programming (Spring 2025)
-- **University**: Amirkabir University of Technology (AUT)
-- **Instructors**: Dr. Amir Kalbasi, Dr. Hossein Zeinali
+## 🧑‍🏫 Course Details
 
-## 👨‍💻 Developers
-This project was developed collaboratively by:
-- **Danial Seyedi**
+- **Course Title**: Advanced Programming – Spring 2025  
+- **Institution**: Amirkabir University of Technology (AUT)  
+- **Instructors**: Dr. Amir Kalbasi, Dr. Hossein Zeinali  
+
+---
+
+## 👨‍💻 Development Team
+
+Project developed collaboratively by:
+
+- **Danial Seyedi**  
 - **Alireza Sarabi**
 
-Each team member actively contributed to both the frontend and backend components of the system.
+Both developers contributed to the design and implementation of both frontend and backend components.
 
 ---
 
-## ✨ Key Features
+## ✨ Features at a Glance
 
-- 🔐 Role-based registration & login
-- 👤 User roles: Customer, Restaurant, Delivery, Admin
-- 🍽️ Dynamic restaurant and menu management
-- 🛒 Cart system with filtering & search
-- 💸 Online payment and internal wallet
-- 📦 Real-time order tracking & delivery
-- 📢 Push notifications for order updates
-- 🌟 Ratings, reviews, and image uploads
-- 📊 Admin dashboard & analytics
-
----
-
-## 🧱 Technologies Used
-
-| Layer     | Technology                             |
-|-----------|----------------------------------------|
-| Frontend  | JavaFX (FXML), SceneBuilder, Java 17   |
-| Backend   | Java OOP, RESTful API (HTTP/JSON)      |
-| Storage   | JSON Files (Local Disk with Auto-save) |
-| Utilities | Gson, JavaFX, Java HTTP Client         |
+- 🔐 Secure, role-based authentication and authorization  
+- 👥 Multiple user roles: Customer, Restaurant, Delivery Agent, Admin  
+- 🍽️ Restaurant and menu management with live updates  
+- 🛒 Interactive cart system with product filtering and search  
+- 💰 Online payments & internal wallet integration  
+- 📦 Real-time order tracking for customers and delivery agents  
+- 🔔 Push notifications on order status changes  
+- 🌟 Ratings, reviews, and image uploads for dishes  
+- 📊 Admin dashboard with analytics and insights  
 
 ---
 
-## 📦 Project Structure
+## 📁 Project Structure
 
-### 🔹 Client Side (Frontend)
-Located at: `Client/src/main/java/org/example/snappfrontend`
+### 🔹 Frontend (`Client/src/main/java/org/example/snappfrontend/`)
 
-- `controllers/` – JavaFX page controllers  
-- `dto/` – Data transfer objects  
-- `http/` – HTTP request handlers  
-- `models/` – Core frontend models  
-- `utils/` – Helper functions and constants  
-- `resources/pages/` – FXML files (JavaFX UI)  
-- `resources/images/` – UI images and icons  
+- `controllers/` – JavaFX controllers (UI logic)  
+- `dto/` – Data transfer objects for API communication  
+- `http/` – HTTP request handling utilities  
+- `models/` – Core frontend data models  
+- `utils/` – Constants and utility functions  
+- `resources/pages/` – FXML layout files  
+- `resources/images/` – Icons and UI assets  
 
-### 🔹 Server Side (Backend)
-Located at: `Server/src/...`
+### 🔹 Backend (`Server/src/...`)
 
-- `controller/` – REST-style endpoints  
-- `model/` – Backend data models  
-- `dao/` – File-based data access layer  
-- `service/` – Business logic layer  
-- `utils/` – Helper functions for backend  
-- `main/` – Entry point for backend execution  
+- `controller/` – RESTful endpoints for handling requests  
+- `model/` – Core backend data models  
+- `dao/` – Data Access Objects for JSON-based persistence  
+- `service/` – Business logic and service layer  
+- `utils/` – Backend utility classes  
+- `main/` – Application entry point  
 
 ---
+
 
 ## 🖼️ Screenshots
 
+![Screenshot 1](screenshots/screenshot1.jpg) <br><br>
 
-![Screenshot 1](screenshots/screenshot1.png)  
 
-![Screenshot 2](screenshots/screenshot2.png)
 
-![Screenshot 3](screenshots/screenshot3.png)  
+![Screenshot 2](screenshots/screenshot2.jpg)<br><br>
 
-![Screenshot 4](screenshots/screenshot4.png)  
 
-![Screenshot 5](screenshots/screenshot5.png)  
 
-![Screenshot 6](screenshots/screenshot6.png)  
+![Screenshot 3](screenshots/screenshot3.jpg)<br><br>  
 
-![Screenshot 7](screenshots/screenshot7.png) 
-  
+
+
+![Screenshot 4](screenshots/screenshot4.jpg)<br><br> 
+
+
+
+![Screenshot 5](screenshots/screenshot5.jpg)<br><br>  
+
+
+
+
+---
+
+  ## 🧱 Tech Stack
+
+| Layer        | Technologies Used                                |
+|--------------|--------------------------------------------------|
+| Frontend     | JavaFX (FXML), SceneBuilder, Java 17             |
+| Backend      | Java OOP, RESTful APIs over HTTP/JSON            |
+| Data Storage | Local JSON files with auto-save functionality    |
+| Libraries    | Gson, JavaFX, Java HTTP Client                   |
 
 ---
 
-## ⚙️ How to Run the Project
+## ⚙️ Getting Started
 
-### ✅ Prerequisites
-- Java 17+ installed
-- IDE like IntelliJ IDEA or Eclipse
+### ✅ Requirements
 
-### ▶️ Run Backend
-1. Open the `Server/` folder in your IDE
-2. Run the main class (entry point)
-3. Backend listens on standard HTTP endpoints
+- Java 17 or higher  
+- IDE (e.g., IntelliJ IDEA, Eclipse)  
 
-### ▶️ Run Frontend
-1. Open the `Client/` folder in your IDE
-2. Launch the JavaFX main class
-3. UI will connect to backend using RESTful HTTP
+### 🚀 Running the Backend
 
-> ⚠️ Ensure the backend is running before launching the frontend.
+1. Open the `Server/` directory in your IDE  
+2. Locate and run the `main` class  
+3. The backend will start and listen for HTTP requests  
+
+### 🖥️ Running the Frontend
+
+1. Open the `Client/` directory in your IDE  
+2. Run the main JavaFX application class  
+3. The UI will automatically communicate with the backend via REST  
+
+> ⚠️ Make sure the backend is up and running before launching the frontend.
 
 ---
+
