@@ -86,8 +86,6 @@ Both developers contributed to the design and implementation of both frontend an
 
 
 
-![Screenshot 6](screenshots/screenshot6.jpg)<br><br>  
-
 
 ---
 
