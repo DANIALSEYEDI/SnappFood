@@ -40,17 +40,6 @@ Both developers contributed to the design and implementation of both frontend an
 
 ---
 
-## 🧱 Tech Stack
-
-| Layer        | Technologies Used                                |
-|--------------|--------------------------------------------------|
-| Frontend     | JavaFX (FXML), SceneBuilder, Java 17             |
-| Backend      | Java OOP, RESTful APIs over HTTP/JSON            |
-| Data Storage | Local JSON files with auto-save functionality    |
-| Libraries    | Gson, JavaFX, Java HTTP Client                   |
-
----
-
 ## 📁 Project Structure
 
 ### 🔹 Frontend (`Client/src/main/java/org/example/snappfrontend/`)
@@ -102,7 +91,17 @@ Both developers contributed to the design and implementation of both frontend an
 
 
 ![Screenshot 7](screenshots/screenshot7.jpg)<br><br> 
-  
+
+---
+
+  ## 🧱 Tech Stack
+
+| Layer        | Technologies Used                                |
+|--------------|--------------------------------------------------|
+| Frontend     | JavaFX (FXML), SceneBuilder, Java 17             |
+| Backend      | Java OOP, RESTful APIs over HTTP/JSON            |
+| Data Storage | Local JSON files with auto-save functionality    |
+| Libraries    | Gson, JavaFX, Java HTTP Client                   |
 
 ---
 
