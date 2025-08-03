@@ -15,12 +15,12 @@
    <children>
       <VBox alignment="CENTER" layoutX="111.0" layoutY="-0.8" prefHeight="399.0" prefWidth="800.0" style="-fx-background-color: sandybrown;" AnchorPane.bottomAnchor="202.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-1.0">
          <children>
-            <Label alignment="CENTER" prefHeight="45.0" prefWidth="758.0" style="-fx-background-color: sandybrown;" text="Rate Your Orders">
+            <Label alignment="CENTER" prefHeight="29.0" prefWidth="758.0" style="-fx-background-color: sandybrown;" text="Rate Your Orders">
                <font>
                   <Font name="Bauhaus 93" size="40.0" />
                </font>
             </Label>
-            <ImageView fitHeight="201.0" fitWidth="289.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="213.0" fitWidth="291.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../images/Pic18.png" />
                </image>
@@ -62,7 +62,7 @@
             <Font name="Bauhaus 93" size="24.0" />
          </font>
       </Button>
-      <Button fx:id="homeButton" layoutX="709.0" layoutY="553.0" mnemonicParsing="false" onAction="#homeHandle" prefHeight="46.0" prefWidth="91.0" style="-fx-background-color: yellow;" text="HOME">
+      <Button fx:id="homeButton" layoutX="714.0" layoutY="567.0" mnemonicParsing="false" onAction="#homeHandle" prefHeight="26.0" prefWidth="86.0" style="-fx-background-color: yellow;" text="HOME">
          <font>
             <Font name="Bauhaus 93" size="20.0" />
          </font>
