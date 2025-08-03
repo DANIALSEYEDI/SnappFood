@@ -77,11 +77,17 @@ Located at: `Server/src/...`
 (Place your screenshots in a folder named `screenshots/` next to your `README.md`)
 
 ![Screenshot 1](screenshots/screenshot1.png)  
-![Screenshot 2](screenshots/screenshot2.png)  
+
+![Screenshot 2](screenshots/screenshot2.png)
+
 ![Screenshot 3](screenshots/screenshot3.png)  
+
 ![Screenshot 4](screenshots/screenshot4.png)  
+
 ![Screenshot 5](screenshots/screenshot5.png)  
+
 ![Screenshot 6](screenshots/screenshot6.png)  
+
 ![Screenshot 7](screenshots/screenshot7.png)  
 
 ---
@@ -105,26 +111,3 @@ Located at: `Server/src/...`
 > ⚠️ Ensure the backend is running before launching the frontend.
 
 ---
-
-## 🧠 How to Add Screenshots in GitHub
-
-1. Create a folder named `screenshots` in the root of your GitHub project (same level as `README.md`).
-2. Name your images like: `screenshot1.png`, `screenshot2.png`, ..., `screenshot7.png`
-3. Push the images using Git:
-```bash
-mkdir screenshots
-mv path/to/images/*.png screenshots/
-git add screenshots/
-git commit -m "Add screenshots"
-git push
-```
-4. Keep image links in `README.md` like this:
-```markdown
-![Screenshot 1](screenshots/screenshot1.png)
-```
-
----
-
-## 📜 License
-
-This repository is intended for educational use only as part of AUT's AP course.
