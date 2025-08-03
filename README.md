@@ -74,7 +74,6 @@ Located at: `Server/src/...`
 
 ## 🖼️ Screenshots
 
-(Place your screenshots in a folder named `screenshots/` next to your `README.md`)
 
 ![Screenshot 1](screenshots/screenshot1.png)  
 
