@@ -16,7 +16,7 @@ This Java-based application emulates real-world online food delivery operations 
 
 ---
 
-## 👨‍💻 Development Team
+## Development Team
 
 Project developed collaboratively by:
 
