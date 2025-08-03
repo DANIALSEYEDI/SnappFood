@@ -77,31 +77,31 @@ Both developers contributed to the design and implementation of both frontend an
 
 ## 🖼️ Screenshots
 
-![Screenshot 1](screenshots/screenshot1.jpg)  
+![Screenshot 1](screenshots/screenshot1.jpg) <br><br>
 
 
 
-![Screenshot 2](screenshots/screenshot2.jpg)
+![Screenshot 2](screenshots/screenshot2.jpg)<br><br>
 
 
 
-![Screenshot 3](screenshots/screenshot3.jpg)  
+![Screenshot 3](screenshots/screenshot3.jpg)<br><br>  
 
 
 
-![Screenshot 4](screenshots/screenshot4.jpg)  
+![Screenshot 4](screenshots/screenshot4.jpg)<br><br> 
 
 
 
-![Screenshot 5](screenshots/screenshot5.jpg)  
+![Screenshot 5](screenshots/screenshot5.jpg)<br><br>  
 
 
 
-![Screenshot 6](screenshots/screenshot6.jpg)  
+![Screenshot 6](screenshots/screenshot6.jpg)<br><br>  
 
 
 
-![Screenshot 7](screenshots/screenshot7.jpg) 
+![Screenshot 7](screenshots/screenshot7.jpg)<br><br> 
   
 
 ---
