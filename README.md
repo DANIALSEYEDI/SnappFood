@@ -77,8 +77,8 @@ Both developers contributed to the design and implementation of both frontend an
 ### 🔹 Backend (`Server/src/...`)
 
 - `controller/` – RESTful endpoints for handling requests  
-- `model/` – Core backend data models  
-- `dao/` – Data Access Objects for JSON-based persistence  
+- `model/` – Core backend data models
+- `dao/` – Data access layer using Hibernate ORM
 - `service/` – Business logic and service layer  
 - `utils/` – Backend utility classes  
 - `main/` – Application entry point 
@@ -91,7 +91,7 @@ Both developers contributed to the design and implementation of both frontend an
 |--------------|--------------------------------------------------|
 | Frontend     | JavaFX (FXML), SceneBuilder, Java 17             |
 | Backend      | Java OOP, RESTful APIs over HTTP/JSON            |
-| Data Storage | Local JSON files with auto-save functionality    |
+| Storage      | Relational Database (via Hibernate ORM)          |
 | Libraries    | Gson, JavaFX, Java HTTP Client                   |
 
 ---
