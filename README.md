@@ -28,15 +28,15 @@ Both developers contributed to the design and implementation of both frontend an
 
 ## ✨ Features at a Glance
 
-- 🔐 Secure, role-based authentication and authorization  
-- 👥 Multiple user roles: Customer, Restaurant, Delivery Agent, Admin  
-- 🍽️ Restaurant and menu management with live updates  
-- 🛒 Interactive cart system with product filtering and search  
-- 💰 Online payments & internal wallet integration  
-- 📦 Real-time order tracking for customers and delivery agents  
-- 🔔 Push notifications on order status changes  
-- 🌟 Ratings, reviews, and image uploads for dishes  
-- 📊 Admin dashboard with analytics and insights  
+-  Secure, role-based authentication and authorization  
+-  Multiple user roles: Customer, Restaurant, Delivery Agent, Admin  
+-  Restaurant and menu management with live updates  
+- Interactive cart system with product filtering and search  
+-  Online payments & internal wallet integration  
+-  Real-time order tracking for customers and delivery agents  
+-  Push notifications on order status changes  
+-  Ratings, reviews, and image uploads for dishes  
+-  Admin dashboard with analytics and insights  
 
 ---
 
@@ -83,8 +83,6 @@ Both developers contributed to the design and implementation of both frontend an
 
 
 ![Screenshot 5](screenshots/screenshot5.jpg)<br><br><br><br>    
-
-
 
 
 ---
