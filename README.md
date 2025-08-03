@@ -19,8 +19,8 @@ This Java-based application emulates real-world online food delivery operations 
 
 Project developed collaboratively by:
 
-- **Danial Seyedi**  
-- **Alireza Sarabi**
+-👨‍💻 **Danial Seyedi**  
+-👨‍💻 **Alireza Sarabi**
 
 Both developers contributed to the design and implementation of both frontend and backend components.
 
