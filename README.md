@@ -37,6 +37,27 @@ Both developers contributed to the design and implementation of both frontend an
 -  Push notifications on order status changes  
 -  Ratings, reviews, and image uploads for dishes  
 -  Admin dashboard with analytics and insights  
+---
+
+## 🖼️ Screenshots
+
+![Screenshot 1](screenshots/screenshot1.jpg) <br><br><br><br><br>   
+
+
+
+![Screenshot 2](screenshots/screenshot2.jpg)<br><br><br><br><br>   
+
+
+
+![Screenshot 3](screenshots/screenshot4.jpg)<br><br><br><br><br>   
+
+
+
+![Screenshot 4](screenshots/screenshot3.jpg)<br><br><br><br><br>   
+
+
+
+![Screenshot 5](screenshots/screenshot5.jpg)
 
 ---
 
@@ -59,30 +80,7 @@ Both developers contributed to the design and implementation of both frontend an
 - `dao/` – Data Access Objects for JSON-based persistence  
 - `service/` – Business logic and service layer  
 - `utils/` – Backend utility classes  
-- `main/` – Application entry point  
-
----
-
-
-## 🖼️ Screenshots
-
-![Screenshot 1](screenshots/screenshot1.jpg) <br><br><br><br>  
-
-
-
-![Screenshot 2](screenshots/screenshot2.jpg)<br><br><br><br>  
-
-
-
-![Screenshot 3](screenshots/screenshot4.jpg)<br><br><br><br>  
-
-
-
-![Screenshot 4](screenshots/screenshot3.jpg)<br><br><br><br>  
-
-
-
-![Screenshot 5](screenshots/screenshot5.jpg)
+- `main/` – Application entry point 
 
 ---
 
