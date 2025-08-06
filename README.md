@@ -30,13 +30,18 @@ Both developers contributed to the design and implementation of both frontend an
 ## ✨ Features at a Glance
 
 -  Secure, role-based authentication and authorization  
--  Multiple user roles: Buyer , Seller , Courier , Admin  
--  Restaurant and menu management with live updates  
-- Interactive cart system with product filtering and search  
--  Online payments & internal wallet integration  
--  Real-time order tracking for customers and delivery agents  
--  Ratings, reviews, and image uploads for dishes  
--  Admin dashboard with analytics and insights  
+-  Multi-role support: Buyer, Seller, Courier, Admin  
+-  Restaurant and menu management (with live updates)  
+-  Smart cart system with search and category filters  
+-  Profile management for all user types  
+-  Advanced search and filtering by food, restaurant, or price  
+-  Online payments and internal wallet integration  
+-  Order creation, confirmation, and delivery flow  
+-  Real-time order tracking for customers and couriers   
+-  Ratings, reviews, and image uploads by customers  
+-  Discount codes and promotional offers  
+-  Admin dashboard with reports and analytics  
+-  Transaction history for payments and earnings  
 ---
 
 ## 🖼️ Screenshots
