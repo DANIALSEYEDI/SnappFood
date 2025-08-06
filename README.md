@@ -78,7 +78,7 @@ Both developers contributed to the design and implementation of both frontend an
 - `controller/` – RESTful endpoints for handling requests  
 - `model/` – Core backend data models
 - `dao/` – Data access layer using Hibernate ORM
-- `service/` – Business logic and service layer  
+- `dto/` – Backend data transfer objects  
 - `utils/` – Backend utility classes  
 - `main/` – Application entry point 
 
