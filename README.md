@@ -46,11 +46,11 @@ Both developers contributed to the design and implementation of both frontend an
 
 ## 🖼️ Screenshots
 <p align="center">
-  <img src="screenshots/screenshot1.jpg" width="400"><br><br>
-  <img src="screenshots/screenshot2.jpg" width="400"><br><br>
-  <img src="screenshots/screenshot4.jpg" width="400"><br><br>
-  <img src="screenshots/screenshot3.jpg" width="400"><br><br>
-  <img src="screenshots/screenshot5.jpg" width="400">
+  <img src="screenshots/screenshot1.jpg" width="700"><br><br>
+  <img src="screenshots/screenshot2.jpg" width="700"><br><br>
+  <img src="screenshots/screenshot4.jpg" width="700"><br><br>
+  <img src="screenshots/screenshot3.jpg" width="700"><br><br>
+  <img src="screenshots/screenshot5.jpg" width="700">
 </p>
 ---
 
