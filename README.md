@@ -45,25 +45,13 @@ Both developers contributed to the design and implementation of both frontend an
 ---
 
 ## 🖼️ Screenshots
-
-![Screenshot 1](screenshots/screenshot1.jpg) <br><br><br><br><br>   
-
-
-
-![Screenshot 2](screenshots/screenshot2.jpg)<br><br><br><br><br>   
-
-
-
-![Screenshot 3](screenshots/screenshot4.jpg)<br><br><br><br><br>   
-
-
-
-![Screenshot 4](screenshots/screenshot3.jpg)<br><br><br><br><br>   
-
-
-
-![Screenshot 5](screenshots/screenshot5.jpg)
-
+<p align="center">
+  <img src="screenshots/screenshot1.jpg" width="400"><br><br>
+  <img src="screenshots/screenshot2.jpg" width="400"><br><br>
+  <img src="screenshots/screenshot4.jpg" width="400"><br><br>
+  <img src="screenshots/screenshot3.jpg" width="400"><br><br>
+  <img src="screenshots/screenshot5.jpg" width="400">
+</p>
 ---
 
 ## 📁 Project Structure
