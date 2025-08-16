@@ -54,6 +54,7 @@ Both developers contributed to the design and implementation of both frontend an
 </p>
 ---
 
+
 ## 📁 Project Structure
 
 ### 🔹 Frontend (`Client/src/main/java/org/example/snappfrontend/`)
